@@ -1,0 +1,4 @@
+:80 {
+	reverse_proxy /api searchengine-backend:3333
+	reverse_proxy /* searchengine-frontend:80
+}
