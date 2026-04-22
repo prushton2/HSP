@@ -31,4 +31,4 @@ services:
     ports:
       - "${PORT}:80"
     volumes:
-      - ./config-prod/Caddyfile:/etc/caddy/Caddyfile
+      - ./config/prod/Caddyfile:/etc/caddy/Caddyfile
