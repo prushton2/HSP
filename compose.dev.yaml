@@ -1,10 +1,4 @@
 services:
-  frontend:
-    container_name: hsp-fe
-
-  backend:
-    container_name: hsp-be
-
   db:
     image: postgres:16
     container_name: hsp-db
