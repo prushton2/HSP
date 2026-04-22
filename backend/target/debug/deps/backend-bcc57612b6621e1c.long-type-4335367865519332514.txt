@@ -1,0 +1,2 @@
+fn(State<Arc<std::sync::Mutex<(dyn Database + 'static)>>>) -> impl Future<Output = std::string::String> {get_users}
+fn(State<Arc<std::sync::Mutex<(dyn Database + 'static)>>>) -> impl Future<Output = std::string::String> {get_users}: Handler<_, _>
