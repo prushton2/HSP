@@ -1,4 +1,0 @@
-(dyn futures_core::stream::Stream<Item = Result<tokio_postgres::AsyncMessage, postgres::Error>> + Send + 'static)
-Unique<(dyn futures_core::stream::Stream<Item = Result<tokio_postgres::AsyncMessage, postgres::Error>> + Send + 'static)>
-Box<(dyn futures_core::stream::Stream<Item = Result<tokio_postgres::AsyncMessage, postgres::Error>> + Send + 'static)>
-Pin<Box<(dyn futures_core::stream::Stream<Item = Result<tokio_postgres::AsyncMessage, postgres::Error>> + Send + 'static)>>
