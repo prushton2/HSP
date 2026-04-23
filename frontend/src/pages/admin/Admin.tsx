@@ -1,8 +1,20 @@
-import { useState } from 'react'
+import { useEffect, useState, type JSX } from 'react'
 import './Admin.css'
+import { GetAllStudentInfo } from '../../axios/axios'
+import type { StudentTablesResponse, TableActivities, TableResidencies, TableStudentActivities, TableStudentInfo } from '../../axios/structs';
 
 function Admin() {
-    const [count, setCount] = useState(0)
+    const [studentInfo, setStudentInfo] = useState<StudentTablesResponse>({} as StudentTablesResponse);
+
+    useEffect(() => {
+        async function init() {
+            let info = await GetAllStudentInfo()
+            setStudentInfo(info);
+            console.log(info);
+            console.log(typeof info);
+        }
+        init();
+    }, [])
 
     return (
     <>
@@ -11,26 +23,10 @@ function Admin() {
         </div>
 
         <div className="body">
-            <table>
-            <tbody>
-                <tr>
-                    <th>Company</th>
-                    <th>Contact</th>
-                    <th>Country</th>
-                </tr>
-                <tr>
-                    <td>Alfreds Futterkiste</td>
-                    <td>Maria Anders</td>
-                    <td>Germany</td>
-                </tr>
-                <tr>
-                    <td>Centro comercial Moctezuma</td>
-                    <td>Francisco Chang</td>
-                    <td>Mexico</td>
-                </tr>
-
-            </tbody>
-            </table>
+            <RenderTable info={studentInfo.student_info} tag="student_info" />
+            <RenderTable info={studentInfo.residencies} tag="residencies" />
+            <RenderTable info={studentInfo.student_activities} tag="student_activities" />
+            <RenderTable info={studentInfo.activities} tag="activities" />
         </div>
     </>
     )
@@ -39,4 +35,118 @@ function Admin() {
 export default Admin
 
 
-// function RenderTable()
+function RenderTable({info, tag}: {info: TableResidencies[] | TableStudentActivities[] | TableActivities[] | TableStudentInfo[], tag: string}): JSX.Element {
+    const [visible, setVisible] = useState<boolean>(false)
+    
+    let table_rows: JSX.Element[] = [];
+    let head: JSX.Element = <></>;
+
+    if (info == undefined) {
+        return <></>
+    }
+
+    switch (tag) {
+        case "student_info":
+            head = <tr>
+                <th>UUID</th>
+                <th>Number</th>
+            </tr>
+            break;
+        case "residencies":
+            head = <tr>
+                <th>UUID</th>
+                <th>hall</th>
+                <th>room</th>
+                <th>wing</th>
+                <th>role</th>
+            </tr>
+            break;
+        case "student_activities":
+            head = <tr>
+                <th>UUID</th>
+                <th>date</th>
+                <th>activity</th>
+            </tr>
+            break;
+        case "activities":
+            head = <tr>
+                <th>activity</th>
+                <th>date</th>
+                <th>staff</th>
+            </tr>
+            break;
+
+    }
+    
+    info.forEach((row) => {
+        console.log(typeof row);
+        switch (tag) {
+            case "student_info":
+                table_rows.push(
+                    <tr>
+                        <td>{(row as TableStudentInfo).uuid}</td>
+                        <td>{(row as TableStudentInfo).number}</td>
+                    </tr>
+                )
+                break;
+            case "residencies":
+                table_rows.push(
+                    <tr>
+                        <td>{(row as TableResidencies).uuid}</td>
+                        <td>{(row as TableResidencies).hall}</td>
+                        <td>{(row as TableResidencies).room}</td>
+                        <td>{(row as TableResidencies).wing}</td>
+                        <td>{(row as TableResidencies).role}</td>
+                        
+                    </tr>
+                )
+                break;
+            case "student_activities":
+                table_rows.push(
+                    <tr>
+                        <td>{(row as TableStudentActivities).uuid}</td>
+                        <td>{(row as TableStudentActivities).date}</td>
+                        <td>{(row as TableStudentActivities).activity}</td>
+                        
+                    </tr>
+                )
+                break;
+            case "activities":
+                table_rows.push(
+                    <tr>
+                        <td>{(row as TableActivities).activity}</td>
+                        <td>{(row as TableActivities).date}</td>
+                        <td>{(row as TableActivities).staff}</td>
+                    </tr>
+                )
+                break;
+        }
+    });
+
+    return <>
+    <h2 onClick={() => setVisible(!visible)}>{formatProperly(tag)}</h2>
+    {visible ? <table>
+        <thead>
+            {head}
+        </thead>
+        <tbody>
+            {table_rows}
+        </tbody>
+    </table> : <></>}
+    </>
+}
+
+function formatProperly(s: string): string {
+    s = s.replaceAll("_", " ");
+    s = s.charAt(0).toUpperCase() + s.substring(1);
+
+    let news = s
+
+    for(let i = 0; i < s.length-1; i++) {
+        if (s[i] == " ") {
+            news = s.substring(0, i+1) + s[i+1].toUpperCase() + s.substring(i+2);
+        }
+    }
+
+    return news;
+}

@@ -1,4 +1,5 @@
 use axum::async_trait;
+use serde::{Deserialize, Serialize};
 use tokio_postgres::error::SqlState;
 
 
@@ -20,13 +21,13 @@ pub trait Database: Send + Sync {
     Error>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TableStudentInfo {
     pub uuid: String,
     pub number: u32,
 }
-#[derive(Debug)]
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TableResidencies {
     pub uuid: String,
     pub hall: String,
@@ -34,17 +35,17 @@ pub struct TableResidencies {
     pub wing: String,
     pub role: String,
 }
-#[derive(Debug)]
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TableStudentActivities {
     pub uuid: String,
-    pub date: u32,
+    pub date: chrono::NaiveDate,
     pub activity: String,
 }
-#[derive(Debug)]
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TableActivities {
     pub activity: String,
-    pub date: u32,
+    pub date: chrono::NaiveDate,
     pub staff: Vec<String>
 }

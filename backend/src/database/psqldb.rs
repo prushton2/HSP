@@ -109,7 +109,7 @@ impl database::Database for PSQLDB {
         let student_activities = rows.iter().map(|row| {
             database::TableStudentActivities {
                 uuid: row.get::<&str, &str>("UUID").to_string(),
-                date: row.get::<&str, u32>("date"),
+                date: row.get::<&str, chrono::NaiveDate>("date"),
                 activity: row.get::<&str, &str>("activity").to_string(),
             }
         }).collect();
@@ -119,7 +119,7 @@ impl database::Database for PSQLDB {
         let activities = rows.iter().map(|row| {
             database::TableActivities {
                 activity: row.get::<&str, &str>("activity").to_string(),
-                date: row.get::<&str, u32>("date"),
+                date: row.get::<&str, chrono::NaiveDate>("date"),
                 staff: row.get::<&str, Vec<String>>("staff"),
             }
         }).collect();

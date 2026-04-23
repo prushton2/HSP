@@ -31,11 +31,14 @@ async fn main() {
 
 
 async fn get_student_info(State(db_mutex): State<Arc<Mutex<dyn database::Database>>>) -> String {
-    println!("attempting to lock mutex");
     let mut db = db_mutex.lock().await;
 
-    println!("calling get_student_tables");
     let all_tables = db.get_student_tables().await.unwrap();
 
-    format!("{{{:?},{:?},{:?},{:?}}}", all_tables.0, all_tables.1, all_tables.2, all_tables.3)
+    format!("{{\"student_info\":{},\"residencies\":{},\"student_activities\":{},\"activities\":{}}}",
+        serde_json::to_string(&all_tables.0).unwrap(),
+        serde_json::to_string(&all_tables.1).unwrap(),
+        serde_json::to_string(&all_tables.2).unwrap(),
+        serde_json::to_string(&all_tables.3).unwrap()
+    )
 }
