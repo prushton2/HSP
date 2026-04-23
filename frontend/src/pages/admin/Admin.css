@@ -28,6 +28,11 @@ table {
   border: 1px solid var(--border);
 }
 
+.highlighted_row {
+  background-color: yellow;
+  color: black
+}
+
 h2 {
   padding: 10px;
   margin-top: 50px;

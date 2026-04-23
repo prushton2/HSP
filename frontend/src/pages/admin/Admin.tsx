@@ -5,6 +5,7 @@ import { type CreateStudent, type StudentTablesResponse, type TableActivities, t
 
 function Admin() {
     const [studentInfo, setStudentInfo] = useState<StudentTablesResponse>({} as StudentTablesResponse);
+    const [selectedUUID, setSelectedUUID] = useState<string>("");
 
     useEffect(() => {
         async function init() {
@@ -23,10 +24,10 @@ function Admin() {
         </div>
 
         <div className="tables">
-            <RenderTable info={studentInfo.student_info} tag="student_info" />
-            <RenderTable info={studentInfo.residencies} tag="residencies" />
-            <RenderTable info={studentInfo.student_activities} tag="student_activities" />
-            <RenderTable info={studentInfo.activities} tag="activities" />
+            <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.student_info} tag="student_info" />
+            <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.residencies} tag="residencies" />
+            <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.student_activities} tag="student_activities" />
+            <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.activities} tag="activities" />
 
         </div>
         <div className="forms">
@@ -39,7 +40,7 @@ function Admin() {
 export default Admin
 
 
-function RenderTable({info, tag}: {info: TableResidencies[] | TableStudentActivities[] | TableActivities[] | TableStudentInfo[], tag: string}): JSX.Element {
+function RenderTable({info, tag, select, selected}: {select: (uuid: string) => void, selected: string, info: TableResidencies[] | TableStudentActivities[] | TableActivities[] | TableStudentInfo[], tag: string}): JSX.Element {
     const [visible, setVisible] = useState<boolean>(false)
     
     let table_rows: JSX.Element[] = [];
@@ -84,46 +85,56 @@ function RenderTable({info, tag}: {info: TableResidencies[] | TableStudentActivi
     
     info.forEach((row) => {
         console.log(typeof row);
+        let table_row = <></>
         switch (tag) {
             case "student_info":
-                table_rows.push(
-                    <tr>
-                        <td>{(row as TableStudentInfo).uuid}</td>
-                        <td>{(row as TableStudentInfo).number}</td>
-                    </tr>
-                )
+                table_row = <>
+                    <td>{(row as TableStudentInfo).uuid}</td>
+                    <td>{(row as TableStudentInfo).number}</td>
+                </>
                 break;
             case "residencies":
-                table_rows.push(
-                    <tr>
-                        <td>{(row as TableResidencies).uuid}</td>
-                        <td>{(row as TableResidencies).hall}</td>
-                        <td>{(row as TableResidencies).room}</td>
-                        <td>{(row as TableResidencies).wing}</td>
-                        <td>{(row as TableResidencies).role}</td>
-                        
-                    </tr>
-                )
+                table_row = <>
+                    <td>{(row as TableResidencies).uuid}</td>
+                    <td>{(row as TableResidencies).hall}</td>
+                    <td>{(row as TableResidencies).room}</td>
+                    <td>{(row as TableResidencies).wing}</td>
+                    <td>{(row as TableResidencies).role}</td>
+                    
+                </>
                 break;
             case "student_activities":
-                table_rows.push(
-                    <tr>
-                        <td>{(row as TableStudentActivities).uuid}</td>
-                        <td>{(row as TableStudentActivities).date}</td>
-                        <td>{(row as TableStudentActivities).activity}</td>
-                        
-                    </tr>
-                )
+                table_row = <>
+                    <td>{(row as TableStudentActivities).uuid}</td>
+                    <td>{(row as TableStudentActivities).date}</td>
+                    <td>{(row as TableStudentActivities).activity}</td>
+                    
+                </>
                 break;
             case "activities":
-                table_rows.push(
-                    <tr>
-                        <td>{(row as TableActivities).activity}</td>
-                        <td>{(row as TableActivities).date}</td>
-                        <td>{(row as TableActivities).staff}</td>
-                    </tr>
-                )
+                table_row = <>
+                    <td>{(row as TableActivities).activity}</td>
+                    <td>{(row as TableActivities).date}</td>
+                    <td>{(row as TableActivities).staff}</td>
+                </>
                 break;
+        }
+
+        if(tag == "activities") {
+            table_rows.push(
+                <tr>
+                    {table_row}
+                </tr>
+            );
+        } else {
+            table_rows.push(
+                <tr 
+                    onClick={() => {if (selected == (row as any).uuid) {select("0")} else {select((row as any).uuid)}}}
+                    className={selected == (row as any).uuid ? "highlighted_row" : ""}
+                >
+                    {table_row}
+                </tr>
+            )
         }
     });
 
