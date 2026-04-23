@@ -1,7 +1,7 @@
 import { useEffect, useState, type JSX } from 'react'
 import './Admin.css'
-import { GetAllStudentInfo } from '../../axios/axios'
-import type { StudentTablesResponse, TableActivities, TableResidencies, TableStudentActivities, TableStudentInfo } from '../../axios/structs';
+import { GetAllStudentInfo, HttpCreateStudent } from '../../axios/axios'
+import { type CreateStudent, type StudentTablesResponse, type TableActivities, type TableResidencies, type TableStudentActivities, type TableStudentInfo } from '../../axios/structs';
 
 function Admin() {
     const [studentInfo, setStudentInfo] = useState<StudentTablesResponse>({} as StudentTablesResponse);
@@ -22,11 +22,15 @@ function Admin() {
         <h1>HSP Admin</h1>
         </div>
 
-        <div className="body">
+        <div className="tables">
             <RenderTable info={studentInfo.student_info} tag="student_info" />
             <RenderTable info={studentInfo.residencies} tag="residencies" />
             <RenderTable info={studentInfo.student_activities} tag="student_activities" />
             <RenderTable info={studentInfo.activities} tag="activities" />
+
+        </div>
+        <div className="forms">
+            <CreateStudent />
         </div>
     </>
     )
@@ -133,6 +137,26 @@ function RenderTable({info, tag}: {info: TableResidencies[] | TableStudentActivi
             {table_rows}
         </tbody>
     </table> : <></>}
+    </>
+}
+
+function CreateStudent(): JSX.Element {
+    const [state, setState] = useState<CreateStudent>({room: 0} as CreateStudent);
+
+    return <>
+        <table>
+        <h3>Create Student</h3>
+        <tbody>
+            <tr><td>fname </td><td><input onChange={(e) => setState({...state, fname:  e.target.value})} /> </td></tr>
+            <tr><td>lname </td><td><input onChange={(e) => setState({...state, lname:  e.target.value})} /> </td></tr>
+            <tr><td>number</td><td><input onChange={(e) => setState({...state, number: parseInt(e.target.value)})} type="number" />  </td></tr>
+            <tr><td>hall  </td><td><input onChange={(e) => setState({...state, hall:   e.target.value})} /> </td></tr>
+            <tr><td>room  </td><td><input onChange={(e) => setState({...state, room:   parseInt(e.target.value)})} type="number" /> </td></tr>
+            <tr><td>wing  </td><td><input onChange={(e) => setState({...state, wing:   e.target.value})} /> </td></tr>
+            <tr><td>role  </td><td><input onChange={(e) => setState({...state, role:   e.target.value})} /> </td></tr>
+            <tr><td></td><td><button onClick={() => HttpCreateStudent(state)}>Create</button></td></tr>
+        </tbody>
+        </table>
     </>
 }
 

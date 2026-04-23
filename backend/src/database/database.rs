@@ -1,10 +1,12 @@
 use axum::async_trait;
 use serde::{Deserialize, Serialize};
 use tokio_postgres::error::SqlState;
+#[allow(dead_code)]
 
 
 #[derive(Debug)]
 pub enum Error {
+    ErrorDuring(String, Box<Error>),
     PostgresError(Option<SqlState>),
     TokioError
 }
@@ -19,19 +21,21 @@ pub trait Database: Send + Sync {
         Vec<TableActivities>
     ),
     Error>;
+
+    async fn create_student(&mut self, user: &crate::endpoints::admin::CreateUser) -> Result<(), Error>;
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TableStudentInfo {
     pub uuid: String,
-    pub number: u32,
+    pub number: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TableResidencies {
     pub uuid: String,
     pub hall: String,
-    pub room: u32,
+    pub room: i32,
     pub wing: String,
     pub role: String,
 }

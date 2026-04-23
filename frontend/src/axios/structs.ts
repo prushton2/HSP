@@ -29,3 +29,13 @@ export interface StudentTablesResponse {
     student_activities: TableStudentActivities[],
     activities: TableActivities[]
 }
+
+export interface CreateStudent {
+    fname: String,
+    lname: String,
+    number: number,
+    hall: String,
+    room: number,
+    wing: String,
+    role: String,
+}

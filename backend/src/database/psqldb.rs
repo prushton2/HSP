@@ -1,6 +1,7 @@
 use axum::async_trait;
 use tokio_postgres::{Client, NoTls};
-use crate::database::{self, DBInfo};
+use uuid::Uuid;
+use crate::database::{self, DBInfo, Error};
 
 pub struct PSQLDB {
     client: Client
@@ -38,8 +39,8 @@ impl database::Database for PSQLDB {
             );
 
             CREATE TABLE IF NOT EXISTS StudentInfo (
-                UUID varchar(36) PRIMARY KEY,
-                number integer,
+                UUID varchar(36),
+                number integer PRIMARY KEY,
                 first_name_hash text,
                 last_name_hash text
             );
@@ -88,7 +89,7 @@ impl database::Database for PSQLDB {
         let student_info = rows.iter().map(|row| {
             database::TableStudentInfo {
                 uuid: row.get::<&str, &str>("UUID").to_string(),
-                number: row.get::<&str, i32>("number") as u32,
+                number: row.get::<&str, i32>("number") as i32,
             }
         }).collect();
 
@@ -98,7 +99,7 @@ impl database::Database for PSQLDB {
             database::TableResidencies {
                 uuid: row.get::<&str, &str>("UUID").to_string(),
                 hall: row.get::<&str, &str>("hall").to_string(),
-                room: row.get::<&str, u32>("room"),
+                room: row.get::<&str, i32>("room"),
                 wing: row.get::<&str, &str>("wing").to_string(),
                 role: row.get::<&str, &str>("role").to_string(),
             }
@@ -125,5 +126,26 @@ impl database::Database for PSQLDB {
         }).collect();
 
         Ok((student_info, residencies, student_activities, activities))
+    }
+
+    async fn create_student(&mut self, user: &crate::endpoints::admin::CreateUser) -> Result<(), Error> {
+        let id = Uuid::new_v4().to_string();
+
+        match self.client.execute("INSERT INTO StudentInfo (uuid, number) VALUES ($1, $2)", &[&id, &user.number]).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::ErrorDuring("Insert into StudentInfo".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
+        }
+
+        match self.client.execute("insert into EncryptedData values ($1, $2)", &[&id, &format!("{},{}", user.fname, user.lname)]).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::ErrorDuring("Insert into EncryptedData".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
+        }
+
+        match self.client.execute("insert into residencies values ($1, $2, $3, $4, $5)", &[&id, &user.hall, &user.room, &user.wing, &user.role]).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::ErrorDuring("Insert into Residencies".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
+        };
+
+        Ok(())
     }
 }
