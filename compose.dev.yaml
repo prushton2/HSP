@@ -29,7 +29,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: password
       PGADMIN_LISTEN_PORT: 8080
     ports:
-    - "8000:8080"
+    - 8000:8080
     volumes:
     - ./servers.json:/pgadmin4/servers.json
 
@@ -37,7 +37,6 @@ services:
     image: caddy
     container_name: hsp-caddy
     restart: always
-    ports:
-      - "${PORT}:80"
+    network_mode: host
     volumes:
-      - ./config/prod/Caddyfile:/etc/caddy/Caddyfile
+      - ./config/dev/Caddyfile:/etc/caddy/Caddyfile

@@ -28,6 +28,7 @@ services:
     image: caddy
     container_name: hsp-caddy
     restart: always
+    user: root
     ports:
       - "${PORT}:80"
     volumes:

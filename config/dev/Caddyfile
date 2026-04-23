@@ -1,4 +1,11 @@
-localhost:80 {
-	reverse_proxy /api localhost:3333
-	reverse_proxy /* localhost:5173
+{
+    auto_https off
+}
+
+:8080 {
+    handle /api/* {
+        uri strip_prefix /api
+        reverse_proxy localhost:3000
+    }
+    reverse_proxy /* localhost:5173
 }
