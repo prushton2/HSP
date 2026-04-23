@@ -83,11 +83,8 @@ impl database::Database for PSQLDB {
         ),
         database::Error> {
         
-        // let client = &mut self.client;
-        
         let rows = self.client.query("SELECT * FROM StudentInfo", &[]).await.unwrap();
         
-        // Process rows normally, no spawn_blocking needed
         let student_info = rows.iter().map(|row| {
             database::TableStudentInfo {
                 uuid: row.get::<&str, &str>("UUID").to_string(),
@@ -95,6 +92,38 @@ impl database::Database for PSQLDB {
             }
         }).collect();
 
-        Ok((student_info, vec![], vec![], vec![]))
+        let rows = self.client.query("SELECT * FROM Residencies", &[]).await.unwrap();
+        
+        let residencies = rows.iter().map(|row| {
+            database::TableResidencies {
+                uuid: row.get::<&str, &str>("UUID").to_string(),
+                hall: row.get::<&str, &str>("hall").to_string(),
+                room: row.get::<&str, u32>("room"),
+                wing: row.get::<&str, &str>("wing").to_string(),
+                role: row.get::<&str, &str>("role").to_string(),
+            }
+        }).collect();
+
+        let rows = self.client.query("SELECT * FROM StudentActivities", &[]).await.unwrap();
+        
+        let student_activities = rows.iter().map(|row| {
+            database::TableStudentActivities {
+                uuid: row.get::<&str, &str>("UUID").to_string(),
+                date: row.get::<&str, u32>("date"),
+                activity: row.get::<&str, &str>("activity").to_string(),
+            }
+        }).collect();
+
+        let rows = self.client.query("SELECT * FROM Activities", &[]).await.unwrap();
+        
+        let activities = rows.iter().map(|row| {
+            database::TableActivities {
+                activity: row.get::<&str, &str>("activity").to_string(),
+                date: row.get::<&str, u32>("date"),
+                staff: row.get::<&str, Vec<String>>("staff"),
+            }
+        }).collect();
+
+        Ok((student_info, residencies, student_activities, activities))
     }
 }

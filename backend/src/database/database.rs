@@ -25,6 +25,7 @@ pub struct TableStudentInfo {
     pub uuid: String,
     pub number: u32,
 }
+#[derive(Debug)]
 
 pub struct TableResidencies {
     pub uuid: String,
@@ -33,15 +34,17 @@ pub struct TableResidencies {
     pub wing: String,
     pub role: String,
 }
+#[derive(Debug)]
 
 pub struct TableStudentActivities {
     pub uuid: String,
     pub date: u32,
     pub activity: String,
 }
+#[derive(Debug)]
 
 pub struct TableActivities {
     pub activity: String,
     pub date: u32,
-    pub staff: [String; 8]
+    pub staff: Vec<String>
 }

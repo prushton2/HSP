@@ -15,25 +15,18 @@ async fn main() {
     };
     let db: Arc<Mutex<dyn database::Database>> = Arc::new(Mutex::new(database::PSQLDB::new(&dbinfo).await));
 
-    let mut reference = db.lock().await;
-    let res = reference.init_if_uninitialized();
-    println!("{:?}", res.await);
-    drop(reference);
-    // let db: Arc<Mutex<dyn database::Database>> = tokio::runtime::Runtime::new().unwrap().block_on(async move {
-            
+    {
+        let mut reference = db.lock().await;
+        let res = reference.init_if_uninitialized();
+        println!("{:?}", res.await);
+    }
 
-
-    // });
-
-
-    // tokio::runtime::Runtime::new().unwrap().block_on(async move {
     let app = Router::new()
         .route("/admin/get_student_info", get(get_student_info))
         .with_state(db); // move db in directly, no clone needed
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();  
-    // });
 }
 
 
@@ -44,5 +37,5 @@ async fn get_student_info(State(db_mutex): State<Arc<Mutex<dyn database::Databas
     println!("calling get_student_tables");
     let all_tables = db.get_student_tables().await.unwrap();
 
-    format!("{:?}", all_tables.0)
+    format!("{{{:?},{:?},{:?},{:?}}}", all_tables.0, all_tables.1, all_tables.2, all_tables.3)
 }
