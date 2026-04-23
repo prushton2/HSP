@@ -5,6 +5,13 @@ pub mod psqldb;
 
 pub use database::Database;
 pub use database::Error;
+
+pub use database::TableStudentInfo;
+pub use database::TableResidencies;
+pub use database::TableStudentActivities;
+pub use database::TableActivities;
+
+
 pub use psqldb::PSQLDB;
 
 #[derive(Serialize, Deserialize, Clone)]

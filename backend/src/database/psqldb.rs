@@ -1,4 +1,5 @@
-use postgres::{Client, NoTls};
+use axum::async_trait;
+use tokio_postgres::{Client, NoTls};
 use crate::database::{self, DBInfo};
 
 pub struct PSQLDB {
@@ -6,20 +7,30 @@ pub struct PSQLDB {
 }
 
 impl PSQLDB {
-    pub fn new(dbinfo: &DBInfo) -> Self {
+    pub async fn new(dbinfo: &DBInfo) -> Self {
         let string: String = format!("host={} user={} password={} dbname={}", dbinfo.host, dbinfo.username, dbinfo.password, dbinfo.dbname);
-        let new_client = Client::connect(&string, NoTls).unwrap();
+        let new_client = match tokio_postgres::connect(&string, NoTls).await {
+            Ok(t) => t,
+            Err(t) => panic!("Couldnt connect to database: {}", t)
+        };
+
+        tokio::spawn(async move {
+            if let Err(e) = new_client.1.await {
+                eprintln!("DB connection error: {}", e);
+            }
+        });
 
         let db: Self = Self{
-            client: new_client,
+            client: new_client.0,
         };
         
         return db;
     }
 }
 
+#[async_trait]
 impl database::Database for PSQLDB {
-    fn init_if_uninitialized(&mut self) -> Result<(), database::Error> {
+    async fn init_if_uninitialized(&mut self) -> Result<(), database::Error> {
         let result = self.client.batch_execute("
             CREATE TABLE IF NOT EXISTS EncryptedData (
                 UUID varchar(36) PRIMARY KEY,
@@ -54,12 +65,36 @@ impl database::Database for PSQLDB {
                 date date,
                 staff text[8],
 
-                PRIMARY KEY (activity date)
+                PRIMARY KEY (activity, date)
             );
-        ");
+        ").await;
+
         match result {
             Ok(_) => {return Ok(())},
             Err(t) => {return Err(database::Error::PostgresError(t.code().cloned()))}
         };
+    }
+
+    async fn get_student_tables(&mut self) -> Result<(
+            Vec<database::TableStudentInfo>,
+            Vec<database::TableResidencies>,
+            Vec<database::TableStudentActivities>,
+            Vec<database::TableActivities>
+        ),
+        database::Error> {
+        
+        // let client = &mut self.client;
+        
+        let rows = self.client.query("SELECT * FROM StudentInfo", &[]).await.unwrap();
+        
+        // Process rows normally, no spawn_blocking needed
+        let student_info = rows.iter().map(|row| {
+            database::TableStudentInfo {
+                uuid: row.get::<&str, &str>("UUID").to_string(),
+                number: row.get::<&str, i32>("number") as u32,
+            }
+        }).collect();
+
+        Ok((student_info, vec![], vec![], vec![]))
     }
 }
