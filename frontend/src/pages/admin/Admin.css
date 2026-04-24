@@ -41,3 +41,49 @@ h2 {
 thead {
   background-color: var(--accent-bg);
 }
+
+.ribbon {
+  /* border: 1px solid red; */
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.dropdown-button {
+  padding: 10px;
+  background-color: var(--accent-bg);
+  border: none;
+  min-width: 150px;
+}
+
+.dropdown-element-button {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: inherit;
+  margin: 0;
+  padding: 0;
+  display: block;
+  min-height: 50px;
+}
+
+.dropdown-element-button:hover{
+  background-color: #3c434f;
+}
+
+.dropdown-ul {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  list-style: none;
+  margin-top: 0px;
+  padding: 4px 0;
+  min-width: 150px;
+  z-index: 1000;
+  background-color: var(--border);
+}
+
+.dropdown-ul li {
+  margin: 0px;
+  padding: 0px;
+}

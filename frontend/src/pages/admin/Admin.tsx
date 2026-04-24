@@ -20,23 +20,49 @@ function Admin() {
         <div className="title">
         <h1>HSP Admin</h1>
         </div>
-
+        <div className='ribbon'>
+            <HoverDropdown title="Student"/>
+            <HoverDropdown title="Activities"/>
+        </div>
         <div className="tables">
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.student_info} tag="student_info" />
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.residencies} tag="residencies" />
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.student_activities} tag="student_activities" />
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.activities} tag="activities" />
         </div>
-        <div className="forms">
+        {/* <div className="forms">
             <CreateStudent />
             <EditStudent />
-        </div>
+        </div> */}
     </>
     )
 }
 
 export default Admin
 
+function HoverDropdown({title}: {title: string}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div
+      style={{ position: "relative", display: "inline-block" }}
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
+      {/* Trigger */}
+      <button className="dropdown-button">{title}</button>
+
+      {/* Dropdown */}
+      {isOpen && (
+        <ul className="dropdown-ul">
+          <li><button className='dropdown-element-button'>Option 1</button></li>
+          <li><button className='dropdown-element-button'>Option 2</button></li>
+          <li><button className='dropdown-element-button'>Option 3</button></li>
+        </ul>
+      )}
+    </div>
+  );
+}
 
 function RenderTable({info, tag, select, selected}: {select: (uuid: string) => void, selected: string, info: TableResidencies[] | TableStudentActivities[] | TableActivities[] | TableStudentInfo[], tag: string}): JSX.Element {
     const [visible, setVisible] = useState<boolean>(false)
@@ -134,15 +160,15 @@ function RenderTable({info, tag, select, selected}: {select: (uuid: string) => v
     });
 
     return <>
-    <h2 onClick={() => setVisible(!visible)}>{formatProperly(tag)}</h2>
-    {visible ? <table>
-        <thead>
-            {head}
-        </thead>
-        <tbody>
-            {table_rows}
-        </tbody>
-    </table> : <></>}
+        <h2 onClick={() => setVisible(!visible)}>{formatProperly(tag)}</h2>
+        <table>
+            <thead onClick={() => setVisible(!visible)}>
+                {head}
+            </thead>
+            {visible ? <tbody>
+                {table_rows}
+            </tbody> : <></>}
+        </table>
     </>
 }
 
