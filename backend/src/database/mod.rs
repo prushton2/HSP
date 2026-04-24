@@ -2,15 +2,17 @@ use serde::{Serialize, Deserialize};
 
 pub mod database;
 pub mod psqldb;
+pub mod structs;
 
 pub use database::Database;
 pub use database::Error;
 pub use database::FieldValue;
 
-pub use database::TableStudentInfo;
-pub use database::TableResidencies;
-pub use database::TableStudentActivities;
-pub use database::TableActivities;
+pub use structs::AllStudentInfo;
+pub use structs::TableStudentInfo;
+pub use structs::TableResidencies;
+pub use structs::TableStudentActivities;
+pub use structs::TableActivities;
 
 
 pub use psqldb::PSQLDB;

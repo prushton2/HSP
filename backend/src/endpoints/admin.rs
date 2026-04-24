@@ -59,8 +59,25 @@ pub async fn edit_sudent(State(db_mutex): State<Arc<Mutex<dyn database::Database
         }
     };
 
-    let response = match db.edit_user(&body.uuid, &body.field, &field).await {
+    let response = match db.edit_student(&body.uuid, &body.field, &field).await {
         Ok(_) => (StatusCode::CREATED, "".to_string()),
+        Err(t) => (StatusCode::BAD_REQUEST, format!("{:?}", t))
+    };
+
+    return response;
+}
+
+#[derive(Deserialize)]
+#[allow(dead_code)]
+pub struct GetStudent {
+    pub uuid: String,
+    pub decrypt: bool
+}
+pub async fn get_student(State(db_mutex): State<Arc<Mutex<dyn database::Database>>>, Json(body): Json<GetStudent>) -> (StatusCode, String) {
+    let mut db = db_mutex.lock().await;
+    
+    let response = match db.get_student(&body.uuid, body.decrypt).await {
+        Ok(t) => (StatusCode::OK, serde_json::to_string(&t).unwrap()),
         Err(t) => (StatusCode::BAD_REQUEST, format!("{:?}", t))
     };
 

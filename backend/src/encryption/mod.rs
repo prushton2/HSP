@@ -8,6 +8,16 @@ pub struct EncryptedContents {
     pub pronouns: String,
 }
 
+impl Default for EncryptedContents {
+    fn default() -> Self {
+        Self {
+            first_name: "".to_string(),
+            last_name: "".to_string(),
+            pronouns: "".to_string()
+        }
+    }
+}
+
 pub trait Encryption: Send + Sync {
     fn encrypt(&mut self, contents: &EncryptedContents) -> String;
     fn decrypt(&mut self, text: &str) -> Option<EncryptedContents>;

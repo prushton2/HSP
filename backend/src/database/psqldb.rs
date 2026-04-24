@@ -4,7 +4,7 @@ use axum::async_trait;
 use tokio_postgres::{Client, NoTls};
 use uuid::Uuid;
 use crate::database::{self, DBInfo, Error};
-use crate::encryption::{self, Encryption};
+use crate::encryption::{self, EncryptedContents, Encryption};
 
 pub struct PSQLDB {
     client: Client,
@@ -154,7 +154,7 @@ impl database::Database for PSQLDB {
         Ok(())
     }
 
-    async fn edit_user(&mut self, uuid: &str, field: &str, new_value: &database::FieldValue) -> Result<(), Error> {
+    async fn edit_student(&mut self, uuid: &str, field: &str, new_value: &database::FieldValue) -> Result<(), Error> {
         enum OpType {
             IntField(String),
             StringField(String),
@@ -238,5 +238,39 @@ impl database::Database for PSQLDB {
         }
 
         Ok(())
+    }
+
+    async fn get_student(&mut self, uuid: &str, decrypt: bool) -> Result<database::AllStudentInfo, Error> {
+        let mut student = database::AllStudentInfo::default();
+
+        let studentinfo = self.client.query_one("SELECT * FROM StudentInfo WHERE uuid = $1", &[&uuid]).await.unwrap();
+        
+        student.info.number = studentinfo.get("number");
+        student.info.uuid = studentinfo.get("uuid");
+
+        let residency = self.client.query_one("SELECT * FROM Residencies WHERE uuid = $1", &[&uuid]).await.unwrap();
+        
+        student.residence.uuid = residency.get::<&str, &str>("UUID").to_string();
+        student.residence.hall = residency.get::<&str, &str>("hall").to_string();
+        student.residence.room = residency.get::<&str, i32>("room");
+        student.residence.wing = residency.get::<&str, &str>("wing").to_string();
+        student.residence.role = residency.get::<&str, &str>("role").to_string();
+
+        if !decrypt {
+            return Ok(student);
+        }
+
+        let encrypted = self.client.query_one("SELECT encrypted FROM encrypteddata WHERE uuid = $1", &[&uuid]).await.unwrap();
+
+        let decrypted = match self.encryption.decrypt(encrypted.get("encrypted")) {
+            Some(t) => t,
+            None => EncryptedContents::default()
+        };
+
+        student.first_name = decrypted.first_name;
+        student.last_name = decrypted.last_name;
+        student.pronouns = decrypted.pronouns;
+
+        Ok(student)
     }
 }
