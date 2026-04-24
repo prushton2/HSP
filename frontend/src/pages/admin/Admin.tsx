@@ -21,8 +21,9 @@ function Admin() {
         <h1>HSP Admin</h1>
         </div>
         <div className='ribbon'>
-            <HoverDropdown title="Student"/>
-            <HoverDropdown title="Activities"/>
+            <HoverDropdown title="Student" buttons={[["Create", () => {}], ["Edit", () => {}], ["Decrypt", () => {}], ["Delete", () => {}]]}/>
+            <HoverDropdown title="Activities" buttons={[["Create", () => {}]]}/>
+            <HoverDropdown title="Access" buttons={[["Grant", () => {}]]}/>
         </div>
         <div className="tables">
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.student_info} tag="student_info" />
@@ -30,18 +31,22 @@ function Admin() {
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.student_activities} tag="student_activities" />
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.activities} tag="activities" />
         </div>
-        {/* <div className="forms">
-            <CreateStudent />
-            <EditStudent />
-        </div> */}
     </>
     )
 }
 
 export default Admin
 
-function HoverDropdown({title}: {title: string}) {
+function HoverDropdown({title, buttons}: {title: string, buttons: [string, () => void][]}) {
   const [isOpen, setIsOpen] = useState(false);
+
+  let button_html: JSX.Element[] = []
+
+  buttons.forEach(([title, fn]) => {
+    button_html.push(
+        <li><button className='dropdown-element-button' onClick={fn}>{title}</button></li>
+    )
+  })
 
   return (
     <div
@@ -55,9 +60,7 @@ function HoverDropdown({title}: {title: string}) {
       {/* Dropdown */}
       {isOpen && (
         <ul className="dropdown-ul">
-          <li><button className='dropdown-element-button'>Option 1</button></li>
-          <li><button className='dropdown-element-button'>Option 2</button></li>
-          <li><button className='dropdown-element-button'>Option 3</button></li>
+            {button_html}
         </ul>
       )}
     </div>
