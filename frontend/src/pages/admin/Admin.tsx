@@ -2,6 +2,7 @@ import { useEffect, useState, type JSX } from 'react'
 import './Admin.css'
 import { GetAllStudentInfo, HttpCreateStudent, HttpEditStudent } from '../../axios/axios'
 import { type CreateStudent, type EditStudent, type StudentTablesResponse, type TableActivities, type TableResidencies, type TableStudentActivities, type TableStudentInfo } from '../../axios/structs';
+import { Modal, prompt } from '../../components/Modal';
 
 function Admin() {
     const [studentInfo, setStudentInfo] = useState<StudentTablesResponse>({} as StudentTablesResponse);
@@ -17,13 +18,30 @@ function Admin() {
 
     return (
     <>
+        <Modal />
         <div className="title">
         <h1>HSP Admin</h1>
         </div>
         <div className='ribbon'>
-            <HoverDropdown title="Student" buttons={[["Create", () => {}], ["Edit", () => {}], ["Decrypt", () => {}], ["Delete", () => {}]]}/>
-            <HoverDropdown title="Activities" buttons={[["Create", () => {}]]}/>
-            <HoverDropdown title="Access" buttons={[["Grant", () => {}]]}/>
+            <HoverDropdown title="Student" buttons={[
+                ["Create", async () => {await prompt.show("Create Student", <CreateStudent/>)}],
+                ["Edit", async () => {await prompt.show("Edit Student", <EditStudent init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Decrypt", () => {}],
+                ["Delete", () => {}]
+            ]}/>
+
+            <HoverDropdown title="Activities" buttons={[
+                ["Create", () => {}],
+                ["Clone", () => {}],
+                ["Assign", () => {}],
+                ["Edit", () => {}]
+            ]}/>
+
+            <HoverDropdown title="Access" buttons={[
+                ["Grant", () => {}],
+                ["Update", () => {}],
+                ["Revoke", () => {}],
+            ]}/>
         </div>
         <div className="tables">
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.student_info} tag="student_info" />
@@ -175,9 +193,9 @@ function RenderTable({info, tag, select, selected}: {select: (uuid: string) => v
     </>
 }
 
-function EditStudent(): JSX.Element {
+function EditStudent({init_uuid}: {init_uuid: string}): JSX.Element {
     const [editData, setEditData] = useState({} as EditStudent)
-    const [uuid, setUuid] = useState("")
+    const [uuid, setUuid] = useState(init_uuid)
     const [field, setField] = useState("")
     const [value, setValue] = useState("")
 
@@ -206,13 +224,12 @@ function EditStudent(): JSX.Element {
         </>
     }
     return <>
-        <table>
-        <h3>Edit Student</h3>
+        <table className='edit_student'>
         <tbody>
-            <tr><td>uuid  </td><td><input  onChange={(e) => setUuid(e.target.value)}/> </td></tr>
+            <tr><td>uuid  </td><td><input  value={uuid} onChange={(e) => setUuid(e.target.value)}/> </td></tr>
             <tr><td>field </td><td><select onChange={(e) => setField(e.target.value)}>{Options()}</select></td></tr>
             <tr><td>value </td><td><input  onChange={(e) => setValue(e.target.value)}/>  </td></tr>
-            <tr><td></td><td><button onClick={() => {HttpEditStudent(editData)}}>Edit</button></td></tr>
+            <tr><td></td><td><button onClick={() => {HttpEditStudent(editData)}}>Submit Edit</button></td></tr>
         </tbody>
         </table>
     </>
@@ -222,17 +239,16 @@ function CreateStudent(): JSX.Element {
     const [state, setState] = useState<CreateStudent>({room: 0} as CreateStudent);
 
     return <>
-        <table>
-        <h3>Create Student</h3>
+        <table className='create_student'>
         <tbody>
-            <tr><td>fname </td><td><input onChange={(e) => setState({...state, fname:  e.target.value})} /> </td></tr>
-            <tr><td>lname </td><td><input onChange={(e) => setState({...state, lname:  e.target.value})} /> </td></tr>
+            <tr><td>first name </td><td><input onChange={(e) => setState({...state, fname:  e.target.value})} /> </td></tr>
+            <tr><td>last name </td><td><input onChange={(e) => setState({...state, lname:  e.target.value})} /> </td></tr>
             <tr><td>number</td><td><input onChange={(e) => setState({...state, number: parseInt(e.target.value)})} type="number" />  </td></tr>
             <tr><td>hall  </td><td><input onChange={(e) => setState({...state, hall:   e.target.value})} /> </td></tr>
             <tr><td>room  </td><td><input onChange={(e) => setState({...state, room:   parseInt(e.target.value)})} type="number" /> </td></tr>
             <tr><td>wing  </td><td><input onChange={(e) => setState({...state, wing:   e.target.value})} /> </td></tr>
             <tr><td>role  </td><td><input onChange={(e) => setState({...state, role:   e.target.value})} /> </td></tr>
-            <tr><td></td><td><button onClick={() => HttpCreateStudent(state)}>Create</button></td></tr>
+            <tr><td></td><td><button onClick={() => HttpCreateStudent(state)}>Create Student</button></td></tr>
         </tbody>
         </table>
     </>
