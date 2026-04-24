@@ -1,7 +1,7 @@
 import { useEffect, useState, type JSX } from 'react'
 import './Admin.css'
 import { GetAllStudentInfo, HttpCreateStudent, HttpEditStudent, HttpGetStudent } from '../../axios/axios'
-import { DefaultAllStudentInfo, type AllStudentInfo, type CreateStudent, type EditStudent, type StudentTablesResponse, type TableActivities, type TableResidencies, type TableStudentActivities, type TableStudentInfo } from '../../axios/structs';
+import { DefaultAllStudentInfo, type CreateStudent, type EditStudent, type StudentTablesResponse, type TableActivities, type TableResidencies, type TableStudentActivities, type TableStudentInfo } from '../../axios/structs';
 import { Modal, prompt } from '../../components/Modal';
 
 function Admin() {
