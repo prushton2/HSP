@@ -1,7 +1,7 @@
 use axum::async_trait;
 use tokio_postgres::error::SqlState;
 
-use crate::database;
+use crate::database::{self, Role};
 
 #[allow(dead_code)]
 
@@ -30,8 +30,10 @@ pub trait Database: Send + Sync {
     ),
     Error>;
 
-    async fn create_student(&mut self, user: &crate::endpoints::admin::CreateUser) -> Result<(), Error>;
+    async fn create_student(&mut self, user: &crate::endpoints::student::CreateUser) -> Result<(), Error>;
     async fn edit_student(&mut self, uuid: &str, field: &str, new_value: &FieldValue) -> Result<(), Error>;
     async fn get_student(&mut self, uuid: &str, decrypt: bool) -> Result<database::AllStudentInfo, Error>;
     async fn delete_student(&mut self, uuid: &str) -> Result<(), Error>;
+
+    async fn create_user(&mut self, first_name: &str, last_name: &str, role: Role, device: &str) -> Result<String, Error>;
 }

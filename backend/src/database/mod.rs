@@ -13,6 +13,7 @@ pub use structs::TableStudentInfo;
 pub use structs::TableResidencies;
 pub use structs::TableStudentActivities;
 pub use structs::TableActivities;
+pub use structs::Role;
 
 
 pub use psqldb::PSQLDB;

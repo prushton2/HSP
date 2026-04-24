@@ -21,4 +21,6 @@ impl Default for EncryptedContents {
 pub trait Encryption: Send + Sync {
     fn encrypt(&mut self, contents: &EncryptedContents) -> String;
     fn decrypt(&mut self, text: &str) -> Option<EncryptedContents>;
+    fn hash(&mut self, text: &str, salt: &str) -> String;
+    fn random_string(&mut self, len: usize) -> String;
 }

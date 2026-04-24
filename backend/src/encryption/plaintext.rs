@@ -1,4 +1,6 @@
+use rand::prelude::*;
 pub struct PlaintextEncryption {}
+
 
 impl PlaintextEncryption {
     pub fn new() -> Self {
@@ -22,5 +24,14 @@ impl super::Encryption for PlaintextEncryption {
             last_name: vec[1].to_string(),
             pronouns: vec[2].to_string(),
         })
+    }
+
+    fn hash(&mut self, text: &str, salt: &str) -> String {
+        return format!("{}{}", text, salt);
+    }
+
+    fn random_string(&mut self, len: usize) -> String {
+        let mut rng = rand::rng();
+        std::iter::repeat_with(|| {rng.random::<char>()}).take(len).collect()
     }
 }

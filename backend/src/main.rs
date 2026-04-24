@@ -29,11 +29,11 @@ async fn main() {
     }
 
     let app = Router::new()
-        .route("/admin/get_student_info", get(endpoints::admin::get_student_info))
-        .route("/admin/student/new", post(endpoints::admin::new_sudent))
-        .route("/admin/student/edit", post(endpoints::admin::edit_sudent))
-        .route("/admin/student/get", post(endpoints::admin::get_student))
-        .route("/admin/student/delete", post(endpoints::admin::delete_student))
+        .route("/student/all", get(endpoints::student::get_student_info))
+        .route("/student/new", post(endpoints::student::new_sudent))
+        .route("/student/edit", post(endpoints::student::edit_sudent))
+        .route("/student/get", post(endpoints::student::get_student))
+        .route("/student/delete", post(endpoints::student::delete_student))
         .with_state(db); // move db in directly, no clone needed
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();

@@ -3,26 +3,26 @@ import type { AllStudentInfo, CreateStudent, EditStudent, StudentTablesResponse 
 
 
 export async function GetAllStudentInfo(): Promise<StudentTablesResponse> {
-    const response = await axios.get('api/admin/get_student_info');
+    const response = await axios.get('api/student/all');
     return response.data as StudentTablesResponse
 }
 
 export async function HttpCreateStudent(student: CreateStudent) {
-    const response = await axios.post("/api/admin/student/new", student);
+    const response = await axios.post("/api/student/new", student);
     console.log(response);
 }
 
 export async function HttpEditStudent(student: EditStudent) {
-    const response = await axios.post("/api/admin/student/edit", student);
+    const response = await axios.post("/api/student/edit", student);
     console.log(response);
 }
 
 export async function HttpGetStudent(uuid: string, decrypt: boolean): Promise<AllStudentInfo> {
-    const response = await axios.post("/api/admin/student/get", {uuid: uuid, decrypt: decrypt});
+    const response = await axios.post("/api/student/get", {uuid: uuid, decrypt: decrypt});
     return response.data as AllStudentInfo
 }
 
 export async function HttpDeleteStudent(uuid: string) {
-    const response = await axios.post("/api/admin/student/delete", {uuid: uuid});
+    const response = await axios.post("/api/student/delete", {uuid: uuid});
     console.log(response);
 }

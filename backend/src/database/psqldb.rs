@@ -3,7 +3,7 @@ use std::collections::{HashMap};
 use axum::async_trait;
 use tokio_postgres::{Client, NoTls};
 use uuid::Uuid;
-use crate::database::{self, DBInfo, Error};
+use crate::database::{self, DBInfo, Error, Role};
 use crate::encryption::{self, EncryptedContents, Encryption};
 
 pub struct PSQLDB {
@@ -73,6 +73,21 @@ impl database::Database for PSQLDB {
 
                 PRIMARY KEY (activity, date)
             );
+
+            CREATE TABLE IF NOT EXISTS Users (
+                UUID varchar(36) PRIMARY KEY,
+                first_name text,
+                last_name text,
+                role text
+            );
+
+            CREATE TABLE IF NOT EXISTS Tokens (
+                UUID varchar(36),
+                token text,
+                device text,
+
+                PRIMARY KEY (UUID, token)
+            );
         ").await;
 
         match result {
@@ -133,7 +148,7 @@ impl database::Database for PSQLDB {
         Ok((student_info, residencies, student_activities, activities))
     }
 
-    async fn create_student(&mut self, user: &crate::endpoints::admin::CreateUser) -> Result<(), Error> {
+    async fn create_student(&mut self, user: &crate::endpoints::student::CreateUser) -> Result<(), Error> {
         let id = Uuid::new_v4().to_string();
 
         match self.client.execute("INSERT INTO StudentInfo (uuid, number) VALUES ($1, $2)", &[&id, &user.number]).await {
@@ -290,4 +305,24 @@ impl database::Database for PSQLDB {
 
         Ok(())
     }
+
+    async fn create_user(&mut self, first_name: &str, last_name: &str, role: Role, device: &str) -> Result<String, Error> {
+        let uuid = Uuid::new_v4();
+        let str_role: String = role.into();
+
+        match self.client.execute("insert into Users (UUID, first_name, last_name, role) values ($1, $2, $3, $4)", &[&uuid.to_string(), &first_name, &last_name, &str_role]).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::ErrorDuring("Inserting User".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
+        };
+
+        let token = self.encryption.random_string(32);
+
+        match self.client.execute("insert into Tokens (UUID, token, device) values ($1, $2, $3)", &[&uuid.to_string(), &self.encryption.hash(&token, ""), &device]).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::ErrorDuring("Inserting Token".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
+        };
+
+        Ok(token)
+    }
 }
+

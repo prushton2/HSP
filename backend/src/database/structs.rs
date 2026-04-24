@@ -73,3 +73,29 @@ pub struct TableActivities {
     pub date: chrono::NaiveDate,
     pub staff: Vec<String>
 }
+
+pub enum Role {
+    Staff,
+    Admin,
+    Owner
+}
+
+impl Into<String> for Role {
+    fn into(self) -> String {
+        match self {
+            Role::Staff => "Staff".to_owned(),
+            Role::Admin => "Admin".to_owned(),
+            Role::Owner => "Owner".to_owned(),
+        }
+    }
+}
+
+impl From<String> for Role {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            "Admin" => Role::Admin,
+            "Owner" => Role::Owner,
+            _ => Role::Staff,
+        }   
+    }
+}
