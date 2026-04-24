@@ -258,6 +258,16 @@ function GetStudent({init_uuid}: {init_uuid: string}): JSX.Element {
     const [uuid, setUuid] = useState(init_uuid)
     const [info, setInfo] = useState(DefaultAllStudentInfo())
 
+    useEffect(() => {
+        async function init() {
+            if(uuid == "") {
+                return
+            }
+            setInfo(await HttpGetStudent(uuid, true))
+        }
+        init()
+    }, [])
+
     return <>
         <table className='context_menu'>
         <tbody>

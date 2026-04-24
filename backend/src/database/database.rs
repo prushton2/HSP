@@ -1,5 +1,4 @@
 use axum::async_trait;
-use serde::{Deserialize, Serialize};
 use tokio_postgres::error::SqlState;
 
 use crate::database;
