@@ -46,3 +46,30 @@ export interface EditStudent {
     str_field: String,
     int_field: number,
 }
+
+export interface AllStudentInfo {
+    first_name: String,
+    last_name: String,
+    pronouns: String,
+    info: TableStudentInfo,
+    residence: TableResidencies
+}
+
+export function DefaultAllStudentInfo(): AllStudentInfo {
+    return {
+        first_name: "",
+        last_name: "",
+        pronouns: "",
+        info: {
+            uuid: "",
+            number: -1
+        } as TableStudentInfo,
+        residence: {
+            uuid: "",
+            hall: "",
+            room: -1,
+            wing: "",
+            role: "",
+        }
+    } as AllStudentInfo
+}

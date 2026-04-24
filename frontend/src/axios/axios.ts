@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { CreateStudent, EditStudent, StudentTablesResponse } from "./structs";
+import type { AllStudentInfo, CreateStudent, EditStudent, StudentTablesResponse } from "./structs";
 
 
 export async function GetAllStudentInfo(): Promise<StudentTablesResponse> {
@@ -15,4 +15,9 @@ export async function HttpCreateStudent(student: CreateStudent) {
 export async function HttpEditStudent(student: EditStudent) {
     const response = await axios.post("/api/admin/student/edit", student);
     console.log(response);
+}
+
+export async function HttpGetStudent(uuid: string, decrypt: boolean): Promise<AllStudentInfo> {
+    const response = await axios.post("/api/admin/student/get", {uuid: uuid, decrypt: decrypt});
+    return response.data as AllStudentInfo
 }

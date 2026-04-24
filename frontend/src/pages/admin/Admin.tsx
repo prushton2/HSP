@@ -1,7 +1,7 @@
 import { useEffect, useState, type JSX } from 'react'
 import './Admin.css'
-import { GetAllStudentInfo, HttpCreateStudent, HttpEditStudent } from '../../axios/axios'
-import { type CreateStudent, type EditStudent, type StudentTablesResponse, type TableActivities, type TableResidencies, type TableStudentActivities, type TableStudentInfo } from '../../axios/structs';
+import { GetAllStudentInfo, HttpCreateStudent, HttpEditStudent, HttpGetStudent } from '../../axios/axios'
+import { DefaultAllStudentInfo, type AllStudentInfo, type CreateStudent, type EditStudent, type StudentTablesResponse, type TableActivities, type TableResidencies, type TableStudentActivities, type TableStudentInfo } from '../../axios/structs';
 import { Modal, prompt } from '../../components/Modal';
 
 function Admin() {
@@ -24,10 +24,10 @@ function Admin() {
         </div>
         <div className='ribbon'>
             <HoverDropdown title="Student" buttons={[
-                ["Create", async () => {await prompt.show("Create Student", <CreateStudent/>)}],
-                ["Edit", async () => {await prompt.show("Edit Student", <EditStudent init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-                ["Decrypt", () => {}],
-                ["Delete", () => {}]
+                ["Create",  async () => {await prompt.show("Create Student", <CreateStudent/>)}],
+                ["Edit",    async () => {await prompt.show("Edit Student", <EditStudent init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Get",     async () => {await prompt.show("Get Student", <GetStudent init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Delete",  async () => {}]
             ]}/>
 
             <HoverDropdown title="Activities" buttons={[
@@ -224,7 +224,7 @@ function EditStudent({init_uuid}: {init_uuid: string}): JSX.Element {
         </>
     }
     return <>
-        <table className='edit_student'>
+        <table className='context_menu'>
         <tbody>
             <tr><td>uuid  </td><td><input  value={uuid} onChange={(e) => setUuid(e.target.value)}/> </td></tr>
             <tr><td>field </td><td><select onChange={(e) => setField(e.target.value)}>{Options()}</select></td></tr>
@@ -239,7 +239,7 @@ function CreateStudent(): JSX.Element {
     const [state, setState] = useState<CreateStudent>({room: 0} as CreateStudent);
 
     return <>
-        <table className='create_student'>
+        <table className='context_menu'>
         <tbody>
             <tr><td>first name </td><td><input onChange={(e) => setState({...state, fname:  e.target.value})} /> </td></tr>
             <tr><td>last name </td><td><input onChange={(e) => setState({...state, lname:  e.target.value})} /> </td></tr>
@@ -249,6 +249,28 @@ function CreateStudent(): JSX.Element {
             <tr><td>wing  </td><td><input onChange={(e) => setState({...state, wing:   e.target.value})} /> </td></tr>
             <tr><td>role  </td><td><input onChange={(e) => setState({...state, role:   e.target.value})} /> </td></tr>
             <tr><td></td><td><button onClick={() => HttpCreateStudent(state)}>Create Student</button></td></tr>
+        </tbody>
+        </table>
+    </>
+}
+
+function GetStudent({init_uuid}: {init_uuid: string}): JSX.Element {
+    const [uuid, setUuid] = useState(init_uuid)
+    const [info, setInfo] = useState(DefaultAllStudentInfo())
+
+    return <>
+        <table className='context_menu'>
+        <tbody>
+            <tr><td>UUID       </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
+            <tr><td>first name </td><td>{info.first_name}</td></tr>
+            <tr><td>last name  </td><td>{info.last_name}</td></tr>
+            <tr><td>pronouns   </td><td>{info.pronouns}</td></tr>
+            <tr><td>number     </td><td>{info.info.number}</td></tr>
+            <tr><td>hall       </td><td>{info.residence.hall}</td></tr>
+            <tr><td>room       </td><td>{info.residence.room}</td></tr>
+            <tr><td>wing       </td><td>{info.residence.wing}</td></tr>
+            <tr><td>role       </td><td>{info.residence.role}</td></tr>
+            <tr><td></td><td><button onClick={async () => {setInfo(await HttpGetStudent(uuid, true))}}>Get</button></td></tr>
         </tbody>
         </table>
     </>
