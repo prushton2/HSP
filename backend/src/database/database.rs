@@ -33,4 +33,5 @@ pub trait Database: Send + Sync {
     async fn create_student(&mut self, user: &crate::endpoints::admin::CreateUser) -> Result<(), Error>;
     async fn edit_student(&mut self, uuid: &str, field: &str, new_value: &FieldValue) -> Result<(), Error>;
     async fn get_student(&mut self, uuid: &str, decrypt: bool) -> Result<database::AllStudentInfo, Error>;
+    async fn delete_student(&mut self, uuid: &str) -> Result<(), Error>;
 }

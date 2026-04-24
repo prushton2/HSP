@@ -273,4 +273,19 @@ impl database::Database for PSQLDB {
 
         Ok(student)
     }
+
+    async fn delete_student(&mut self, uuid: &str) -> Result<(), Error> {
+        let tables = ["encrypteddata", "studentinfo", "residencies", "studentactivities"];
+
+        for table in tables {
+            let statement = format!("DELETE FROM {} WHERE uuid = $1", table);
+
+            match self.client.execute(&statement, &[&uuid]).await {
+                Ok(_) => (),
+                Err(t) => return Err(Error::ErrorDuring(format!("Deleting from {}", table), Box::new(Error::PostgresError(t.code().cloned()))))
+            }
+        }
+
+        Ok(())
+    }
 }

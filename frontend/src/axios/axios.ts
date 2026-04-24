@@ -21,3 +21,8 @@ export async function HttpGetStudent(uuid: string, decrypt: boolean): Promise<Al
     const response = await axios.post("/api/admin/student/get", {uuid: uuid, decrypt: decrypt});
     return response.data as AllStudentInfo
 }
+
+export async function HttpDeleteStudent(uuid: string) {
+    const response = await axios.post("/api/admin/student/delete", {uuid: uuid});
+    console.log(response);
+}

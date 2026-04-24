@@ -83,3 +83,19 @@ pub async fn get_student(State(db_mutex): State<Arc<Mutex<dyn database::Database
 
     return response;
 }
+
+#[derive(Deserialize)]
+#[allow(dead_code)]
+pub struct DeleteStudent {
+    pub uuid: String,
+}
+pub async fn delete_student(State(db_mutex): State<Arc<Mutex<dyn database::Database>>>, Json(body): Json<DeleteStudent>) -> (StatusCode, String) {
+    let mut db = db_mutex.lock().await;
+    
+    let response = match db.delete_student(&body.uuid).await {
+        Ok(t) => (StatusCode::OK, serde_json::to_string(&t).unwrap()),
+        Err(t) => (StatusCode::BAD_REQUEST, format!("{:?}", t))
+    };
+
+    return response;
+}

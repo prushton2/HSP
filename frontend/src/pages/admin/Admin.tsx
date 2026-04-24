@@ -1,8 +1,9 @@
 import { useEffect, useState, type JSX } from 'react'
 import './Admin.css'
-import { GetAllStudentInfo, HttpCreateStudent, HttpEditStudent, HttpGetStudent } from '../../axios/axios'
+import { GetAllStudentInfo, HttpCreateStudent, HttpDeleteStudent, HttpEditStudent, HttpGetStudent } from '../../axios/axios'
 import { DefaultAllStudentInfo, type CreateStudent, type EditStudent, type StudentTablesResponse, type TableActivities, type TableResidencies, type TableStudentActivities, type TableStudentInfo } from '../../axios/structs';
 import { Modal, prompt } from '../../components/Modal';
+import HoverDropdown from '../../components/HoverDropdown';
 
 function Admin() {
     const [studentInfo, setStudentInfo] = useState<StudentTablesResponse>({} as StudentTablesResponse);
@@ -27,7 +28,7 @@ function Admin() {
                 ["Create",  async () => {await prompt.show("Create Student", <CreateStudent/>)}],
                 ["Edit",    async () => {await prompt.show("Edit Student", <EditStudent init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
                 ["Get",     async () => {await prompt.show("Get Student", <GetStudent init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-                ["Delete",  async () => {}]
+                ["Delete",  async () => {await prompt.show("Delete Student", <DeleteStudent init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
             ]}/>
 
             <HoverDropdown title="Activities" buttons={[
@@ -55,34 +56,19 @@ function Admin() {
 
 export default Admin
 
-function HoverDropdown({title, buttons}: {title: string, buttons: [string, () => void][]}) {
-  const [isOpen, setIsOpen] = useState(false);
+function formatProperly(s: string): string {
+    s = s.replaceAll("_", " ");
+    s = s.charAt(0).toUpperCase() + s.substring(1);
 
-  let button_html: JSX.Element[] = []
+    let news = s
 
-  buttons.forEach(([title, fn]) => {
-    button_html.push(
-        <li><button className='dropdown-element-button' onClick={fn}>{title}</button></li>
-    )
-  })
+    for(let i = 0; i < s.length-1; i++) {
+        if (s[i] == " ") {
+            news = s.substring(0, i+1) + s[i+1].toUpperCase() + s.substring(i+2);
+        }
+    }
 
-  return (
-    <div
-      style={{ position: "relative", display: "inline-block" }}
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
-    >
-      {/* Trigger */}
-      <button className="dropdown-button">{title}</button>
-
-      {/* Dropdown */}
-      {isOpen && (
-        <ul className="dropdown-ul">
-            {button_html}
-        </ul>
-      )}
-    </div>
-  );
+    return news;
 }
 
 function RenderTable({info, tag, select, selected}: {select: (uuid: string) => void, selected: string, info: TableResidencies[] | TableStudentActivities[] | TableActivities[] | TableStudentInfo[], tag: string}): JSX.Element {
@@ -286,17 +272,19 @@ function GetStudent({init_uuid}: {init_uuid: string}): JSX.Element {
     </>
 }
 
-function formatProperly(s: string): string {
-    s = s.replaceAll("_", " ");
-    s = s.charAt(0).toUpperCase() + s.substring(1);
+function DeleteStudent({init_uuid}: {init_uuid: string}): JSX.Element {
+    const [uuid, setUuid] = useState(init_uuid)
+    const [checked, setChecked] = useState(false)
 
-    let news = s
-
-    for(let i = 0; i < s.length-1; i++) {
-        if (s[i] == " ") {
-            news = s.substring(0, i+1) + s[i+1].toUpperCase() + s.substring(i+2);
-        }
-    }
-
-    return news;
+    return <>
+        <table className='context_menu'>
+        <tbody>
+            <tr><td>UUID         </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
+            <tr><td>Are you sure?</td><td><input type="checkbox" onChange={(e) => setChecked(e.target.checked)} /></td></tr>
+            {!checked ? <></> : 
+            <tr><td></td><td><button onClick={() => HttpDeleteStudent(uuid)}>Confirm</button></td></tr>
+            }
+        </tbody>
+        </table>
+    </>
 }
