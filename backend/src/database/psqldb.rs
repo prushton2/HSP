@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 
 use axum::async_trait;
 use tokio_postgres::{Client, NoTls};
@@ -182,7 +182,8 @@ impl database::Database for PSQLDB {
                     _ => return Err(Error::InvalidParameter("New value must be an int".to_owned(), "".to_owned()))
                 };
 
-                match self.client.execute("update $1 set $2 = $3 where UUID = $4", &[&table, &field, &v, &uuid]).await {
+                let query = format!("update {} set {} = $1 where UUID = $2", table, field);
+                match self.client.execute(&query, &[&v, &uuid]).await {
                     Ok(_) => {},
                     Err(t) => return Err(Error::ErrorDuring("Updating Integer Field".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
                 };
@@ -192,8 +193,9 @@ impl database::Database for PSQLDB {
                     database::FieldValue::Str(t) => t,
                     _ => return Err(Error::InvalidParameter("New value must be a string".to_owned(), "".to_owned()))
                 };
-
-                match self.client.execute("update $1 set $2 = $3 where UUID = $4", &[&table, &field, &v, &uuid]).await {
+                
+                let query = format!("update {} set {} = $1 where UUID = $2", table, field);
+                match self.client.execute(&query, &[&v, &uuid]).await {
                     Ok(_) => {},
                     Err(t) => return Err(Error::ErrorDuring("Updating Integer Field".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
                 };

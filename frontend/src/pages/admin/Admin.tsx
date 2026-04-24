@@ -1,7 +1,7 @@
 import { useEffect, useState, type JSX } from 'react'
 import './Admin.css'
-import { GetAllStudentInfo, HttpCreateStudent } from '../../axios/axios'
-import { type CreateStudent, type StudentTablesResponse, type TableActivities, type TableResidencies, type TableStudentActivities, type TableStudentInfo } from '../../axios/structs';
+import { GetAllStudentInfo, HttpCreateStudent, HttpEditStudent } from '../../axios/axios'
+import { type CreateStudent, type EditStudent, type StudentTablesResponse, type TableActivities, type TableResidencies, type TableStudentActivities, type TableStudentInfo } from '../../axios/structs';
 
 function Admin() {
     const [studentInfo, setStudentInfo] = useState<StudentTablesResponse>({} as StudentTablesResponse);
@@ -11,8 +11,6 @@ function Admin() {
         async function init() {
             let info = await GetAllStudentInfo()
             setStudentInfo(info);
-            console.log(info);
-            console.log(typeof info);
         }
         init();
     }, [])
@@ -31,6 +29,7 @@ function Admin() {
         </div>
         <div className="forms">
             <CreateStudent />
+            <EditStudent />
         </div>
     </>
     )
@@ -83,7 +82,6 @@ function RenderTable({info, tag, select, selected}: {select: (uuid: string) => v
     }
     
     info.forEach((row) => {
-        console.log(typeof row);
         let table_row = <></>
         switch (tag) {
             case "student_info":
@@ -145,6 +143,49 @@ function RenderTable({info, tag, select, selected}: {select: (uuid: string) => v
             {table_rows}
         </tbody>
     </table> : <></>}
+    </>
+}
+
+function EditStudent(): JSX.Element {
+    const [editData, setEditData] = useState({} as EditStudent)
+    const [uuid, setUuid] = useState("")
+    const [field, setField] = useState("")
+    const [value, setValue] = useState("")
+
+    useEffect(() => {
+        let int_data = field == "number" || field == "room" ? parseInt(value) : -1;
+        
+        setEditData({
+            uuid: uuid,
+            field: field,
+            int_field: int_data,
+            str_field: int_data == -1 ? value : ""
+        } as EditStudent);
+
+    }, [uuid, field, value])
+
+    function Options(): JSX.Element {
+        return <>
+            <option value="number">number</option>
+            <option value="hall">hall</option>
+            <option value="room">room</option>
+            <option value="wing">wing</option>
+            <option value="role">role</option>
+            <option value="first name">first name</option>
+            <option value="last name">last name</option>
+            <option value="pronouns">pronouns</option>
+        </>
+    }
+    return <>
+        <table>
+        <h3>Edit Student</h3>
+        <tbody>
+            <tr><td>uuid  </td><td><input  onChange={(e) => setUuid(e.target.value)}/> </td></tr>
+            <tr><td>field </td><td><select onChange={(e) => setField(e.target.value)}>{Options()}</select></td></tr>
+            <tr><td>value </td><td><input  onChange={(e) => setValue(e.target.value)}/>  </td></tr>
+            <tr><td></td><td><button onClick={() => {HttpEditStudent(editData)}}>Edit</button></td></tr>
+        </tbody>
+        </table>
     </>
 }
 

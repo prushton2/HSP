@@ -39,3 +39,10 @@ export interface CreateStudent {
     wing: String,
     role: String,
 }
+
+export interface EditStudent {
+    uuid: String,
+    field: String,
+    str_field: String,
+    int_field: number,
+}
