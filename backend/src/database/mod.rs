@@ -5,6 +5,7 @@ pub mod psqldb;
 
 pub use database::Database;
 pub use database::Error;
+pub use database::FieldValue;
 
 pub use database::TableStudentInfo;
 pub use database::TableResidencies;

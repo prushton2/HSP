@@ -7,8 +7,14 @@ use tokio_postgres::error::SqlState;
 #[derive(Debug)]
 pub enum Error {
     ErrorDuring(String, Box<Error>),
+    InvalidParameter(String, String),
     PostgresError(Option<SqlState>),
     TokioError
+}
+
+pub enum FieldValue<'a> {
+    Str(&'a str),
+    I32(i32)
 }
 
 #[async_trait]
@@ -23,6 +29,7 @@ pub trait Database: Send + Sync {
     Error>;
 
     async fn create_student(&mut self, user: &crate::endpoints::admin::CreateUser) -> Result<(), Error>;
+    async fn edit_user(&mut self, uuid: &str, field: &str, new_value: &FieldValue) -> Result<(), Error>;
 }
 
 #[derive(Debug, Serialize, Deserialize)]

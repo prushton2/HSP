@@ -28,7 +28,6 @@ function Admin() {
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.residencies} tag="residencies" />
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.student_activities} tag="student_activities" />
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.activities} tag="activities" />
-
         </div>
         <div className="forms">
             <CreateStudent />
@@ -100,7 +99,6 @@ function RenderTable({info, tag, select, selected}: {select: (uuid: string) => v
                     <td>{(row as TableResidencies).room}</td>
                     <td>{(row as TableResidencies).wing}</td>
                     <td>{(row as TableResidencies).role}</td>
-                    
                 </>
                 break;
             case "student_activities":
@@ -108,7 +106,6 @@ function RenderTable({info, tag, select, selected}: {select: (uuid: string) => v
                     <td>{(row as TableStudentActivities).uuid}</td>
                     <td>{(row as TableStudentActivities).date}</td>
                     <td>{(row as TableStudentActivities).activity}</td>
-                    
                 </>
                 break;
             case "activities":
@@ -134,7 +131,7 @@ function RenderTable({info, tag, select, selected}: {select: (uuid: string) => v
                 >
                     {table_row}
                 </tr>
-            )
+            );
         }
     });
 

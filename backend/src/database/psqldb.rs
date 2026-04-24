@@ -1,14 +1,18 @@
+use std::collections::{HashMap, HashSet};
+
 use axum::async_trait;
 use tokio_postgres::{Client, NoTls};
 use uuid::Uuid;
 use crate::database::{self, DBInfo, Error};
+use crate::encryption::{self, Encryption};
 
 pub struct PSQLDB {
-    client: Client
+    client: Client,
+    encryption: Box<dyn Encryption>
 }
 
 impl PSQLDB {
-    pub async fn new(dbinfo: &DBInfo) -> Self {
+    pub async fn new(dbinfo: &DBInfo, encryption: Box<dyn Encryption>) -> Self {
         let string: String = format!("host={} user={} password={} dbname={}", dbinfo.host, dbinfo.username, dbinfo.password, dbinfo.dbname);
         let new_client = match tokio_postgres::connect(&string, NoTls).await {
             Ok(t) => t,
@@ -23,6 +27,7 @@ impl PSQLDB {
 
         let db: Self = Self{
             client: new_client.0,
+            encryption: encryption
         };
         
         return db;
@@ -145,6 +150,90 @@ impl database::Database for PSQLDB {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Insert into Residencies".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
         };
+
+        Ok(())
+    }
+
+    async fn edit_user(&mut self, uuid: &str, field: &str, new_value: &database::FieldValue) -> Result<(), Error> {
+        enum OpType {
+            IntField(String),
+            StringField(String),
+            EncryptedField
+        }
+        let valid_fields: HashMap<&str, OpType> = [
+            ("number", OpType::IntField("StudentInfo".to_owned())),
+            ("hall", OpType::StringField("Residencies".to_owned())),
+            ("room", OpType::IntField("Residencies".to_owned())),
+            ("wing", OpType::StringField("Residencies".to_owned())),
+            ("role", OpType::StringField("Residencies".to_owned())),
+            ("first name", OpType::EncryptedField),
+            ("last name", OpType::EncryptedField),
+            ("pronouns", OpType::EncryptedField),
+        ].into();
+
+        if valid_fields.get(&field).is_none() {
+            return Err(Error::InvalidParameter("Invalid field".to_string(), field.to_string()));
+        }
+
+        match &valid_fields.get(&field).unwrap() {
+            OpType::IntField(table) => {
+                let v: i32 = match new_value {
+                    database::FieldValue::I32(t) => *t,
+                    _ => return Err(Error::InvalidParameter("New value must be an int".to_owned(), "".to_owned()))
+                };
+
+                match self.client.execute("update $1 set $2 = $3 where UUID = $4", &[&table, &field, &v, &uuid]).await {
+                    Ok(_) => {},
+                    Err(t) => return Err(Error::ErrorDuring("Updating Integer Field".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
+                };
+            },
+            OpType::StringField(table) => {
+                let v: &str = match new_value {
+                    database::FieldValue::Str(t) => t,
+                    _ => return Err(Error::InvalidParameter("New value must be a string".to_owned(), "".to_owned()))
+                };
+
+                match self.client.execute("update $1 set $2 = $3 where UUID = $4", &[&table, &field, &v, &uuid]).await {
+                    Ok(_) => {},
+                    Err(t) => return Err(Error::ErrorDuring("Updating Integer Field".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
+                };
+            },
+            OpType::EncryptedField => {
+                let v: String = match new_value {
+                    database::FieldValue::Str(t) => t.to_string(),
+                    _ => return Err(Error::InvalidParameter("New value must be a string".to_owned(), "".to_owned()))
+                };
+
+                let row = match self.client.query_one("select * from encrypteddata where uuid = $1", &[&uuid]).await {
+                    Ok(t) => t,
+                    Err(t) => return Err(Error::ErrorDuring("Fetching encrypted data".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+                };
+
+                let mut data = match self.encryption.decrypt(row.get("encrypted")) {
+                    Some(t) => t,
+                    None => encryption::EncryptedContents {
+                        first_name: "".to_string(),
+                        last_name: "".to_string(),
+                        pronouns: "".to_string(),
+                    }
+                };
+
+                match field {
+                    "first name" => {data.first_name = v;},
+                    "last name" =>  {data.last_name  = v;},
+                    "pronouns" =>   {data.pronouns   = v;},
+                    _ => return Err(Error::InvalidParameter("field must be one of `first name | last name | pronouns`".to_owned(), field.to_owned()))
+                }
+
+                let encrypted = self.encryption.encrypt(&data);
+
+                match self.client.execute("update encrypteddata set encrypted = $1 where uuid = $2", &[&encrypted, &uuid]).await {
+                    Ok(_) => {},
+                    Err(t) => return Err(Error::ErrorDuring("Writing encrypted data".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+                };
+
+            }
+        }
 
         Ok(())
     }

@@ -29,10 +29,37 @@ pub struct CreateUser {
     pub wing: String,
     pub role: String,
 }
-pub async fn new_sudent(State(db_mutex): State<Arc<Mutex<dyn database::Database>>>, Json(payload): Json<CreateUser>, ) -> (StatusCode, String) {
+pub async fn new_sudent(State(db_mutex): State<Arc<Mutex<dyn database::Database>>>, Json(body): Json<CreateUser>) -> (StatusCode, String) {
     let mut db = db_mutex.lock().await;
     
-    let response = match db.create_student(&payload).await {
+    let response = match db.create_student(&body).await {
+        Ok(_) => (StatusCode::CREATED, "".to_string()),
+        Err(t) => (StatusCode::BAD_REQUEST, format!("{:?}", t))
+    };
+
+    return response;
+}
+
+#[derive(Deserialize)]
+#[allow(dead_code)]
+pub struct EditUser {
+    pub uuid: String,
+    pub field: String,
+    pub str_field: String,
+    pub int_field: i32,
+}
+pub async fn edit_sudent(State(db_mutex): State<Arc<Mutex<dyn database::Database>>>, Json(body): Json<EditUser>) -> (StatusCode, String) {
+    let mut db = db_mutex.lock().await;
+    
+    let field = {
+        if body.str_field != "" {
+            database::FieldValue::Str(&body.str_field)
+        } else {
+            database::FieldValue::I32(body.int_field)
+        }
+    };
+
+    let response = match db.edit_user(&body.uuid, &body.field, &field).await {
         Ok(_) => (StatusCode::CREATED, "".to_string()),
         Err(t) => (StatusCode::BAD_REQUEST, format!("{:?}", t))
     };
