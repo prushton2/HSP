@@ -141,12 +141,14 @@ impl database::Database for PSQLDB {
             Err(t) => return Err(Error::ErrorDuring("Insert into StudentInfo".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
         }
 
-        match self.client.execute("insert into EncryptedData values ($1, $2)", &[&id, &format!("{},{}", user.fname, user.lname)]).await {
+        let encrypted_data = self.encryption.encrypt(&EncryptedContents { first_name: user.fname.clone(), last_name: user.lname.clone(), pronouns: user.pronouns.clone() });
+
+        match self.client.execute("insert into EncryptedData (uuid, encrypted) values ($1, $2)", &[&id, &encrypted_data]).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Insert into EncryptedData".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
         }
 
-        match self.client.execute("insert into residencies values ($1, $2, $3, $4, $5)", &[&id, &user.hall, &user.room, &user.wing, &user.role]).await {
+        match self.client.execute("insert into residencies (uuid, hall, room, wing, role) values ($1, $2, $3, $4, $5)", &[&id, &user.hall, &user.room, &user.wing, &user.role]).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Insert into Residencies".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
         };

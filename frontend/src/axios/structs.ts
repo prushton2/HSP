@@ -33,6 +33,7 @@ export interface StudentTablesResponse {
 export interface CreateStudent {
     fname: String,
     lname: String,
+    pronouns: String,
     number: number,
     hall: String,
     room: number,

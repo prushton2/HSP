@@ -23,6 +23,7 @@ pub async fn get_student_info(State(db_mutex): State<Arc<Mutex<dyn database::Dat
 pub struct CreateUser {
     pub fname: String,
     pub lname: String,
+    pub pronouns: String,
     pub number: i32,
     pub hall: String,
     pub room: i32,
