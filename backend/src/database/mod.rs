@@ -1,9 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-pub mod database;
 pub mod psql;
-
-pub use database::Database;
 
 use tokio_postgres::error::SqlState;
 
