@@ -3,7 +3,7 @@
 use uuid::Uuid;
 
 use crate::repository::StudentRepository;
-use crate::repository::student_repository::{self, CreateInfo, InfoUpdate};
+use crate::repository::student_repository::{self, CreateInfo, FullStudent, InfoUpdate, ResidenceUpdate};
 
 use crate::encryption::{Encryption, EncryptedContents};
 
@@ -24,7 +24,7 @@ impl<R: StudentRepository> StudentService<R> {
         }
     }
 
-    pub async fn create_student(&mut self, student: &student_repository::CreateStudent) -> Result<(), Error> {
+    pub async fn create_student(&mut self, student: &student_repository::FullStudent) -> Result<(), Error> {
         let uuid = Uuid::new_v4().to_string();
 
         match self.repo.insert_residence(&uuid, student).await {
@@ -87,15 +87,74 @@ impl<R: StudentRepository> StudentService<R> {
                 Err(t) => return Err(Error::ErrorDuring("Updating info".to_owned(), Box::new(t)))
             }
         }
+
+        if update.role.is_some() || update.room.is_some() || update.wing.is_some() || update.hall.is_some() {
+            let new_info = ResidenceUpdate {
+                role: update.role.clone(),
+                room: update.room.clone(),
+                wing: update.wing.clone(),
+                hall: update.hall.clone()
+            };
+
+            match self.repo.update_residence(uuid, &new_info).await {
+                Ok(_) => {},
+                Err(t) => return Err(Error::ErrorDuring("Updating Residence".to_owned(), Box::new(t)))
+            }
+        }
         Ok(())
     }
 
     pub async fn delete_student(&mut self, uuid: &str) -> Result<(), Error> {
+        match self.repo.delete_encrypted(uuid).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::ErrorDuring("Deleting Encrypted".to_owned(), Box::new(t)))
+        }
+
+        match self.repo.delete_residence(uuid).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::ErrorDuring("Deleting Residence".to_owned(), Box::new(t)))
+        }
+
+        match self.repo.delete_info(uuid).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::ErrorDuring("Deleting Info".to_owned(), Box::new(t)))
+        }
+
         Ok(())
     }
 
-    pub async fn get_student(&mut self, uuid: &str, decrypt: bool) -> Result<(), Error> {
-        Ok(())
+    pub async fn get_student(&mut self, uuid: &str, decrypt: bool) -> Result<FullStudent, Error> {
+        let mut student = FullStudent::default();
+
+        if decrypt {
+            let info = match self.repo.get_encrypted(uuid).await {
+                Ok(t) => self.encryption.decrypt(&t.data),
+                Err(t) => return Err(Error::ErrorDuring("Getting encrypted data".to_owned(), Box::new(t)))
+            };
+
+            student.fname = info.first_name;
+            student.lname = info.last_name;
+            student.pronouns = info.pronouns;
+        }
+
+        let info = match self.repo.get_info(uuid).await {
+            Ok(t) => t,
+            Err(t) => return Err(Error::ErrorDuring("Getting info".to_owned(), Box::new(t)))
+        };
+
+        student.number = info.number;
+
+        let info = match self.repo.get_residence(uuid).await {
+            Ok(t) => t,
+            Err(t) => return Err(Error::ErrorDuring("Getting residence".to_owned(), Box::new(t)))
+        };
+
+        student.hall = info.hall;
+        student.room = info.room;
+        student.wing = info.wing;
+        student.role = info.role;
+
+        Ok(student)
     }
 }
 

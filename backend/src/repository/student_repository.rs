@@ -13,7 +13,7 @@ pub trait StudentRepository: Send + Sync {
     async fn delete_encrypted(&mut self, uuid: &str) -> Result<(), Error>;
     async fn get_encrypted   (&mut self, uuid: &str) -> Result<EncryptedInfo, Error>;
     
-    async fn insert_residence(&mut self, uuid: &str, user: &CreateStudent) -> Result<(), Error>;
+    async fn insert_residence(&mut self, uuid: &str, user: &FullStudent) -> Result<(), Error>;
     async fn update_residence(&mut self, uuid: &str, update: &ResidenceUpdate) -> Result<(), Error>;
     async fn delete_residence(&mut self, uuid: &str) -> Result<(), Error>;
     async fn get_residence   (&mut self, uuid: &str) -> Result<ResidenceInfo, Error>;
@@ -55,7 +55,7 @@ pub struct CreateInfo {
     pub number: i32,
 }
 
-pub struct CreateStudent {
+pub struct FullStudent {
     pub fname: String,
     pub lname: String,
     pub pronouns: String,
@@ -64,4 +64,19 @@ pub struct CreateStudent {
     pub room: i32,
     pub wing: String,
     pub role: Role,
+}
+
+impl Default for FullStudent {
+    fn default() -> Self {
+        Self {
+            fname:    String::new(),
+            lname:    String::new(),
+            pronouns: String::new(),
+            hall:     String::new(),
+            wing:     String::new(),
+            number:   0,
+            room:     0,
+            role:     Role::Staff,
+        }
+    }
 }
