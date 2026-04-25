@@ -24,10 +24,10 @@ export interface TableActivities {
 }
 
 export interface StudentTablesResponse {
-    student_info: TableStudentInfo[],
-    residencies: TableResidencies[],
-    student_activities: TableStudentActivities[],
-    activities: TableActivities[]
+    studentinfo: TableStudentInfo[],
+    residence: TableResidencies[],
+    // student_activities: TableStudentActivities[],
+    // activities: TableActivities[]
 }
 
 export interface CreateStudent {

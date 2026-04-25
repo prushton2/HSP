@@ -1,5 +1,7 @@
 // The service handles the actual logic to doing stuff to the database.
 
+use serde::{Deserialize, Serialize};
+
 use crate::encryption::Encryption;
 
 use crate::database::{Database, Error};
@@ -9,14 +11,14 @@ use crate::repository::student_repository::{EncryptedInfo, ResidenceInfo, Studen
 // #[derive(Clone)]
 pub struct AdminService {
     repo: Box<dyn Database>,
-    encryption: Box<dyn Encryption>
+    _encryption: Box<dyn Encryption>
 }
 
 impl AdminService {
     pub fn new(repo: Box<dyn Database>, encryption: Box<dyn Encryption>) -> Self {
         Self {
             repo: repo,
-            encryption: encryption
+            _encryption: encryption
         }
     }
 
@@ -31,6 +33,7 @@ impl AdminService {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct AllTables {
     residence: Vec<ResidenceInfo>,
     studentinfo: Vec<StudentInfo>,

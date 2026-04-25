@@ -1,4 +1,5 @@
 use axum::async_trait;
+use serde::{Deserialize, Serialize};
 
 // this holds the traits that directly interface with the database. These can be easily faked for tests.
 use crate::database::Error;
@@ -24,19 +25,20 @@ pub trait StudentRepository: Send + Sync {
     async fn get_residence   (&mut self, uuid: &str) -> Result<ResidenceInfo, Error>;
     async fn getall_residence(&mut self) -> Result<Vec<ResidenceInfo>, Error>;
 }
-
+#[derive(Serialize, Deserialize)]
 pub struct StudentInfo {
     pub uuid: String,
     pub number: i32,
     pub fname: String,
     pub lname: String,
 }
-
+#[derive(Serialize, Deserialize)]
 pub struct EncryptedInfo {
     pub uuid: String,
     pub data: String
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct ResidenceInfo {
     pub uuid: String,
     pub hall: String,

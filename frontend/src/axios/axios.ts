@@ -3,7 +3,7 @@ import type { AllStudentInfo, CreateStudent, EditStudent, StudentTablesResponse 
 
 
 export async function GetAllStudentInfo(): Promise<StudentTablesResponse> {
-    const response = await axios.get('api/student/all');
+    const response = await axios.get('api/admin/all');
     return response.data as StudentTablesResponse
 }
 

@@ -23,5 +23,5 @@ pub async fn get_all_students(State(state): State<Arc<super::Services>>) -> (Sta
         Err(t) => return (StatusCode::INTERNAL_SERVER_ERROR, "String::from(t)".to_string())
     };
 
-    (StatusCode::OK, "".to_string())
+    (StatusCode::OK, serde_json::to_string(&tables).unwrap())
 }
