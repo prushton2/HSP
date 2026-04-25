@@ -1,5 +1,7 @@
 pub mod plaintext;
 
+pub use plaintext::PlaintextEncryption;
+
 pub struct EncryptedContents {
     pub first_name: String,
     pub last_name: String,

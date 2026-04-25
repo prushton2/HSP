@@ -6,18 +6,7 @@ use tokio::sync::Mutex;
 
 use crate::database;
 
-pub async fn get_student_info(State(db_mutex): State<Arc<Mutex<dyn database::Database>>>) -> String {
-    let mut db = db_mutex.lock().await;
 
-    let all_tables = db.get_student_tables().await.unwrap();
-
-    format!("{{\"student_info\":{},\"residencies\":{},\"student_activities\":{},\"activities\":{}}}",
-        serde_json::to_string(&all_tables.0).unwrap(),
-        serde_json::to_string(&all_tables.1).unwrap(),
-        serde_json::to_string(&all_tables.2).unwrap(),
-        serde_json::to_string(&all_tables.3).unwrap()
-    )
-}
 
 #[derive(Deserialize)]
 pub struct CreateUser {

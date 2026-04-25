@@ -19,30 +19,38 @@ async fn main() {
         port: "5432".to_string()
     };
 
-    let db: Arc<Mutex<dyn database::Database>> = 
-        Arc::new(
-            Mutex::new(
-                database::PSQLDB::new(&dbinfo).await
-            )
-        );
-
     {
-        let mut reference = db.lock().await;
-        let res = reference.init_if_uninitialized();
+        let mut db = database::PSQLDB::new(&dbinfo).await;
+        let res = db.init_if_uninitialized();
         println!("{:?}", res.await);
     }
 
+    let state = Arc::new(
+        endpoints::Services { 
+            student: Mutex::new(service::StudentService::new(
+                Box::new(database::PSQLDB::new(&dbinfo).await),
+                Box::new(encryption::PlaintextEncryption::new())
+            )),
+            admin: Mutex::new(service::AdminService::new(
+                Box::new(database::PSQLDB::new(&dbinfo).await),
+                Box::new(encryption::PlaintextEncryption::new())
+            ))
+        }
+    );
+
     let app = Router::new()
-        // .route("/admin/all", get(blah))
-        .route("/student/new",   post(create_sudent))
-        .route("/student/edit",  post(update_sudent))
-        .route("/student/delete",post(delete_student))
-        .route("/student/get",   post(get_student))
+        .route("/admin/all",      get(endpoints::admin::get_all_students))
+        // .route("/student/new",   post())
+        // .route("/student/edit",  post())
+        // .route("/student/delete",post())
+        // .route("/student/get",   post())
 
-        .route("/auth/create", post(endpoints::auth::create_user))
+        // .route("/auth/create", post(endpoints::auth::create_user))
 
-        .with_state(db); // move db in directly, no clone needed
+        .with_state(state); // move db in directly, no clone needed
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();  
 }
+
+

@@ -1,8 +1,12 @@
 use serde::{Serialize, Deserialize};
 
-pub mod psql;
+pub mod psqldb;
+
+pub use psqldb::PSQLDB;
 
 use tokio_postgres::error::SqlState;
+
+use crate::repository::StudentRepository;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct DBInfo {
@@ -20,3 +24,5 @@ pub enum Error {
     PostgresError(Option<SqlState>),
     TokioError
 }
+
+pub trait Database: StudentRepository + Send + Sync {}

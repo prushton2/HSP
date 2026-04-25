@@ -11,13 +11,14 @@ use crate::database::Error;
 
 use crate::types::Role;
 
-pub struct StudentService<R: StudentRepository> {
-    repo: R,
+// #[derive(Clone)]
+pub struct StudentService {
+    repo: Box<dyn StudentRepository>,
     encryption: Box<dyn Encryption>
 }
 
-impl<R: StudentRepository> StudentService<R> {
-    pub fn new(repo: R, encryption: Box<dyn Encryption>) -> Self {
+impl StudentService {
+    pub fn new(repo: Box<dyn StudentRepository>, encryption: Box<dyn Encryption>) -> Self {
         Self {
             repo: repo,
             encryption: encryption
@@ -43,7 +44,7 @@ impl<R: StudentRepository> StudentService<R> {
             Err(t) => return Err(Error::ErrorDuring("Insert Encrypted".to_owned(), Box::new(t)))
         };
 
-        match self.repo.insert_info(&uuid, &CreateInfo {
+        match self.repo.insert_studentinfo(&uuid, &CreateInfo {
             fname: self.encryption.hash(&student.fname, ""),
             lname: self.encryption.hash(&student.lname, ""),
             number: student.number
@@ -82,7 +83,7 @@ impl<R: StudentRepository> StudentService<R> {
                 lname: if update.lname.is_some() { update.lname.clone() } else { None }
             };
 
-            match self.repo.update_info(uuid, &new_info).await {
+            match self.repo.update_studentinfo(uuid, &new_info).await {
                 Ok(_) => {},
                 Err(t) => return Err(Error::ErrorDuring("Updating info".to_owned(), Box::new(t)))
             }
@@ -115,7 +116,7 @@ impl<R: StudentRepository> StudentService<R> {
             Err(t) => return Err(Error::ErrorDuring("Deleting Residence".to_owned(), Box::new(t)))
         }
 
-        match self.repo.delete_info(uuid).await {
+        match self.repo.delete_studentinfo(uuid).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Deleting Info".to_owned(), Box::new(t)))
         }
@@ -137,7 +138,7 @@ impl<R: StudentRepository> StudentService<R> {
             student.pronouns = info.pronouns;
         }
 
-        let info = match self.repo.get_info(uuid).await {
+        let info = match self.repo.get_studentinfo(uuid).await {
             Ok(t) => t,
             Err(t) => return Err(Error::ErrorDuring("Getting info".to_owned(), Box::new(t)))
         };
