@@ -1,8 +1,9 @@
-use std::collections::{HashMap};
+use std::collections::{HashMap, HashSet};
 
 use axum::async_trait;
 use tokio_postgres::{Client, NoTls};
 use uuid::Uuid;
+use crate::database::structs::UserInfo;
 use crate::database::{self, DBInfo, Error, Role};
 use crate::encryption::{self, EncryptedContents, Encryption};
 
@@ -36,6 +37,10 @@ impl PSQLDB {
 
 #[async_trait]
 impl database::Database for PSQLDB {
+    fn get_encryption(&mut self) -> &mut dyn Encryption {
+        return self.encryption.as_mut();
+    }
+
     async fn init_if_uninitialized(&mut self) -> Result<(), database::Error> {
         let result = self.client.batch_execute("
             CREATE TABLE IF NOT EXISTS EncryptedData (
@@ -306,23 +311,84 @@ impl database::Database for PSQLDB {
         Ok(())
     }
 
-    async fn create_user(&mut self, first_name: &str, last_name: &str, role: Role, device: &str) -> Result<String, Error> {
+    async fn create_user(&mut self, first_name: &str, last_name: &str, role: Role, device: &str) -> Result<Uuid, Error> {
         let uuid = Uuid::new_v4();
-        let str_role: String = role.into();
+        let str_role: String = String::from(&role);
 
         match self.client.execute("insert into Users (UUID, first_name, last_name, role) values ($1, $2, $3, $4)", &[&uuid.to_string(), &first_name, &last_name, &str_role]).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Inserting User".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
         };
 
+        
+        Ok(uuid)
+    }
+    
+    async fn grant_access(&mut self, uuid: &str, device: &str) -> Result<String, Error> {
         let token = self.encryption.random_string(32);
-
+    
         match self.client.execute("insert into Tokens (UUID, token, device) values ($1, $2, $3)", &[&uuid.to_string(), &self.encryption.hash(&token, ""), &device]).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Inserting Token".to_string(), Box::new(Error::PostgresError(t.code().cloned()))))
         };
 
         Ok(token)
+    }
+
+    async fn get_user(&mut self, token: &str) -> Option<UserInfo> {
+        let mut user_info = UserInfo {
+            first_name: "".to_string(),
+            last_name: "".to_string(),
+            role: Role::Staff,
+            accessed_from: "".to_string(),
+        };
+
+        let row = match self.client.query_opt("select * from tokens where token = $1", &[&self.encryption.hash(&token, "")]).await.unwrap() {
+            Some(t) => t,
+            None => return None
+        };
+
+        let uuid = row.get::<&str, &str>("uuid");
+
+        let user = match self.client.query_opt("select * from users where uuid = $1", &[&uuid]).await.unwrap() {
+            Some(t) => t,
+            None => return None
+        };
+
+        user_info.first_name = user.get("first_name");
+        user_info.last_name = user.get("last_name");
+        user_info.role = user.get::<&str, &str>("role").into();
+        user_info.accessed_from = row.get("device");
+
+        Some(user_info)
+    }
+
+
+    async fn edit_user(&mut self, uuid: &str, field: &str, new_value: &database::FieldValue) -> Result<(), Error> {
+        if !HashSet::from(["first_name", "last_name", "role"]).contains(field) {
+            return Err(Error::InvalidParameter("field".to_owned(), "".to_owned()));
+        }
+
+        let statement = format!("update Users set {} = $1 where uuid = $2", field);
+        match self.client.execute(&statement, &[&new_value, &uuid]).await {
+            Ok(_) => Ok(()),
+            Err(t) => Err(Error::PostgresError(t.code().cloned()))
+        }
+    }
+    
+    async fn delete_user(&mut self, uuid: &str) -> Result<(), Error> {
+        
+        match self.client.execute("delete from Users where uuid = $1", &[&uuid]).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::PostgresError(t.code().cloned()))
+        };
+        
+        match self.client.execute("delete from tokens where uuid = $1", &[&uuid]).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::PostgresError(t.code().cloned()))
+        };
+
+        Ok(())
     }
 }
 

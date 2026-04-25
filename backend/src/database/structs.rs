@@ -10,8 +10,6 @@ pub struct AllStudentInfo {
     pub residence: TableResidencies
 }
 
-
-
 impl Default for AllStudentInfo {
     fn default() -> Self {
         Self {
@@ -74,28 +72,79 @@ pub struct TableActivities {
     pub staff: Vec<String>
 }
 
+#[derive(Debug, PartialEq)]
 pub enum Role {
     Staff,
     Admin,
     Owner
 }
 
-impl Into<String> for Role {
-    fn into(self) -> String {
-        match self {
-            Role::Staff => "Staff".to_owned(),
-            Role::Admin => "Admin".to_owned(),
-            Role::Owner => "Owner".to_owned(),
+impl From<&Role> for i32 {
+    fn from(value: &Role) -> i32 {
+        match value {
+            Role::Staff => 0,
+            Role::Admin => 1,
+            Role::Owner => 2,
         }
     }
 }
 
-impl From<String> for Role {
-    fn from(value: String) -> Self {
-        match value.as_str() {
+impl From<&str> for Role {
+    fn from(value: &str) -> Self {
+        match value {
             "Admin" => Role::Admin,
             "Owner" => Role::Owner,
             _ => Role::Staff,
         }   
     }
+}
+
+impl From<&Role> for String {
+    fn from(value: &Role) -> Self {
+        match value {
+            Role::Admin => "Admin".to_owned(),
+            Role::Owner => "Owner".to_owned(),
+            Role::Staff => "Staff".to_owned()
+        }
+    }
+}
+
+impl PartialOrd for Role {
+    fn ge(&self, other: &Self) -> bool {
+        self.partial_cmp(other) == Some(std::cmp::Ordering::Greater) || 
+        self.partial_cmp(other) == Some(std::cmp::Ordering::Equal)        
+    }
+    fn gt(&self, other: &Self) -> bool {
+        self.partial_cmp(other) == Some(std::cmp::Ordering::Greater)
+    }
+    fn le(&self, other: &Self) -> bool {
+        self.partial_cmp(other) == Some(std::cmp::Ordering::Less) || 
+        self.partial_cmp(other) == Some(std::cmp::Ordering::Equal)
+    }
+    fn lt(&self, other: &Self) -> bool {
+        self.partial_cmp(other) == Some(std::cmp::Ordering::Less)
+    }
+
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        if i32::from(self) == i32::from(other) {
+            return Some(std::cmp::Ordering::Equal);
+        }
+
+        if i32::from(self) > i32::from(other) {
+            return Some(std::cmp::Ordering::Greater);
+        }
+
+        if i32::from(self) < i32::from(other) {
+            return Some(std::cmp::Ordering::Less);
+        }
+
+        return None
+    }
+}
+
+pub struct UserInfo {
+    pub first_name: String,
+    pub last_name: String,
+    pub role: Role,
+    pub accessed_from: String
 }

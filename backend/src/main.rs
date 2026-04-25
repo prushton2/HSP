@@ -34,6 +34,9 @@ async fn main() {
         .route("/student/edit", post(endpoints::student::edit_sudent))
         .route("/student/get", post(endpoints::student::get_student))
         .route("/student/delete", post(endpoints::student::delete_student))
+
+        .route("/auth/create", post(endpoints::auth::create_user))
+
         .with_state(db); // move db in directly, no clone needed
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
