@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { AllStudentInfo, CreateStudent, EditStudent, StudentTablesResponse } from "./structs";
+import type { FullStudentInfo, EditStudent, StudentTablesResponse } from "./structs";
 
 
 export async function GetAllStudentInfo(): Promise<StudentTablesResponse> {
@@ -7,7 +7,7 @@ export async function GetAllStudentInfo(): Promise<StudentTablesResponse> {
     return response.data as StudentTablesResponse
 }
 
-export async function HttpCreateStudent(student: CreateStudent) {
+export async function HttpCreateStudent(student: FullStudentInfo) {
     const response = await axios.post("/api/student/new", student);
     console.log(response);
 }
@@ -17,9 +17,9 @@ export async function HttpEditStudent(student: EditStudent) {
     console.log(response);
 }
 
-export async function HttpGetStudent(uuid: string, decrypt: boolean): Promise<AllStudentInfo> {
+export async function HttpGetStudent(uuid: string, decrypt: boolean): Promise<FullStudentInfo> {
     const response = await axios.post("/api/student/get", {uuid: uuid, decrypt: decrypt});
-    return response.data as AllStudentInfo
+    return response.data as FullStudentInfo
 }
 
 export async function HttpDeleteStudent(uuid: string) {

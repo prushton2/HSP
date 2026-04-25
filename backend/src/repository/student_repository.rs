@@ -66,6 +66,7 @@ pub struct CreateInfo {
     pub number: i32,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct FullStudent {
     pub fname: String,
     pub lname: String,

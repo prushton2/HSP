@@ -2,7 +2,7 @@ use tokio::sync::Mutex;
 
 use crate::service;
 
-// pub mod auth;
+pub mod student;
 pub mod admin;
 
 pub struct Services {

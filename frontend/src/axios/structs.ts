@@ -30,7 +30,14 @@ export interface StudentTablesResponse {
     // activities: TableActivities[]
 }
 
-export interface CreateStudent {
+export interface EditStudent {
+    uuid: String,
+    field: String,
+    str_field: String,
+    int_field: number,
+}
+
+export interface FullStudentInfo {
     fname: String,
     lname: String,
     pronouns: String,
@@ -41,36 +48,15 @@ export interface CreateStudent {
     role: String,
 }
 
-export interface EditStudent {
-    uuid: String,
-    field: String,
-    str_field: String,
-    int_field: number,
-}
-
-export interface AllStudentInfo {
-    first_name: String,
-    last_name: String,
-    pronouns: String,
-    info: TableStudentInfo,
-    residence: TableResidencies
-}
-
-export function DefaultAllStudentInfo(): AllStudentInfo {
+export function DefaultAllStudentInfo(): FullStudentInfo {
     return {
-        first_name: "",
-        last_name: "",
+        fname: "",
+        lname: "",
         pronouns: "",
-        info: {
-            uuid: "",
-            number: -1
-        } as TableStudentInfo,
-        residence: {
-            uuid: "",
-            hall: "",
-            room: -1,
-            wing: "",
-            role: "",
-        }
-    } as AllStudentInfo
+        number: 0,
+        hall: "",
+        room: 0,
+        wing: "",
+        role: "",
+    } as FullStudentInfo
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState, type JSX } from 'react'
 import './Admin.css'
 import { GetAllStudentInfo, HttpCreateStudent, HttpDeleteStudent, HttpEditStudent, HttpGetStudent } from '../../axios/axios'
-import { DefaultAllStudentInfo, type CreateStudent, type EditStudent, type StudentTablesResponse, type TableActivities, type TableResidencies, type TableStudentActivities, type TableStudentInfo } from '../../axios/structs';
+import { DefaultAllStudentInfo, type EditStudent, type FullStudentInfo, type StudentTablesResponse, type TableActivities, type TableResidencies, type TableStudentActivities, type TableStudentInfo } from '../../axios/structs';
 import { Modal, prompt } from '../../components/Modal';
 import HoverDropdown from '../../components/HoverDropdown';
 
@@ -222,7 +222,7 @@ function EditStudent({init_uuid}: {init_uuid: string}): JSX.Element {
 }
 
 function CreateStudent(): JSX.Element {
-    const [state, setState] = useState<CreateStudent>({room: 0} as CreateStudent);
+    const [state, setState] = useState<FullStudentInfo>({room: 0} as FullStudentInfo);
 
     return <>
         <table className='context_menu'>
@@ -259,14 +259,14 @@ function GetStudent({init_uuid}: {init_uuid: string}): JSX.Element {
         <table className='context_menu'>
         <tbody>
             <tr><td>UUID       </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
-            <tr><td>first name </td><td>{info.first_name}</td></tr>
-            <tr><td>last name  </td><td>{info.last_name}</td></tr>
+            <tr><td>first name </td><td>{info.fname}</td></tr>
+            <tr><td>last name  </td><td>{info.lname}</td></tr>
             <tr><td>pronouns   </td><td>{info.pronouns}</td></tr>
-            <tr><td>number     </td><td>{info.info.number}</td></tr>
-            <tr><td>hall       </td><td>{info.residence.hall}</td></tr>
-            <tr><td>room       </td><td>{info.residence.room}</td></tr>
-            <tr><td>wing       </td><td>{info.residence.wing}</td></tr>
-            <tr><td>role       </td><td>{info.residence.role}</td></tr>
+            <tr><td>number     </td><td>{info.number}</td></tr>
+            <tr><td>hall       </td><td>{info.hall}</td></tr>
+            <tr><td>room       </td><td>{info.room}</td></tr>
+            <tr><td>wing       </td><td>{info.wing}</td></tr>
+            <tr><td>role       </td><td>{info.role}</td></tr>
             <tr><td></td><td><button onClick={async () => {setInfo(await HttpGetStudent(uuid, true))}}>Get</button></td></tr>
         </tbody>
         </table>

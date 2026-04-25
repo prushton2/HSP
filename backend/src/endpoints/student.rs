@@ -2,10 +2,10 @@ use std::sync::Arc;
 
 use axum::{Json, extract::State, http::StatusCode};
 use serde::Deserialize;
-use tokio::sync::Mutex;
 
-use crate::database;
-
+use crate::repository::student_repository;
+use crate::service::student_service;
+use crate::types::Role;
 
 
 #[derive(Deserialize)]
@@ -19,12 +19,23 @@ pub struct CreateUser {
     pub wing: String,
     pub role: String,
 }
-pub async fn new_sudent(State(db_mutex): State<Arc<Mutex<dyn database::Database>>>, Json(body): Json<CreateUser>) -> (StatusCode, String) {
-    let mut db = db_mutex.lock().await;
+pub async fn new_sudent(State(state): State<Arc<super::Services>>, Json(body): Json<CreateUser>) -> (StatusCode, String) {
+    let mut service = state.student.lock().await;
     
-    let response = match db.create_student(&body).await {
+    let student = student_repository::FullStudent {
+        fname:    body.fname,
+        lname:    body.lname,
+        pronouns: body.pronouns,
+        number:   body.number,
+        hall:     body.hall,
+        room:     body.room,
+        wing:     body.wing,
+        role:     Role::from(body.role.as_str())
+    };
+
+    let response = match service.create_student(&student).await {
         Ok(_) => (StatusCode::CREATED, "".to_string()),
-        Err(t) => (StatusCode::BAD_REQUEST, format!("{:?}", t))
+        Err(t) => (StatusCode::BAD_REQUEST, String::from(t))
     };
 
     return response;
@@ -38,23 +49,36 @@ pub struct EditUser {
     pub str_field: String,
     pub int_field: i32,
 }
-pub async fn edit_sudent(State(db_mutex): State<Arc<Mutex<dyn database::Database>>>, Json(body): Json<EditUser>) -> (StatusCode, String) {
-    let mut db = db_mutex.lock().await;
+pub async fn edit_student(State(state): State<Arc<super::Services>>, Json(body): Json<EditUser>) -> (StatusCode, String) {
+    let mut service = state.student.lock().await;
     
-    let field = {
-        if body.str_field != "" {
-            database::FieldValue::Str(&body.str_field)
-        } else {
-            database::FieldValue::I32(body.int_field)
-        }
+    let mut update = student_service::StudentUpdate {
+        fname:    None,
+        lname:    None,
+        pronouns: None,
+        number:   None,
+        hall:     None,
+        role:     None,
+        room:     None,
+        wing:     None
     };
 
-    let response = match db.edit_student(&body.uuid, &body.field, &field).await {
-        Ok(_) => (StatusCode::CREATED, "".to_string()),
-        Err(t) => (StatusCode::BAD_REQUEST, format!("{:?}", t))
-    };
+    match body.field.as_str() {
+        "first name" => {update.fname    = Some(body.str_field)},
+        "last name"  => {update.lname    = Some(body.str_field)},
+        "pronouns"   => {update.pronouns = Some(body.str_field)},
+        "number"     => {update.number   = Some(body.int_field)},
+        "hall"       => {update.hall     = Some(body.str_field)},
+        "role"       => {update.role     = Some(Role::from(body.str_field.as_str()))},
+        "wing"       => {update.room     = Some(body.int_field)},
+        "room"       => {update.wing     = Some(body.str_field)},
+        _            => { return (StatusCode::BAD_REQUEST, "Invalid Field".to_string())}
+    }
 
-    return response;
+    match service.update_student(&body.uuid, &update).await {
+        Ok(_) => (StatusCode::OK, "".to_owned()),
+        Err(t) => (StatusCode::INTERNAL_SERVER_ERROR, String::from(t))
+    }
 }
 
 #[derive(Deserialize)]
@@ -63,15 +87,13 @@ pub struct GetStudent {
     pub uuid: String,
     pub decrypt: bool
 }
-pub async fn get_student(State(db_mutex): State<Arc<Mutex<dyn database::Database>>>, Json(body): Json<GetStudent>) -> (StatusCode, String) {
-    let mut db = db_mutex.lock().await;
+pub async fn get_student(State(state): State<Arc<super::Services>>, Json(body): Json<GetStudent>) -> (StatusCode, String) {
+    let mut service = state.student.lock().await;
     
-    let response = match db.get_student(&body.uuid, body.decrypt).await {
+    return match service.get_student(&body.uuid, body.decrypt).await {
         Ok(t) => (StatusCode::OK, serde_json::to_string(&t).unwrap()),
-        Err(t) => (StatusCode::BAD_REQUEST, format!("{:?}", t))
-    };
-
-    return response;
+        Err(t) => (StatusCode::BAD_REQUEST, String::from(t))
+    }
 }
 
 #[derive(Deserialize)]
@@ -79,12 +101,12 @@ pub async fn get_student(State(db_mutex): State<Arc<Mutex<dyn database::Database
 pub struct DeleteStudent {
     pub uuid: String,
 }
-pub async fn delete_student(State(db_mutex): State<Arc<Mutex<dyn database::Database>>>, Json(body): Json<DeleteStudent>) -> (StatusCode, String) {
-    let mut db = db_mutex.lock().await;
+pub async fn delete_student(State(state): State<Arc<super::Services>>, Json(body): Json<DeleteStudent>) -> (StatusCode, String) {
+    let mut service = state.student.lock().await;
     
-    let response = match db.delete_student(&body.uuid).await {
-        Ok(t) => (StatusCode::OK, serde_json::to_string(&t).unwrap()),
-        Err(t) => (StatusCode::BAD_REQUEST, format!("{:?}", t))
+    let response = match service.delete_student(&body.uuid).await {
+        Ok(_) => (StatusCode::OK, String::from("")),
+        Err(t) => (StatusCode::BAD_REQUEST, String::from(t))
     };
 
     return response;
