@@ -1,22 +1,11 @@
 use serde::{Serialize, Deserialize};
 
 pub mod database;
-pub mod psqldb;
-pub mod structs;
+pub mod psql;
 
 pub use database::Database;
-pub use database::Error;
-pub use database::FieldValue;
 
-pub use structs::AllStudentInfo;
-pub use structs::TableStudentInfo;
-pub use structs::TableResidencies;
-pub use structs::TableStudentActivities;
-pub use structs::TableActivities;
-pub use structs::Role;
-
-
-pub use psqldb::PSQLDB;
+use tokio_postgres::error::SqlState;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct DBInfo {
@@ -25,4 +14,12 @@ pub struct DBInfo {
     pub password: String,
     pub dbname: String,
     pub port: String
+}
+
+#[derive(Debug)]
+pub enum Error {
+    ErrorDuring(String, Box<Error>),
+    InvalidParameter(String, String),
+    PostgresError(Option<SqlState>),
+    TokioError
 }

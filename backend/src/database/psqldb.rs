@@ -3,17 +3,16 @@ use std::collections::{HashMap, HashSet};
 use axum::async_trait;
 use tokio_postgres::{Client, NoTls};
 use uuid::Uuid;
-use crate::database::structs::UserInfo;
-use crate::database::{self, DBInfo, Error, Role};
+use crate::database::{self, DBInfo, Error};
 use crate::encryption::{self, EncryptedContents, Encryption};
+use crate::types::Role;
 
 pub struct PSQLDB {
-    client: Client,
-    encryption: Box<dyn Encryption>
+    client: Client
 }
 
 impl PSQLDB {
-    pub async fn new(dbinfo: &DBInfo, encryption: Box<dyn Encryption>) -> Self {
+    pub async fn new(dbinfo: &DBInfo) -> Self {
         let string: String = format!("host={} user={} password={} dbname={}", dbinfo.host, dbinfo.username, dbinfo.password, dbinfo.dbname);
         let new_client = match tokio_postgres::connect(&string, NoTls).await {
             Ok(t) => t,
@@ -28,7 +27,6 @@ impl PSQLDB {
 
         let db: Self = Self{
             client: new_client.0,
-            encryption: encryption
         };
         
         return db;

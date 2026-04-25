@@ -5,6 +5,9 @@ use axum::{Router, routing::{get, post}};
 mod database;
 mod endpoints;
 mod encryption;
+mod repository;
+mod service;
+mod types;
 
 #[tokio::main]
 async fn main() {
@@ -15,10 +18,11 @@ async fn main() {
         password: "password".to_string(),
         port: "5432".to_string()
     };
+
     let db: Arc<Mutex<dyn database::Database>> = 
         Arc::new(
             Mutex::new(
-                database::PSQLDB::new(&dbinfo, Box::new(encryption::PlaintextEncryption::new())).await
+                database::PSQLDB::new(&dbinfo).await
             )
         );
 
@@ -29,11 +33,11 @@ async fn main() {
     }
 
     let app = Router::new()
-        .route("/student/all", get(endpoints::student::get_student_info))
-        .route("/student/new", post(endpoints::student::new_sudent))
-        .route("/student/edit", post(endpoints::student::edit_sudent))
-        .route("/student/get", post(endpoints::student::get_student))
-        .route("/student/delete", post(endpoints::student::delete_student))
+        // .route("/admin/all", get(blah))
+        .route("/student/new",   post(create_sudent))
+        .route("/student/edit",  post(update_sudent))
+        .route("/student/delete",post(delete_student))
+        .route("/student/get",   post(get_student))
 
         .route("/auth/create", post(endpoints::auth::create_user))
 
