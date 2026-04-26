@@ -1,9 +1,10 @@
 import { useEffect, useState, type JSX } from 'react'
 import './Admin.css'
-import { GetAllStudentInfo, HttpCreateStudent, HttpDeleteStudent, HttpEditStudent, HttpGetStudent } from '../../axios/axios'
-import { DefaultAllStudentInfo, type EditStudent, type FullStudentInfo, type StudentTablesResponse, type TableActivities, type TableResidencies, type TableStudentActivities, type TableStudentInfo } from '../../axios/structs';
+import { GetAllStudentInfo, HttpCreateStudent, HttpCreateUser, HttpDeleteStudent, HttpEditStudent, HttpGetStudent, HttpUpdateUser } from '../../axios/axios'
+import { DefaultAllStudentInfo, type EditStudent, type FullStudentInfo, type TableUsers, type StudentTablesResponse, type UpdateUser } from '../../axios/structs';
 import { Modal, prompt } from '../../components/Modal';
 import HoverDropdown from '../../components/HoverDropdown';
+import RenderTable from './RenderTable';
 
 function Admin() {
     const [studentInfo, setStudentInfo] = useState<StudentTablesResponse>({} as StudentTablesResponse);
@@ -39,14 +40,16 @@ function Admin() {
             ]}/>
 
             <HoverDropdown title="Access" buttons={[
-                ["Grant", () => {}],
-                ["Update", () => {}],
-                ["Revoke", () => {}],
+                ["Grant",  async () => {await prompt.show("Grant Access", <GrantAccess />)}],
+                ["Update", async () => {await prompt.show("Update Access", <EditUser init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Revoke", async () => {}],
             ]}/>
         </div>
         <div className="tables">
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.studentinfo} tag="student_info" />
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.residence} tag="residencies" />
+            <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.users} tag="users" />
+            <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.tokens} tag="tokens" />
             {/* <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.student_activities} tag="student_activities" />
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.activities} tag="activities" /> */}
         </div>
@@ -55,129 +58,6 @@ function Admin() {
 }
 
 export default Admin
-
-function formatProperly(s: string): string {
-    s = s.replaceAll("_", " ");
-    s = s.charAt(0).toUpperCase() + s.substring(1);
-
-    let news = s
-
-    for(let i = 0; i < s.length-1; i++) {
-        if (s[i] == " ") {
-            news = s.substring(0, i+1) + s[i+1].toUpperCase() + s.substring(i+2);
-        }
-    }
-
-    return news;
-}
-
-function RenderTable({info, tag, select, selected}: {select: (uuid: string) => void, selected: string, info: TableResidencies[] | TableStudentActivities[] | TableActivities[] | TableStudentInfo[], tag: string}): JSX.Element {
-    const [visible, setVisible] = useState<boolean>(false)
-    
-    let table_rows: JSX.Element[] = [];
-    let head: JSX.Element = <></>;
-
-    if (info == undefined) {
-        return <></>
-    }
-
-    switch (tag) {
-        case "student_info":
-            head = <tr>
-                <th>UUID</th>
-                <th>Number</th>
-            </tr>
-            break;
-        case "residencies":
-            head = <tr>
-                <th>UUID</th>
-                <th>hall</th>
-                <th>room</th>
-                <th>wing</th>
-                <th>role</th>
-            </tr>
-            break;
-        case "student_activities":
-            head = <tr>
-                <th>UUID</th>
-                <th>date</th>
-                <th>activity</th>
-            </tr>
-            break;
-        case "activities":
-            head = <tr>
-                <th>activity</th>
-                <th>date</th>
-                <th>staff</th>
-            </tr>
-            break;
-
-    }
-    
-    info.forEach((row) => {
-        let table_row = <></>
-        switch (tag) {
-            case "student_info":
-                table_row = <>
-                    <td>{(row as TableStudentInfo).uuid}</td>
-                    <td>{(row as TableStudentInfo).number}</td>
-                </>
-                break;
-            case "residencies":
-                table_row = <>
-                    <td>{(row as TableResidencies).uuid}</td>
-                    <td>{(row as TableResidencies).hall}</td>
-                    <td>{(row as TableResidencies).room}</td>
-                    <td>{(row as TableResidencies).wing}</td>
-                    <td>{(row as TableResidencies).role}</td>
-                </>
-                break;
-            case "student_activities":
-                table_row = <>
-                    <td>{(row as TableStudentActivities).uuid}</td>
-                    <td>{(row as TableStudentActivities).date}</td>
-                    <td>{(row as TableStudentActivities).activity}</td>
-                </>
-                break;
-            case "activities":
-                table_row = <>
-                    <td>{(row as TableActivities).activity}</td>
-                    <td>{(row as TableActivities).date}</td>
-                    <td>{(row as TableActivities).staff}</td>
-                </>
-                break;
-        }
-
-        if(tag == "activities") {
-            table_rows.push(
-                <tr>
-                    {table_row}
-                </tr>
-            );
-        } else {
-            table_rows.push(
-                <tr 
-                    onClick={() => {if (selected == (row as any).uuid) {select("0")} else {select((row as any).uuid)}}}
-                    className={selected == (row as any).uuid ? "highlighted_row" : ""}
-                >
-                    {table_row}
-                </tr>
-            );
-        }
-    });
-
-    return <>
-        <h2 onClick={() => setVisible(!visible)}>{formatProperly(tag)}</h2>
-        <table>
-            <thead onClick={() => setVisible(!visible)}>
-                {head}
-            </thead>
-            {visible ? <tbody>
-                {table_rows}
-            </tbody> : <></>}
-        </table>
-    </>
-}
 
 function EditStudent({init_uuid}: {init_uuid: string}): JSX.Element {
     const [editData, setEditData] = useState({} as EditStudent)
@@ -234,7 +114,6 @@ function CreateStudent(): JSX.Element {
             <tr><td>hall  </td><td><input onChange={(e) => setState({...state, hall:   e.target.value})} /> </td></tr>
             <tr><td>room  </td><td><input onChange={(e) => setState({...state, room:   parseInt(e.target.value)})} type="number" /> </td></tr>
             <tr><td>wing  </td><td><input onChange={(e) => setState({...state, wing:   e.target.value})} /> </td></tr>
-            <tr><td>role  </td><td><input onChange={(e) => setState({...state, role:   e.target.value})} /> </td></tr>
             <tr><td></td><td><button onClick={() => HttpCreateStudent(state)}>Create Student</button></td></tr>
         </tbody>
         </table>
@@ -266,7 +145,6 @@ function GetStudent({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>hall       </td><td>{info.hall}</td></tr>
             <tr><td>room       </td><td>{info.room}</td></tr>
             <tr><td>wing       </td><td>{info.wing}</td></tr>
-            <tr><td>role       </td><td>{info.role}</td></tr>
             <tr><td></td><td><button onClick={async () => {setInfo(await HttpGetStudent(uuid, true))}}>Get</button></td></tr>
         </tbody>
         </table>
@@ -289,3 +167,53 @@ function DeleteStudent({init_uuid}: {init_uuid: string}): JSX.Element {
         </table>
     </>
 }
+
+function GrantAccess(): JSX.Element {
+    const [state, setState] = useState<TableUsers>({} as TableUsers);
+
+    return <>
+        <table className='context_menu'>
+        <tbody>
+            <tr><td>first name </td><td><input onChange={(e) => setState({...state, fname:  e.target.value})} /> </td></tr>
+            <tr><td>last name </td><td><input onChange={(e) => setState({...state, lname:  e.target.value})} /> </td></tr>
+            <tr><td>role  </td><td><input onChange={(e) => setState({...state, role:   e.target.value})} /> </td></tr>
+            <tr><td></td><td><button onClick={async () => alert(`${window.origin}/signup?token=${(await HttpCreateUser(state)).token}`)}>Create User</button></td></tr>
+        </tbody>
+        </table>
+    </>
+}
+
+function EditUser({init_uuid}: {init_uuid: string}): JSX.Element {
+    const [editData, setEditData] = useState({} as UpdateUser)
+    const [uuid, setUuid] = useState(init_uuid)
+    const [field, setField] = useState("first name")
+    const [value, setValue] = useState("")
+
+    useEffect(() => {
+        setEditData({
+            uuid: uuid,
+            field: field,
+            str_field: value,
+        } as UpdateUser);
+
+    }, [uuid, field, value])
+
+    function Options(): JSX.Element {
+        return <>
+            <option value="first name">first name</option>
+            <option value="last name">last name</option>
+            <option value="role">role</option>
+        </>
+    }
+    return <>
+        <table className='context_menu'>
+        <tbody>
+            <tr><td>uuid  </td><td><input  value={uuid} onChange={(e) => setUuid(e.target.value)}/> </td></tr>
+            <tr><td>field </td><td><select onChange={(e) => setField(e.target.value)}>{Options()}</select></td></tr>
+            <tr><td>value </td><td><input  onChange={(e) => setValue(e.target.value)}/>  </td></tr>
+            <tr><td></td><td><button onClick={() => {HttpUpdateUser(editData)}}>Submit Edit</button></td></tr>
+        </tbody>
+        </table>
+    </>
+}
+

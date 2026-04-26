@@ -4,7 +4,7 @@ use axum::{extract::State, http::StatusCode};
 
 
 
-pub async fn get_all_students(State(state): State<Arc<super::Services>>) -> (StatusCode, String) {
+pub async fn get_all_tables(State(state): State<Arc<super::Services>>) -> (StatusCode, String) {
     let mut service = state.admin.lock().await;
 
     let tables = match service.get_all_tables().await {

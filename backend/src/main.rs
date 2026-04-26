@@ -43,13 +43,15 @@ async fn main() {
     );
 
     let app = Router::new()
-        .route("/admin/all",      get(endpoints::admin::get_all_students))
+        .route("/admin/all",      get(endpoints::admin::get_all_tables))
         .route("/student/new",   post(endpoints::student::new_sudent))
         .route("/student/edit",  post(endpoints::student::edit_student))
         .route("/student/delete",post(endpoints::student::delete_student))
         .route("/student/get",   post(endpoints::student::get_student))
 
         .route("/auth/create", post(endpoints::auth::create_user))
+        .route("/auth/signup", post(endpoints::auth::signup))
+        .route("/auth/update", post(endpoints::auth::update_user))
 
         .with_state(state); // move db in directly, no clone needed
 

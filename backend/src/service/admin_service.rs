@@ -7,28 +7,29 @@ use crate::encryption::Encryption;
 use crate::database::Error;
 
 use crate::repository::Repository;
+use crate::repository::auth_repository::{FullUser, TokenInfo};
 use crate::repository::student_repository::{EncryptedInfo, ResidenceInfo, StudentInfo};
 
-// #[derive(Clone)]
 pub struct AdminService {
     repo: Box<dyn Repository>,
-    encryption: Box<dyn Encryption>
+    _encryption: Box<dyn Encryption>
 }
 
 impl AdminService {
     pub fn new(repo: Box<dyn Repository>, encryption: Box<dyn Encryption>) -> Self {
         Self {
             repo: repo,
-            encryption: encryption
+            _encryption: encryption
         }
     }
 
     pub async fn get_all_tables(&mut self) -> Result<AllTables, Error> {
-        
         Ok(AllTables {
             residence: self.repo.getall_residence().await?,
             studentinfo: self.repo.getall_studentinfo().await?,
-            encryptedinfo: self.repo.getall_encrypted().await?
+            encryptedinfo: self.repo.getall_encrypted().await?,
+            users: self.repo.getall_user().await?,
+            tokens: self.repo.getall_token().await?
         })
     }
 }
@@ -37,5 +38,7 @@ impl AdminService {
 pub struct AllTables {
     residence: Vec<ResidenceInfo>,
     studentinfo: Vec<StudentInfo>,
-    encryptedinfo: Vec<EncryptedInfo>
+    encryptedinfo: Vec<EncryptedInfo>,
+    users: Vec<FullUser>,
+    tokens: Vec<TokenInfo>
 }

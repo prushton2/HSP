@@ -36,6 +36,6 @@ impl super::Encryption for PlaintextEncryption {
 
     fn random_string(&mut self, len: usize) -> String {
         let mut rng = rand::rng();
-        std::iter::repeat_with(|| {rng.random::<char>()}).take(len).collect()
+        std::iter::repeat_with(|| {rng.sample(rand::distr::Alphanumeric) as char}).take(len).collect()
     }
 }

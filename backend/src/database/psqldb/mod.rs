@@ -51,8 +51,7 @@ impl PSQLDB {
                 UUID varchar(36) PRIMARY KEY,
                 hall varchar(16),
                 room integer,
-                wing varchar(64),
-                role varchar(64)
+                wing varchar(64)
             );
 
             CREATE TABLE IF NOT EXISTS StudentActivities (
@@ -81,7 +80,7 @@ impl PSQLDB {
             CREATE TABLE IF NOT EXISTS Tokens (
                 UUID varchar(36),
                 token text,
-                device text,
+                signup_hash text,
 
                 PRIMARY KEY (UUID, token)
             );

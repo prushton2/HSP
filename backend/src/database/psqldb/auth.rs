@@ -82,8 +82,8 @@ impl AuthRepository for super::PSQLDB {
                 rows.into_iter().map(|row| {
                     TokenInfo {
                         uuid: row.get("uuid"),
-                        hashed_token: row.get("token"),
-                        device: row.get("device")
+                        token: row.get("token"),
+                        signup_hash: row.get("signup_hash")
                     }
                 }).collect::<Vec<TokenInfo>>()
             },
@@ -105,15 +105,40 @@ impl AuthRepository for super::PSQLDB {
         }
     }
 
-    async fn insert_token(&mut self, uuid: &str, hashed_token: &str, device: &str) -> Result<(), Error> {
+    async fn insert_token(&mut self, uuid: &str, plain_token: &str, signup_hash: &str) -> Result<(), Error> {
         match self.client.execute(
-            "INSERT INTO Tokens (UUID, token, device) VALUES ($1, $2, $3)",
-            &[&uuid, &hashed_token, &device]
+            "INSERT INTO Tokens (UUID, token, signup_hash) VALUES ($1, $2, $3)",
+            &[&uuid, &plain_token, &signup_hash]
         ).await {
             Ok(_) => Ok(()),
             Err(t) => Err(Error::ErrorDuring("Inserting token".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
         }
     }
+
+    async fn update_token(&mut self, uuid: &str, old_token: &str, new_token: Option<&str>, new_signup_hash: Option<&str>) -> Result<(), Error> {
+        if let Some(token) = new_token {
+            match self.client.execute(
+                "UPDATE Tokens SET token = $1 WHERE UUID = $2 and token = $3",
+                &[&token, &uuid, &old_token]
+            ).await {
+                Ok(_) => {},
+                Err(t) => return Err(Error::ErrorDuring("Updating token".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            }
+        }
+
+        if let Some(signup_hash) = new_signup_hash {
+            match self.client.execute(
+                "UPDATE Tokens SET signup_hash = $1 WHERE UUID = $2 and token = $3",
+                &[&signup_hash, &uuid, &old_token]
+            ).await {
+                Ok(_) => {},
+                Err(t) => return Err(Error::ErrorDuring("Updating token signup hash".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            }
+        }
+
+        Ok(())
+    }
+
 
     async fn delete_token(&mut self, uuid: &str, hashed_token: &str) -> Result<(), Error> {
         match self.client.execute(
@@ -125,24 +150,36 @@ impl AuthRepository for super::PSQLDB {
         }
     }
 
-    async fn has_token(&mut self, uuid: &str, hashed_token: &str) -> Result<bool, Error> {
-        match self.client.query_opt(
-            "SELECT 1 FROM Tokens WHERE UUID = $1 AND token = $2",
-            &[&uuid, &hashed_token]
-        ).await {
-            Ok(row) => Ok(row.is_some()),
-            Err(t)  => Err(Error::ErrorDuring("Checking token".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+    async fn get_token(&mut self, signup_hash: &str) -> Result<(String, String), Error> {
+        match self.client.query_one(
+            "SELECT * FROM tokens WHERE signup_hash = $1",
+            &[&signup_hash]).await
+        {
+            Ok(t) => Ok((t.get("token"), t.get("uuid"))),
+            Err(t) => Err(Error::ErrorDuring("Getting Token".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))    
         }
     }
+
 
     async fn getall_token(&mut self) -> Result<Vec<TokenInfo>, Error> {
         match self.client.query("SELECT * FROM Tokens", &[]).await {
             Ok(rows) => Ok(rows.iter().map(|row| TokenInfo {
                 uuid:         row.get::<&str, &str>("UUID").to_string(),
-                hashed_token: row.get::<&str, &str>("token").to_string(),
-                device:       row.get::<&str, &str>("device").to_string(),
+                token:        row.get::<&str, &str>("token").to_string(),
+                signup_hash:  row.get::<&str, &str>("signup_hash").to_string(),
             }).collect()),
             Err(t) => Err(Error::ErrorDuring("Getting all tokens".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+        }
+    }
+
+    async fn has_token(&mut self, uuid: &str, hashed_token: &str) -> Result<bool, Error> {
+        match self.client.query_opt(
+            "SELECT 1 FROM Tokens WHERE UUID = $1 AND token = $2",
+            &[&uuid, &hashed_token]
+        ).await {
+            Ok(Some(row)) => Ok(row.get("active")),
+            Ok(None) => Ok(false),
+            Err(t)  => Err(Error::ErrorDuring("Checking token".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
         }
     }
 }

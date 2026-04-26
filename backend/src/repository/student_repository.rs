@@ -43,15 +43,13 @@ pub struct ResidenceInfo {
     pub uuid: String,
     pub hall: String,
     pub room: i32,
-    pub wing: String,
-    pub role: Role,
+    pub wing: String
 }
 
 pub struct ResidenceUpdate {
     pub hall: Option<String>,
     pub room: Option<i32>,
     pub wing: Option<String>,
-    pub role: Option<Role>,
 }
 
 pub struct InfoUpdate {
@@ -75,7 +73,6 @@ pub struct FullStudent {
     pub hall: String,
     pub room: i32,
     pub wing: String,
-    pub role: Role,
 }
 
 impl Default for FullStudent {
@@ -88,7 +85,6 @@ impl Default for FullStudent {
             wing:     String::new(),
             number:   0,
             room:     0,
-            role:     Role::Staff,
         }
     }
 }

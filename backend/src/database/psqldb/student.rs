@@ -2,7 +2,6 @@ use crate::repository::StudentRepository;
 use crate::repository::student_repository::{CreateInfo, EncryptedInfo, FullStudent, InfoUpdate, ResidenceInfo, ResidenceUpdate, StudentInfo};
 
 use crate::database::Error;
-use crate::types::Role;
 
 use axum::async_trait;
 use tokio_postgres::types::ToSql;
@@ -148,10 +147,8 @@ impl StudentRepository for super::PSQLDB {
 
 
     async fn insert_residence(&mut self, uuid: &str, user: &FullStudent) -> Result<(), Error> {
-        let role_str: String = String::from(&user.role);
-
-        return match self.client.execute("insert into residencies (UUID, hall, room, wing, role) values ($1, $2, $3, $4, $5)",
-            &[&uuid, &user.hall, &user.room, &user.wing, &role_str]).await {
+        return match self.client.execute("insert into residencies (UUID, hall, room, wing) values ($1, $2, $3, $4)",
+            &[&uuid, &user.hall, &user.room, &user.wing]).await {
             Ok(_) => Ok(()),
             Err(t) => Err(Error::ErrorDuring("Inserting residence".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
         };
@@ -175,11 +172,6 @@ impl StudentRepository for super::PSQLDB {
         if let Some(wing) = &update.wing {
             set_clauses.push(format!("wing = ${}", idx));
             params.push(Box::new(wing.clone()));
-            idx += 1;
-        }
-        if let Some(role) = &update.role {
-            set_clauses.push(format!("role = ${}", idx));
-            params.push(Box::new(String::from(role)));
             idx += 1;
         }
 
@@ -206,7 +198,7 @@ impl StudentRepository for super::PSQLDB {
     }
 
     async fn get_residence(&mut self, uuid: &str) -> Result<ResidenceInfo, Error> {
-        let row = match self.client.query_one("select hall, room, wing, role from residencies where UUID = $1", &[&uuid]).await {
+        let row = match self.client.query_one("select * from residencies where UUID = $1", &[&uuid]).await {
             Ok(t) => t,
             Err(t) => return Err(Error::ErrorDuring("Getting residence".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
         };
@@ -216,7 +208,6 @@ impl StudentRepository for super::PSQLDB {
             hall: row.get::<&str, &str>("hall").to_string(),
             room: row.get::<&str, i32>("room"),
             wing: row.get::<&str, &str>("wing").to_string(),
-            role: Role::from(row.get::<&str, &str>("role")),
         })
     }
 
@@ -234,7 +225,6 @@ impl StudentRepository for super::PSQLDB {
                 hall: row.get::<&str, &str>("hall").to_string(),
                 room: row.get::<&str, i32>("room"),
                 wing: row.get::<&str, &str>("wing").to_string(),
-                role: Role::from(row.get::<&str, &str>("role")),
             })
         }
 

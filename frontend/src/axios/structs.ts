@@ -8,7 +8,6 @@ export interface TableResidencies {
     hall: String,
     room: number,
     wing: String,
-    role: String,
 }
 
 export interface TableStudentActivities {
@@ -28,6 +27,14 @@ export interface StudentTablesResponse {
     residence: TableResidencies[],
     // student_activities: TableStudentActivities[],
     // activities: TableActivities[]
+    users: TableUsers[],
+    tokens: TableTokens[]
+}
+
+export interface TableTokens {
+    uuid: string,
+    token: string,
+    signup_hash: string
 }
 
 export interface EditStudent {
@@ -45,7 +52,19 @@ export interface FullStudentInfo {
     hall: String,
     room: number,
     wing: String,
-    role: String,
+}
+
+export interface TableUsers {
+    uuid: String,
+    fname: String,
+    lname: String,
+    role: String
+}
+
+export interface UpdateUser {
+    uuid: String,
+    field: String,
+    str_field: String,
 }
 
 export function DefaultAllStudentInfo(): FullStudentInfo {

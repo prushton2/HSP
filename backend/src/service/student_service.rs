@@ -9,8 +9,6 @@ use crate::encryption::{Encryption, EncryptedContents};
 
 use crate::database::Error;
 
-use crate::types::Role;
-
 // #[derive(Clone)]
 pub struct StudentService {
     repo: Box<dyn StudentRepository>,
@@ -89,9 +87,8 @@ impl StudentService {
             }
         }
 
-        if update.role.is_some() || update.room.is_some() || update.wing.is_some() || update.hall.is_some() {
+        if update.room.is_some() || update.wing.is_some() || update.hall.is_some() {
             let new_info = ResidenceUpdate {
-                role: update.role.clone(),
                 room: update.room.clone(),
                 wing: update.wing.clone(),
                 hall: update.hall.clone()
@@ -153,7 +150,6 @@ impl StudentService {
         student.hall = info.hall;
         student.room = info.room;
         student.wing = info.wing;
-        student.role = info.role;
 
         Ok(student)
     }
@@ -167,5 +163,4 @@ pub struct StudentUpdate {
     pub hall:     Option<String>,
     pub room:     Option<i32>,
     pub wing:     Option<String>,
-    pub role:     Option<Role>,
 }

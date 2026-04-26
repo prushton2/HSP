@@ -5,7 +5,6 @@ use serde::Deserialize;
 
 use crate::repository::student_repository;
 use crate::service::student_service;
-use crate::types::Role;
 
 
 #[derive(Deserialize)]
@@ -17,7 +16,6 @@ pub struct CreateUser {
     pub hall: String,
     pub room: i32,
     pub wing: String,
-    pub role: String,
 }
 pub async fn new_sudent(State(state): State<Arc<super::Services>>, Json(body): Json<CreateUser>) -> (StatusCode, String) {
     let mut service = state.student.lock().await;
@@ -30,7 +28,6 @@ pub async fn new_sudent(State(state): State<Arc<super::Services>>, Json(body): J
         hall:     body.hall,
         room:     body.room,
         wing:     body.wing,
-        role:     Role::from(body.role.as_str())
     };
 
     let response = match service.create_student(&student).await {
@@ -58,7 +55,6 @@ pub async fn edit_student(State(state): State<Arc<super::Services>>, Json(body):
         pronouns: None,
         number:   None,
         hall:     None,
-        role:     None,
         room:     None,
         wing:     None
     };
@@ -69,7 +65,6 @@ pub async fn edit_student(State(state): State<Arc<super::Services>>, Json(body):
         "pronouns"   => {update.pronouns = Some(body.str_field)},
         "number"     => {update.number   = Some(body.int_field)},
         "hall"       => {update.hall     = Some(body.str_field)},
-        "role"       => {update.role     = Some(Role::from(body.str_field.as_str()))},
         "wing"       => {update.room     = Some(body.int_field)},
         "room"       => {update.wing     = Some(body.str_field)},
         _            => { return (StatusCode::BAD_REQUEST, "Invalid Field".to_string())}

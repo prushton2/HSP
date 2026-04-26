@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import './index.css'
 import App from './App.tsx'
 import Admin from './pages/admin/Admin.tsx';
+import Signup from './pages/signup/signup.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -11,6 +12,7 @@ createRoot(document.getElementById('root')!).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/signup" element={<Signup />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
