@@ -56,6 +56,7 @@ export default function RenderTable({info, tag, select, selected}: {select: (uui
                 <th>uuid</th>
                 <th>token</th>
                 <th>signup hash</th>
+                <th>expiry</th>
             </tr>
             break;
 
@@ -107,9 +108,12 @@ export default function RenderTable({info, tag, select, selected}: {select: (uui
                     <td>{(row as TableTokens).uuid}</td>
                     <td>{(row as TableTokens).token}</td>
                     <td>{(row as TableTokens).signup_hash}</td>
+                    <td>{(new Date((row as TableTokens).expiry*1000)).toLocaleString()}</td>
                 </>
                 break;
         }
+
+        console.log((row as TableTokens).expiry);
 
         if(tag == "activities") {
             table_rows.push(

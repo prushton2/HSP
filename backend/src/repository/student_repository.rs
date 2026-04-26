@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 
 // this holds the traits that directly interface with the database. These can be easily faked for tests.
 use crate::database::Error;
-use crate::types::Role;
 
 #[async_trait]
 pub trait StudentRepository: Send + Sync {

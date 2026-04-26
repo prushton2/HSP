@@ -12,7 +12,7 @@ impl StudentRepository for super::PSQLDB {
         return match self.client.execute("insert into studentinfo (UUID, number, first_name_hash, last_name_hash) values ($1, $2, $3, $4)", 
             &[&uuid, &student.number, &student.fname, &student.lname]).await {
             Ok(_) => Ok(()),
-            Err(t) => Err(Error::ErrorDuring("Inserting info".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => Err(Error::ErrorDuring("Inserting info".to_owned(), Box::new(Error::PostgresError(t))))
         };
     }
 
@@ -49,21 +49,21 @@ impl StudentRepository for super::PSQLDB {
 
         return match self.client.execute(&query, &param_refs[..]).await {
             Ok(_) => Ok(()),
-            Err(t) => Err(Error::ErrorDuring("Updating info".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => Err(Error::ErrorDuring("Updating info".to_owned(), Box::new(Error::PostgresError(t))))
         };
     }
 
     async fn delete_studentinfo(&mut self, uuid: &str) -> Result<(), Error> {
         return match self.client.execute("delete from studentinfo where UUID = $1", &[&uuid]).await {
             Ok(_) => Ok(()),
-            Err(t) => Err(Error::ErrorDuring("Deleting info".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => Err(Error::ErrorDuring("Deleting info".to_owned(), Box::new(Error::PostgresError(t))))
         };
     }
 
     async fn get_studentinfo(&mut self, uuid: &str) -> Result<StudentInfo, Error> {
         let row = match self.client.query_one("select number, first_name_hash, last_name_hash from studentinfo where UUID = $1", &[&uuid]).await {
             Ok(t) => t,
-            Err(t) => return Err(Error::ErrorDuring("Getting info".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => return Err(Error::ErrorDuring("Getting info".to_owned(), Box::new(Error::PostgresError(t))))
         };
 
         Ok(StudentInfo {
@@ -79,7 +79,7 @@ impl StudentRepository for super::PSQLDB {
         
         let rows = match self.client.query("select * from studentinfo", &[]).await {
             Ok(t) => t,
-            Err(t) => return Err(Error::ErrorDuring("Getting info".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => return Err(Error::ErrorDuring("Getting info".to_owned(), Box::new(Error::PostgresError(t))))
         };
 
         for row in rows {
@@ -97,28 +97,28 @@ impl StudentRepository for super::PSQLDB {
     async fn insert_encrypted(&mut self, uuid: &str, data: &str) -> Result<(), Error> {
         return match self.client.execute("insert into encrypteddata (UUID, encrypted) values ($1, $2)", &[&uuid, &data]).await {
             Ok(_) => Ok(()),
-            Err(t) => Err(Error::ErrorDuring("Inserting encrypted".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => Err(Error::ErrorDuring("Inserting encrypted".to_owned(), Box::new(Error::PostgresError(t))))
         };
     }
 
     async fn update_encrypted(&mut self, uuid: &str, data: &str) -> Result<(), Error> {
         return match self.client.execute("update encrypteddata set encrypted = $1 where UUID = $2", &[&data, &uuid]).await {
             Ok(_) => Ok(()),
-            Err(t) => Err(Error::ErrorDuring("Updating encrypted".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => Err(Error::ErrorDuring("Updating encrypted".to_owned(), Box::new(Error::PostgresError(t))))
         };
     }
 
     async fn delete_encrypted(&mut self, uuid: &str) -> Result<(), Error> {
         return match self.client.execute("delete from encrypteddata where UUID = $1", &[&uuid]).await {
             Ok(_) => Ok(()),
-            Err(t) => Err(Error::ErrorDuring("Deleting encrypted".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => Err(Error::ErrorDuring("Deleting encrypted".to_owned(), Box::new(Error::PostgresError(t))))
         };
     }
 
     async fn get_encrypted(&mut self, uuid: &str) -> Result<EncryptedInfo, Error> {
         let row = match self.client.query_one("select encrypted from encrypteddata where UUID = $1", &[&uuid]).await {
             Ok(t) => t,
-            Err(t) => return Err(Error::ErrorDuring("Getting encrypted".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => return Err(Error::ErrorDuring("Getting encrypted".to_owned(), Box::new(Error::PostgresError(t))))
         };
 
         Ok(EncryptedInfo {
@@ -132,7 +132,7 @@ impl StudentRepository for super::PSQLDB {
 
         let rows = match self.client.query("select * from encrypteddata", &[]).await {
             Ok(t) => t,
-            Err(t) => return Err(Error::ErrorDuring("Getting encrypted".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => return Err(Error::ErrorDuring("Getting encrypted".to_owned(), Box::new(Error::PostgresError(t))))
         };
 
         for row in rows {
@@ -150,7 +150,7 @@ impl StudentRepository for super::PSQLDB {
         return match self.client.execute("insert into residencies (UUID, hall, room, wing) values ($1, $2, $3, $4)",
             &[&uuid, &user.hall, &user.room, &user.wing]).await {
             Ok(_) => Ok(()),
-            Err(t) => Err(Error::ErrorDuring("Inserting residence".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => Err(Error::ErrorDuring("Inserting residence".to_owned(), Box::new(Error::PostgresError(t))))
         };
     }
 
@@ -186,21 +186,21 @@ impl StudentRepository for super::PSQLDB {
 
         return match self.client.execute(&query, &param_refs[..]).await {
             Ok(_) => Ok(()),
-            Err(t) => Err(Error::ErrorDuring("Updating residence".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => Err(Error::ErrorDuring("Updating residence".to_owned(), Box::new(Error::PostgresError(t))))
         };
     }
 
     async fn delete_residence(&mut self, uuid: &str) -> Result<(), Error> {
         return match self.client.execute("delete from residencies where UUID = $1", &[&uuid]).await {
             Ok(_) => Ok(()),
-            Err(t) => Err(Error::ErrorDuring("Deleting residence".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => Err(Error::ErrorDuring("Deleting residence".to_owned(), Box::new(Error::PostgresError(t))))
         };
     }
 
     async fn get_residence(&mut self, uuid: &str) -> Result<ResidenceInfo, Error> {
         let row = match self.client.query_one("select * from residencies where UUID = $1", &[&uuid]).await {
             Ok(t) => t,
-            Err(t) => return Err(Error::ErrorDuring("Getting residence".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => return Err(Error::ErrorDuring("Getting residence".to_owned(), Box::new(Error::PostgresError(t))))
         };
 
         Ok(ResidenceInfo {
@@ -216,7 +216,7 @@ impl StudentRepository for super::PSQLDB {
 
         let rows = match self.client.query("select * from residencies", &[]).await {
             Ok(t) => t,
-            Err(t) => return Err(Error::ErrorDuring("Getting residence".to_owned(), Box::new(Error::PostgresError(t.code().cloned()))))
+            Err(t) => return Err(Error::ErrorDuring("Getting residence".to_owned(), Box::new(Error::PostgresError(t))))
         };
 
         for row in rows {

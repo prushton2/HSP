@@ -1,7 +1,9 @@
 // The service handles the actual logic to doing stuff to the database.
 
+use chrono::Utc;
 use uuid::Uuid;
 
+use crate::SIGNUP_HASH_EXPIRY;
 use crate::encryption::Encryption;
 
 use crate::database::Error;
@@ -39,7 +41,7 @@ impl AuthService {
             Err(t) => return Err(Error::ErrorDuring("Inserting user".to_owned(), Box::new(t)))
         };
 
-        match self.repo.insert_token(&new_user.uuid, &token, &signup_hash).await {
+        match self.repo.insert_token(&new_user.uuid, &token, &signup_hash, 86400).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Inserting token".to_owned(), Box::new(t)))
         };
@@ -52,19 +54,24 @@ impl AuthService {
             return Err(Error::InvalidParameter("signup_hash".to_owned(), "".to_owned()));
         }
 
-        let (token, uuid) = match self.repo.get_token(signup_hash).await {
+        let token = match self.repo.get_token(signup_hash).await {
             Ok(t) => t,
             Err(t) => return Err(Error::ErrorDuring("Fetching token for singup".to_owned(), Box::new(t)))
         };
 
-        let hashed_token = self.encryption.hash(token.as_str(), "");
+        if token.expiry < Utc::now().timestamp() {
+            let _ = self.repo.delete_token(&token.uuid, &token.token).await;
+            return Err(Error::ExpiredError)
+        }
 
-        match self.repo.update_token(&uuid, &token, Some(hashed_token.as_str()), Some("")).await {
+        let hashed_token = self.encryption.hash(&token.token.as_str(), "");
+
+        match self.repo.update_token(&token.uuid, &token.token, Some(hashed_token.as_str()), Some(""), Some(3024000)).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Updating token".to_owned(), Box::new(t)))
         };
 
-        Ok(token)
+        Ok(token.token)
     }
 
     pub async fn update_user(&mut self, uuid: &str, update: &UpdateUser) -> Result<(), Error> {
@@ -73,4 +80,38 @@ impl AuthService {
             Err(t) => return Err(Error::ErrorDuring("Updating User".to_owned(), Box::new(t)))
         }
     }
+
+    pub async fn delete_user(&mut self, uuid: &str) -> Result<(), Error>{
+        match self.repo.delete_user(uuid).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::ErrorDuring("Deleting User".to_owned(), Box::new(t)))
+        };
+
+        match self.repo.delete_tokens(uuid).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::ErrorDuring("Deleting Tokens".to_owned(), Box::new(t)))
+        };
+
+        Ok(())
+    }
+
+    pub async fn revoke_tokens(&mut self, uuid: &str) -> Result<(), Error> {
+        match self.repo.delete_tokens(uuid).await {
+            Ok(_) => {Ok(())},
+            Err(t) => Err(Error::ErrorDuring("Deleting Tokens".to_owned(), Box::new(t)))
+        }
+    }
+
+    pub async fn grant_token(&mut self, uuid: &str) -> Result<String, Error>{
+        let token = self.encryption.random_string(32);
+        let signup_hash = self.encryption.random_string(32);
+
+        match self.repo.insert_token(uuid, &token, &signup_hash, SIGNUP_HASH_EXPIRY).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::ErrorDuring("Inserting token".to_owned(), Box::new(t)))
+        };
+
+        Ok(signup_hash)
+    }
+    
 }

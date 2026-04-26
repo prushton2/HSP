@@ -81,6 +81,7 @@ impl PSQLDB {
                 UUID varchar(36),
                 token text,
                 signup_hash text,
+                expiry bigint,
 
                 PRIMARY KEY (UUID, token)
             );
@@ -88,7 +89,7 @@ impl PSQLDB {
 
         match result {
             Ok(_) => {return Ok(())},
-            Err(t) => {return Err(Error::PostgresError(t.code().cloned()))}
+            Err(t) => {return Err(Error::PostgresError(t))}
         };
     }
 }

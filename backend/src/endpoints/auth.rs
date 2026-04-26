@@ -6,6 +6,7 @@ use axum::response::IntoResponse;
 use axum::{Json, extract::State, http::StatusCode};
 use serde::Deserialize;
 
+use crate::TOKEN_EXPIRY;
 use crate::database::Error;
 use crate::repository::auth_repository::{FullUser, UpdateUser};
 use crate::types::Role;
@@ -47,8 +48,7 @@ pub async fn signup(State(state): State<Arc<super::Services>>, Json(body): Json<
         Err(t) => return (StatusCode::BAD_REQUEST, String::from(t)).into_response()
     };
 
-
-    let cookie = format!("token={}; HttpOnly; SameSite=Strict; Path=/", token);
+    let cookie = format!("token={}; HttpOnly; SameSite=Strict; Path=/; Max-Age={}", token, TOKEN_EXPIRY);
 
     (
         StatusCode::OK,
@@ -84,3 +84,43 @@ pub async fn update_user(State(state): State<Arc<super::Services>>, Json(body): 
         Err(t) => (StatusCode::INTERNAL_SERVER_ERROR, String::from(t))
     }
 }
+
+#[derive(Deserialize)]
+pub struct HttpDeleteUser {
+    uuid: String
+}
+pub async fn delete_user(State(state): State<Arc<super::Services>>, Json(body): Json<HttpDeleteUser>) -> (StatusCode, String) {
+    let mut service = state.auth.lock().await;
+
+    match service.delete_user(body.uuid.as_str()).await {
+        Ok(_) => (StatusCode::OK, String::from("")),
+        Err(t) => (StatusCode::BAD_REQUEST, String::from(t))
+    }
+}
+
+#[derive(Deserialize)]
+pub struct HttpRevokeTokens {
+    uuid: String
+}
+pub async fn revoke_tokens(State(state): State<Arc<super::Services>>, Json(body): Json<HttpRevokeTokens>) -> (StatusCode, String) {
+    let mut service = state.auth.lock().await;
+
+    match service.revoke_tokens(body.uuid.as_str()).await {
+        Ok(_) => (StatusCode::OK, String::from("")),
+        Err(t) => (StatusCode::BAD_REQUEST, String::from(t))
+    }
+}
+
+#[derive(Deserialize)]
+pub struct HttpGrantToken {
+    uuid: String
+}
+pub async fn grant_token(State(state): State<Arc<super::Services>>, Json(body): Json<HttpGrantToken>) -> (StatusCode, String) {
+    let mut service = state.auth.lock().await;
+
+    match service.grant_token(body.uuid.as_str()).await {
+        Ok(t) => (StatusCode::OK, format!("{{\"token\": \"{}\"}}", t)),
+        Err(t) => (StatusCode::BAD_REQUEST, String::from(t))
+    }
+}
+

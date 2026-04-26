@@ -34,7 +34,8 @@ export interface StudentTablesResponse {
 export interface TableTokens {
     uuid: string,
     token: string,
-    signup_hash: string
+    signup_hash: string,
+    expiry: number
 }
 
 export interface EditStudent {

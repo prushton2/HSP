@@ -1,6 +1,6 @@
 import { useEffect, useState, type JSX } from 'react'
 import './Admin.css'
-import { GetAllStudentInfo, HttpCreateStudent, HttpCreateUser, HttpDeleteStudent, HttpEditStudent, HttpGetStudent, HttpUpdateUser } from '../../axios/axios'
+import { GetAllStudentInfo, HttpCreateStudent, HttpCreateUser, HttpDeleteStudent, HttpDeleteUser, HttpEditStudent, HttpGetStudent, HttpGrantToken, HttpRevokeTokens, HttpUpdateUser } from '../../axios/axios'
 import { DefaultAllStudentInfo, type EditStudent, type FullStudentInfo, type TableUsers, type StudentTablesResponse, type UpdateUser } from '../../axios/structs';
 import { Modal, prompt } from '../../components/Modal';
 import HoverDropdown from '../../components/HoverDropdown';
@@ -39,10 +39,15 @@ function Admin() {
                 ["Edit", () => {}]
             ]}/>
 
-            <HoverDropdown title="Access" buttons={[
-                ["Grant",  async () => {await prompt.show("Grant Access", <GrantAccess />)}],
-                ["Update", async () => {await prompt.show("Update Access", <EditUser init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-                ["Revoke", async () => {}],
+            <HoverDropdown title="Users" buttons={[
+                ["Create",   async () => {await prompt.show("Create User", <GrantAccess />)}],
+                ["Update",   async () => {await prompt.show("Update User", <EditUser init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Delete",   async () => {await prompt.show("Delete Student", <DeleteUser init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+            ]}/>
+
+            <HoverDropdown title="Tokens" buttons={[
+                ["Grant",  async () => {await prompt.show("Grant Token", <GrantToken init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Revoke", async () => {await prompt.show("Revoke Tokens", <RevokeTokens init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
             ]}/>
         </div>
         <div className="tables">
@@ -217,3 +222,53 @@ function EditUser({init_uuid}: {init_uuid: string}): JSX.Element {
     </>
 }
 
+function DeleteUser({init_uuid}: {init_uuid: string}): JSX.Element {
+    const [uuid, setUuid] = useState(init_uuid)
+    const [checked, setChecked] = useState(false)
+
+    return <>
+        <table className='context_menu'>
+        <tbody>
+            <tr><td>UUID         </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
+            <tr><td>Are you sure?</td><td><input type="checkbox" onChange={(e) => setChecked(e.target.checked)} /></td></tr>
+            {!checked ? <></> : 
+            <tr><td></td><td><button onClick={() => HttpDeleteUser(uuid)}>Confirm</button></td></tr>
+            }
+        </tbody>
+        </table>
+    </>
+}
+
+function GrantToken({init_uuid}: {init_uuid: string}): JSX.Element {
+    const [uuid, setUuid] = useState(init_uuid)
+    const [checked, setChecked] = useState(false)
+
+    return <>
+        <table className='context_menu'>
+        <tbody>
+            <tr><td>UUID         </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
+            <tr><td>Are you sure?</td><td><input type="checkbox" onChange={(e) => setChecked(e.target.checked)} /></td></tr>
+            {!checked ? <></> : 
+            <tr><td></td><td><button onClick={async () => alert(`${window.origin}/signup?token=${(await HttpGrantToken(uuid)).token}`)}>Confirm</button></td></tr>
+            }
+        </tbody>
+        </table>
+    </>
+}
+
+function RevokeTokens({init_uuid}: {init_uuid: string}): JSX.Element {
+    const [uuid, setUuid] = useState(init_uuid)
+    const [checked, setChecked] = useState(false)
+
+    return <>
+        <table className='context_menu'>
+        <tbody>
+            <tr><td>UUID         </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
+            <tr><td>Are you sure?</td><td><input type="checkbox" onChange={(e) => setChecked(e.target.checked)} /></td></tr>
+            {!checked ? <></> : 
+            <tr><td></td><td><button onClick={() => HttpRevokeTokens(uuid)}>Confirm</button></td></tr>
+            }
+        </tbody>
+        </table>
+    </>
+}
