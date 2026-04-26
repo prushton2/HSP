@@ -1,74 +1,83 @@
-export interface TableStudentInfo {
-    uuid: String,
-    number: number,
+export namespace ApiResponseObjects {
+    export interface AllTables {
+        studentinfo: Tables.StudentInfo[],
+        residence: Tables.Residencies[],
+        student_activities: Tables.StudentActivities[],
+        activities: Tables.Activities[]
+        users: Tables.Users[],
+        tokens: Tables.Tokens[]
+    }
 }
 
-export interface TableResidencies {
-    uuid: String,
-    hall: String,
-    room: number,
-    wing: String,
+export namespace ApiRequestObjects {
+    export interface EditStudent {
+        uuid: String,
+        field: String,
+        str_field: String,
+        int_field: number,
+    }
+    
+    export interface CreateStudent {
+        fname: String,
+        lname: String,
+        pronouns: String,
+        number: number,
+        hall: String,
+        room: number,
+        wing: String,
+    }
+    
+    export interface EditUser {
+        uuid: String,
+        field: String,
+        str_field: String,
+    }
 }
 
-export interface TableStudentActivities {
-    uuid: String,
-    date: number,
-    activity: String,
+export namespace Tables {
+    export interface StudentInfo {
+        uuid: String,
+        number: number,
+    }
+    
+    export interface Residencies {
+        uuid: String,
+        hall: String,
+        room: number,
+        wing: String,
+    }
+    
+    export interface StudentActivities {
+        uuid: String,
+        date: number,
+        activity: String,
+    }
+    
+    export interface Activities {
+        activity: String,
+        date: number,
+        staff: String[]
+    }
+    
+    export interface Tokens {
+        uuid: string,
+        token: string,
+        signup_hash: string,
+        expiry: number
+    }
+    
+    export interface Users {
+        uuid: String,
+        fname: String,
+        lname: String,
+        role: String
+    }
+
+    export type AnyTable = StudentInfo | Residencies | StudentActivities | Activities | Users | Tokens;
+    export type AnyTableArray = StudentInfo[] | Residencies[] | StudentActivities[] | Activities[] | Users[] | Tokens[];
 }
 
-export interface TableActivities {
-    activity: String,
-    date: number,
-    staff: String[]
-}
-
-export interface StudentTablesResponse {
-    studentinfo: TableStudentInfo[],
-    residence: TableResidencies[],
-    // student_activities: TableStudentActivities[],
-    // activities: TableActivities[]
-    users: TableUsers[],
-    tokens: TableTokens[]
-}
-
-export interface TableTokens {
-    uuid: string,
-    token: string,
-    signup_hash: string,
-    expiry: number
-}
-
-export interface EditStudent {
-    uuid: String,
-    field: String,
-    str_field: String,
-    int_field: number,
-}
-
-export interface FullStudentInfo {
-    fname: String,
-    lname: String,
-    pronouns: String,
-    number: number,
-    hall: String,
-    room: number,
-    wing: String,
-}
-
-export interface TableUsers {
-    uuid: String,
-    fname: String,
-    lname: String,
-    role: String
-}
-
-export interface UpdateUser {
-    uuid: String,
-    field: String,
-    str_field: String,
-}
-
-export function DefaultAllStudentInfo(): FullStudentInfo {
+export function DefaultAllStudentInfo(): ApiRequestObjects.CreateStudent {
     return {
         fname: "",
         lname: "",
@@ -78,5 +87,5 @@ export function DefaultAllStudentInfo(): FullStudentInfo {
         room: 0,
         wing: "",
         role: "",
-    } as FullStudentInfo
+    } as ApiRequestObjects.CreateStudent
 }

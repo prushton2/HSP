@@ -1,7 +1,7 @@
 import { useState, type JSX } from "react";
-import type { TableUsers, TableActivities, TableResidencies, TableStudentActivities, TableStudentInfo, TableTokens } from "../../axios/structs";
+import type { Tables } from '../../axios/structs';
 
-export default function RenderTable({info, tag, select, selected}: {select: (uuid: string) => void, selected: string, info: TableUsers[] | TableTokens[] | TableResidencies[] | TableStudentActivities[] | TableActivities[] | TableStudentInfo[], tag: string}): JSX.Element {
+export default function RenderTable({info, tag, select, selected}: {select: (uuid: string) => void, selected: string, info: Tables.AnyTableArray, tag: string}): JSX.Element {
     const [visible, setVisible] = useState<boolean>(false)
     
     let table_rows: JSX.Element[] = [];
@@ -67,53 +67,51 @@ export default function RenderTable({info, tag, select, selected}: {select: (uui
         switch (tag) {
             case "student_info":
                 table_row = <>
-                    <td>{(row as TableStudentInfo).uuid}</td>
-                    <td>{(row as TableStudentInfo).number}</td>
+                    <td>{(row as Tables.StudentInfo).uuid}</td>
+                    <td>{(row as Tables.StudentInfo).number}</td>
                 </>
                 break;
             case "residencies":
                 table_row = <>
-                    <td>{(row as TableResidencies).uuid}</td>
-                    <td>{(row as TableResidencies).hall}</td>
-                    <td>{(row as TableResidencies).room}</td>
-                    <td>{(row as TableResidencies).wing}</td>
+                    <td>{(row as Tables.Residencies).uuid}</td>
+                    <td>{(row as Tables.Residencies).hall}</td>
+                    <td>{(row as Tables.Residencies).room}</td>
+                    <td>{(row as Tables.Residencies).wing}</td>
                 </>
                 break;
 
             case "student_activities":
                 table_row = <>
-                    <td>{(row as TableStudentActivities).uuid}</td>
-                    <td>{(row as TableStudentActivities).date}</td>
-                    <td>{(row as TableStudentActivities).activity}</td>
+                    <td>{(row as Tables.StudentActivities).uuid}</td>
+                    <td>{(row as Tables.StudentActivities).date}</td>
+                    <td>{(row as Tables.StudentActivities).activity}</td>
                 </>
                 break;
             case "activities":
                 table_row = <>
-                    <td>{(row as TableActivities).activity}</td>
-                    <td>{(row as TableActivities).date}</td>
-                    <td>{(row as TableActivities).staff}</td>
+                    <td>{(row as Tables.Activities).activity}</td>
+                    <td>{(row as Tables.Activities).date}</td>
+                    <td>{(row as Tables.Activities).staff}</td>
                 </>
                 break;
 
             case "users":
                 table_row = <>
-                    <td>{(row as TableUsers).uuid}</td>
-                    <td>{(row as TableUsers).fname}</td>
-                    <td>{(row as TableUsers).lname}</td>
-                    <td>{(row as TableUsers).role}</td>
+                    <td>{(row as Tables.Users).uuid}</td>
+                    <td>{(row as Tables.Users).fname}</td>
+                    <td>{(row as Tables.Users).lname}</td>
+                    <td>{(row as Tables.Users).role}</td>
                 </>
                 break;
             case "tokens":
                 table_row = <>
-                    <td>{(row as TableTokens).uuid}</td>
-                    <td>{(row as TableTokens).token}</td>
-                    <td>{(row as TableTokens).signup_hash}</td>
-                    <td>{(new Date((row as TableTokens).expiry*1000)).toLocaleString()}</td>
+                    <td>{(row as Tables.Tokens).uuid}</td>
+                    <td>{(row as Tables.Tokens).token}</td>
+                    <td>{(row as Tables.Tokens).signup_hash}</td>
+                    <td>{(new Date((row as Tables.Tokens).expiry*1000)).toLocaleString()}</td>
                 </>
                 break;
         }
-
-        console.log((row as TableTokens).expiry);
 
         if(tag == "activities") {
             table_rows.push(

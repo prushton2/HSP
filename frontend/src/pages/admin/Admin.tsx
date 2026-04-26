@@ -1,18 +1,18 @@
 import { useEffect, useState, type JSX } from 'react'
 import './Admin.css'
-import { GetAllStudentInfo, HttpCreateStudent, HttpCreateUser, HttpDeleteStudent, HttpDeleteUser, HttpEditStudent, HttpGetStudent, HttpGrantToken, HttpRevokeTokens, HttpUpdateUser } from '../../axios/axios'
-import { DefaultAllStudentInfo, type EditStudent, type FullStudentInfo, type TableUsers, type StudentTablesResponse, type UpdateUser } from '../../axios/structs';
+import { Http } from '../../axios/axios'
+import { type ApiRequestObjects, type ApiResponseObjects, type Tables, DefaultAllStudentInfo } from '../../axios/structs';
 import { Modal, prompt } from '../../components/Modal';
 import HoverDropdown from '../../components/HoverDropdown';
 import RenderTable from './RenderTable';
 
 function Admin() {
-    const [studentInfo, setStudentInfo] = useState<StudentTablesResponse>({} as StudentTablesResponse);
+    const [studentInfo, setStudentInfo] = useState<ApiResponseObjects.AllTables>({} as ApiResponseObjects.AllTables);
     const [selectedUUID, setSelectedUUID] = useState<string>("");
 
     useEffect(() => {
         async function init() {
-            let info = await GetAllStudentInfo()
+            let info = await Http.Admin.GetAllTables()
             setStudentInfo(info);
         }
         init();
@@ -26,27 +26,27 @@ function Admin() {
         </div>
         <div className='ribbon'>
             <HoverDropdown title="Student" buttons={[
-                ["Create",  async () => {await prompt.show("Create Student", <CreateStudent/>)}],
-                ["Edit",    async () => {await prompt.show("Edit Student", <EditStudent init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-                ["Get",     async () => {await prompt.show("Get Student", <GetStudent init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Create",  async () => {await prompt.show("Create Student", <CreateStudent />)}],
+                ["Edit",    async () => {await prompt.show("Edit Student",   <EditStudent   init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Get",     async () => {await prompt.show("Get Student",    <GetStudent    init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
                 ["Delete",  async () => {await prompt.show("Delete Student", <DeleteStudent init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
             ]}/>
 
             <HoverDropdown title="Activities" buttons={[
-                ["Create", () => {}],
-                ["Clone", () => {}],
-                ["Assign", () => {}],
-                ["Edit", () => {}]
+                ["Create", async () => {}],
+                ["Clone",  async () => {}],
+                ["Assign", async () => {}],
+                ["Edit",   async () => {}]
             ]}/>
 
             <HoverDropdown title="Users" buttons={[
-                ["Create",   async () => {await prompt.show("Create User", <GrantAccess />)}],
-                ["Update",   async () => {await prompt.show("Update User", <EditUser init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-                ["Delete",   async () => {await prompt.show("Delete Student", <DeleteUser init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Create",   async () => {await prompt.show("Create User",    <GrantAccess />)}],
+                ["Update",   async () => {await prompt.show("Update User",    <EditUser    init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Delete",   async () => {await prompt.show("Delete Student", <DeleteUser  init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
             ]}/>
 
             <HoverDropdown title="Tokens" buttons={[
-                ["Grant",  async () => {await prompt.show("Grant Token", <GrantToken init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Grant",  async () => {await prompt.show("Grant Token",   <GrantToken   init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
                 ["Revoke", async () => {await prompt.show("Revoke Tokens", <RevokeTokens init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
             ]}/>
         </div>
@@ -55,8 +55,6 @@ function Admin() {
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.residence} tag="residencies" />
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.users} tag="users" />
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.tokens} tag="tokens" />
-            {/* <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.student_activities} tag="student_activities" />
-            <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.activities} tag="activities" /> */}
         </div>
     </>
     )
@@ -65,7 +63,7 @@ function Admin() {
 export default Admin
 
 function EditStudent({init_uuid}: {init_uuid: string}): JSX.Element {
-    const [editData, setEditData] = useState({} as EditStudent)
+    const [editData, setEditData] = useState({} as ApiRequestObjects.EditStudent)
     const [uuid, setUuid] = useState(init_uuid)
     const [field, setField] = useState("")
     const [value, setValue] = useState("")
@@ -78,7 +76,7 @@ function EditStudent({init_uuid}: {init_uuid: string}): JSX.Element {
             field: field,
             int_field: int_data,
             str_field: int_data == -1 ? value : ""
-        } as EditStudent);
+        } as ApiRequestObjects.EditStudent);
 
     }, [uuid, field, value])
 
@@ -100,14 +98,14 @@ function EditStudent({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>uuid  </td><td><input  value={uuid} onChange={(e) => setUuid(e.target.value)}/> </td></tr>
             <tr><td>field </td><td><select onChange={(e) => setField(e.target.value)}>{Options()}</select></td></tr>
             <tr><td>value </td><td><input  onChange={(e) => setValue(e.target.value)}/>  </td></tr>
-            <tr><td></td><td><button onClick={() => {HttpEditStudent(editData)}}>Submit Edit</button></td></tr>
+            <tr><td></td><td><button onClick={() => {Http.Student.Edit(editData)}}>Submit Edit</button></td></tr>
         </tbody>
         </table>
     </>
 }
 
 function CreateStudent(): JSX.Element {
-    const [state, setState] = useState<FullStudentInfo>({room: 0} as FullStudentInfo);
+    const [state, setState] = useState<ApiRequestObjects.CreateStudent>({room: 0} as ApiRequestObjects.CreateStudent);
 
     return <>
         <table className='context_menu'>
@@ -119,7 +117,7 @@ function CreateStudent(): JSX.Element {
             <tr><td>hall  </td><td><input onChange={(e) => setState({...state, hall:   e.target.value})} /> </td></tr>
             <tr><td>room  </td><td><input onChange={(e) => setState({...state, room:   parseInt(e.target.value)})} type="number" /> </td></tr>
             <tr><td>wing  </td><td><input onChange={(e) => setState({...state, wing:   e.target.value})} /> </td></tr>
-            <tr><td></td><td><button onClick={() => HttpCreateStudent(state)}>Create Student</button></td></tr>
+            <tr><td></td><td><button onClick={() => Http.Student.Create(state)}>Create Student</button></td></tr>
         </tbody>
         </table>
     </>
@@ -134,7 +132,7 @@ function GetStudent({init_uuid}: {init_uuid: string}): JSX.Element {
             if(uuid == "") {
                 return
             }
-            setInfo(await HttpGetStudent(uuid, true))
+            setInfo(await Http.Student.Get(uuid, true))
         }
         init()
     }, [])
@@ -150,7 +148,7 @@ function GetStudent({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>hall       </td><td>{info.hall}</td></tr>
             <tr><td>room       </td><td>{info.room}</td></tr>
             <tr><td>wing       </td><td>{info.wing}</td></tr>
-            <tr><td></td><td><button onClick={async () => {setInfo(await HttpGetStudent(uuid, true))}}>Get</button></td></tr>
+            <tr><td></td><td><button onClick={async () => {setInfo(await Http.Student.Get(uuid, true))}}>Get</button></td></tr>
         </tbody>
         </table>
     </>
@@ -166,7 +164,7 @@ function DeleteStudent({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>UUID         </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
             <tr><td>Are you sure?</td><td><input type="checkbox" onChange={(e) => setChecked(e.target.checked)} /></td></tr>
             {!checked ? <></> : 
-            <tr><td></td><td><button onClick={() => HttpDeleteStudent(uuid)}>Confirm</button></td></tr>
+            <tr><td></td><td><button onClick={() => Http.Student.Delete(uuid)}>Confirm</button></td></tr>
             }
         </tbody>
         </table>
@@ -174,7 +172,7 @@ function DeleteStudent({init_uuid}: {init_uuid: string}): JSX.Element {
 }
 
 function GrantAccess(): JSX.Element {
-    const [state, setState] = useState<TableUsers>({} as TableUsers);
+    const [state, setState] = useState<Tables.Users>({} as Tables.Users);
 
     return <>
         <table className='context_menu'>
@@ -182,14 +180,14 @@ function GrantAccess(): JSX.Element {
             <tr><td>first name </td><td><input onChange={(e) => setState({...state, fname:  e.target.value})} /> </td></tr>
             <tr><td>last name </td><td><input onChange={(e) => setState({...state, lname:  e.target.value})} /> </td></tr>
             <tr><td>role  </td><td><input onChange={(e) => setState({...state, role:   e.target.value})} /> </td></tr>
-            <tr><td></td><td><button onClick={async () => alert(`${window.origin}/signup?token=${(await HttpCreateUser(state)).token}`)}>Create User</button></td></tr>
+            <tr><td></td><td><button onClick={async () => alert(`${window.origin}/signup?token=${(await Http.User.Create(state)).token}`)}>Create User</button></td></tr>
         </tbody>
         </table>
     </>
 }
 
 function EditUser({init_uuid}: {init_uuid: string}): JSX.Element {
-    const [editData, setEditData] = useState({} as UpdateUser)
+    const [editData, setEditData] = useState({} as ApiRequestObjects.EditUser)
     const [uuid, setUuid] = useState(init_uuid)
     const [field, setField] = useState("first name")
     const [value, setValue] = useState("")
@@ -199,7 +197,7 @@ function EditUser({init_uuid}: {init_uuid: string}): JSX.Element {
             uuid: uuid,
             field: field,
             str_field: value,
-        } as UpdateUser);
+        } as ApiRequestObjects.EditUser);
 
     }, [uuid, field, value])
 
@@ -216,7 +214,7 @@ function EditUser({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>uuid  </td><td><input  value={uuid} onChange={(e) => setUuid(e.target.value)}/> </td></tr>
             <tr><td>field </td><td><select onChange={(e) => setField(e.target.value)}>{Options()}</select></td></tr>
             <tr><td>value </td><td><input  onChange={(e) => setValue(e.target.value)}/>  </td></tr>
-            <tr><td></td><td><button onClick={() => {HttpUpdateUser(editData)}}>Submit Edit</button></td></tr>
+            <tr><td></td><td><button onClick={() => {Http.User.Update(editData)}}>Submit Edit</button></td></tr>
         </tbody>
         </table>
     </>
@@ -232,7 +230,7 @@ function DeleteUser({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>UUID         </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
             <tr><td>Are you sure?</td><td><input type="checkbox" onChange={(e) => setChecked(e.target.checked)} /></td></tr>
             {!checked ? <></> : 
-            <tr><td></td><td><button onClick={() => HttpDeleteUser(uuid)}>Confirm</button></td></tr>
+            <tr><td></td><td><button onClick={() => Http.User.Delete(uuid)}>Confirm</button></td></tr>
             }
         </tbody>
         </table>
@@ -249,7 +247,7 @@ function GrantToken({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>UUID         </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
             <tr><td>Are you sure?</td><td><input type="checkbox" onChange={(e) => setChecked(e.target.checked)} /></td></tr>
             {!checked ? <></> : 
-            <tr><td></td><td><button onClick={async () => alert(`${window.origin}/signup?token=${(await HttpGrantToken(uuid)).token}`)}>Confirm</button></td></tr>
+            <tr><td></td><td><button onClick={async () => alert(`${window.origin}/signup?token=${(await Http.User.Token.Grant(uuid)).token}`)}>Confirm</button></td></tr>
             }
         </tbody>
         </table>
@@ -266,7 +264,7 @@ function RevokeTokens({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>UUID         </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
             <tr><td>Are you sure?</td><td><input type="checkbox" onChange={(e) => setChecked(e.target.checked)} /></td></tr>
             {!checked ? <></> : 
-            <tr><td></td><td><button onClick={() => HttpRevokeTokens(uuid)}>Confirm</button></td></tr>
+            <tr><td></td><td><button onClick={() => Http.User.Token.Revoke(uuid)}>Confirm</button></td></tr>
             }
         </tbody>
         </table>

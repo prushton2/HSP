@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import "../../App.css"
-import { HttpSignupUser } from "../../axios/axios";
+import { Http } from "../../axios/axios";
 import { useSearchParams } from "react-router";
 
 export default function Signup() {
@@ -11,7 +11,7 @@ export default function Signup() {
             let token = searchParams.get("token")
             if (token != null) {
                 try {
-                    await HttpSignupUser(token)
+                    await Http.User.Signup(token)
                 } catch {
                     alert("Invalid URL");
                 }
