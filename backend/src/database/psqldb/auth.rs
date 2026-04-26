@@ -176,10 +176,25 @@ impl AuthRepository for super::PSQLDB {
         }
     }
 
-    async fn get_token(&mut self, signup_hash: &str) -> Result<TokenInfo, Error> {
+    async fn get_token_hash(&mut self, signup_hash: &str) -> Result<TokenInfo, Error> {
         match self.client.query_one(
             "SELECT * FROM tokens WHERE signup_hash = $1",
             &[&signup_hash]).await
+        {
+            Ok(row) => Ok(TokenInfo {
+                uuid:        row.get("uuid"),
+                token:       row.get("token"),
+                signup_hash: row.get("signup_hash"),
+                expiry:      row.get("expiry")
+            }),
+            Err(t) => Err(Error::ErrorDuring("Getting Token".to_owned(), Box::new(Error::PostgresError(t))))    
+        }
+    }
+
+    async fn get_token(&mut self, token: &str) -> Result<TokenInfo, Error> {
+        match self.client.query_one(
+            "SELECT * FROM tokens WHERE token = $1",
+            &[&token]).await
         {
             Ok(row) => Ok(TokenInfo {
                 uuid:        row.get("uuid"),
@@ -201,17 +216,6 @@ impl AuthRepository for super::PSQLDB {
                 expiry:       row.get::<&str,  i64>("expiry")
             }).collect()),
             Err(t) => Err(Error::ErrorDuring("Getting all tokens".to_owned(), Box::new(Error::PostgresError(t))))
-        }
-    }
-
-    async fn has_token(&mut self, uuid: &str, hashed_token: &str) -> Result<bool, Error> {
-        match self.client.query_opt(
-            "SELECT 1 FROM Tokens WHERE UUID = $1 AND token = $2",
-            &[&uuid, &hashed_token]
-        ).await {
-            Ok(Some(row)) => Ok(row.get("active")),
-            Ok(None) => Ok(false),
-            Err(t)  => Err(Error::ErrorDuring("Checking token".to_owned(), Box::new(Error::PostgresError(t))))
         }
     }
 }

@@ -1,10 +1,12 @@
 use std::sync::Arc;
 
 use axum::{Json, extract::State, http::StatusCode};
+use axum_extra::extract::CookieJar;
 use serde::Deserialize;
 
 use crate::repository::student_repository;
 use crate::service::student_service;
+use crate::types::Role;
 
 
 #[derive(Deserialize)]
@@ -17,7 +19,11 @@ pub struct CreateUser {
     pub room: i32,
     pub wing: String,
 }
-pub async fn new_sudent(State(state): State<Arc<super::Services>>, Json(body): Json<CreateUser>) -> (StatusCode, String) {
+pub async fn new_sudent(State(state): State<Arc<super::Services>>, Json(body): Json<CreateUser>, jar: CookieJar) -> (StatusCode, String) {
+    let mut auth = state.auth.lock().await;
+    if !auth.is_authenticated(&jar, &Role::Admin, "new_student").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    drop(auth);
+
     let mut service = state.student.lock().await;
     
     let student = student_repository::FullStudent {
@@ -46,7 +52,11 @@ pub struct EditUser {
     pub str_field: String,
     pub int_field: i32,
 }
-pub async fn edit_student(State(state): State<Arc<super::Services>>, Json(body): Json<EditUser>) -> (StatusCode, String) {
+pub async fn edit_student(State(state): State<Arc<super::Services>>, Json(body): Json<EditUser>, jar: CookieJar) -> (StatusCode, String) {
+    let mut auth = state.auth.lock().await;
+    if !auth.is_authenticated(&jar, &Role::Admin, "edit_student").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    drop(auth);
+
     let mut service = state.student.lock().await;
     
     let mut update = student_service::StudentUpdate {
@@ -82,7 +92,11 @@ pub struct GetStudent {
     pub uuid: String,
     pub decrypt: bool
 }
-pub async fn get_student(State(state): State<Arc<super::Services>>, Json(body): Json<GetStudent>) -> (StatusCode, String) {
+pub async fn get_student(State(state): State<Arc<super::Services>>, Json(body): Json<GetStudent>, jar: CookieJar) -> (StatusCode, String) {
+    let mut auth = state.auth.lock().await;
+    if !auth.is_authenticated(&jar, &Role::Staff, "get_student").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    drop(auth);
+
     let mut service = state.student.lock().await;
     
     return match service.get_student(&body.uuid, body.decrypt).await {
@@ -96,7 +110,11 @@ pub async fn get_student(State(state): State<Arc<super::Services>>, Json(body): 
 pub struct DeleteStudent {
     pub uuid: String,
 }
-pub async fn delete_student(State(state): State<Arc<super::Services>>, Json(body): Json<DeleteStudent>) -> (StatusCode, String) {
+pub async fn delete_student(State(state): State<Arc<super::Services>>, Json(body): Json<DeleteStudent>, jar: CookieJar) -> (StatusCode, String) {
+    let mut auth = state.auth.lock().await;
+    if !auth.is_authenticated(&jar, &Role::Admin, "delete_student").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    drop(auth);
+
     let mut service = state.student.lock().await;
     
     let response = match service.delete_student(&body.uuid).await {

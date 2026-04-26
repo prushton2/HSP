@@ -17,11 +17,11 @@ pub trait AuthRepository: Send + Sync {
     async fn insert_token(&mut self, uuid: &str, plain_token: &str, signup_hash: &str, expiry: i64) -> Result<(), Error>;
     async fn update_token(&mut self, uuid: &str, old_token: &str, new_token: Option<&str>, new_signup_hash: Option<&str>, new_expiry: Option<i64>) -> Result<(), Error>;
     async fn delete_token(&mut self, uuid: &str, token: &str) -> Result<(), Error>;
-    async fn get_token   (&mut self, signup_hash: &str) -> Result<TokenInfo, Error>;
+    async fn get_token   (&mut self, token: &str) -> Result<TokenInfo, Error>; 
     async fn getall_token(&mut self) -> Result<Vec<TokenInfo>, Error>;
     
+    async fn get_token_hash(&mut self, signup_hash: &str) -> Result<TokenInfo, Error>;
     async fn delete_tokens(&mut self, uuid: &str) -> Result<(), Error>;
-    async fn has_token   (&mut self, uuid: &str, hashed_token: &str) -> Result<bool, Error>;
 }
 
 // Heres the signup flow:
