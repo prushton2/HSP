@@ -34,7 +34,11 @@ async fn main() {
             admin: Mutex::new(service::AdminService::new(
                 Box::new(database::PSQLDB::new(&dbinfo).await),
                 Box::new(encryption::PlaintextEncryption::new())
-            ))
+            )),
+            auth: Mutex::new(service::AuthService::new(
+                Box::new(database::PSQLDB::new(&dbinfo).await),
+                Box::new(encryption::PlaintextEncryption::new())
+            )),
         }
     );
 
@@ -45,7 +49,7 @@ async fn main() {
         .route("/student/delete",post(endpoints::student::delete_student))
         .route("/student/get",   post(endpoints::student::get_student))
 
-        // .route("/auth/create", post(endpoints::auth::create_user))
+        .route("/auth/create", post(endpoints::auth::create_user))
 
         .with_state(state); // move db in directly, no clone needed
 

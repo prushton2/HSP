@@ -1,15 +1,16 @@
 use tokio_postgres::{Client, NoTls};
 
-use crate::database::{DBInfo, Error};
+use crate::{database::{DBInfo, Error}, repository::Repository};
 
 pub mod student;
+pub mod auth;
 
 
 pub struct PSQLDB {
     client: Client
 }
 
-impl super::Database for PSQLDB {}
+impl Repository for PSQLDB {}
 
 impl PSQLDB {
     pub async fn new(dbinfo: &DBInfo) -> Self {

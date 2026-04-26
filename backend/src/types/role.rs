@@ -37,6 +37,16 @@ impl From<&str> for Role {
     }
 }
 
+impl From<String> for Role {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            "Admin" => Role::Admin,
+            "Owner" => Role::Owner,
+            _       => Role::Staff,
+        }   
+    }
+}
+
 impl From<&i32> for Role {
     fn from(value: &i32) -> Self {
         match value {

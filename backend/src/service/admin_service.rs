@@ -4,24 +4,24 @@ use serde::{Deserialize, Serialize};
 
 use crate::encryption::Encryption;
 
-use crate::database::{Database, Error};
+use crate::database::Error;
 
+use crate::repository::Repository;
 use crate::repository::student_repository::{EncryptedInfo, ResidenceInfo, StudentInfo};
 
 // #[derive(Clone)]
 pub struct AdminService {
-    repo: Box<dyn Database>,
-    _encryption: Box<dyn Encryption>
+    repo: Box<dyn Repository>,
+    encryption: Box<dyn Encryption>
 }
 
 impl AdminService {
-    pub fn new(repo: Box<dyn Database>, encryption: Box<dyn Encryption>) -> Self {
+    pub fn new(repo: Box<dyn Repository>, encryption: Box<dyn Encryption>) -> Self {
         Self {
             repo: repo,
-            _encryption: encryption
+            encryption: encryption
         }
     }
-
 
     pub async fn get_all_tables(&mut self) -> Result<AllTables, Error> {
         

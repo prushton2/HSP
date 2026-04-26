@@ -6,8 +6,6 @@ pub use psqldb::PSQLDB;
 
 use tokio_postgres::error::SqlState;
 
-use crate::repository::StudentRepository;
-
 #[derive(Serialize, Deserialize, Clone)]
 pub struct DBInfo {
     pub host: String,
@@ -16,8 +14,6 @@ pub struct DBInfo {
     pub dbname: String,
     pub port: String
 }
-
-pub trait Database:  StudentRepository + Send + Sync {}
 
 #[derive(Debug)]
 pub enum Error {
