@@ -8,12 +8,7 @@
   margin-top: auto;
 }
 
-.searchtable td {
-  /* border: 1px solid blue; */
-}
-
 .searchtable .lefttd {
-  /* border: 1px solid green; */
   width: min-content;
 }
 
@@ -30,4 +25,8 @@
 .searchtable select {
   width: 100%;
   box-sizing: border-box;
+}
+
+.searchresult {
+  margin-bottom: 5px;
 }

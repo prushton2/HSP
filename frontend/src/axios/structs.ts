@@ -9,38 +9,38 @@ export namespace ApiResponseObjects {
     }
     
     export interface FullStudent {
-        fname: String,
-        lname: String,
-        pronouns: String,
+        fname: string,
+        lname: string,
+        pronouns: string,
         number: number,
-        hall: String,
+        hall: string,
         room: number,
-        wing: String,
+        wing: string,
     }
 }
 
 export namespace ApiRequestObjects {
     export interface EditStudent {
-        uuid: String,
-        field: String,
-        str_field: String,
+        uuid: string,
+        field: string,
+        str_field: string,
         int_field: number,
     }
     
     export interface CreateStudent {
-        fname: String,
-        lname: String,
-        pronouns: String,
+        fname: string,
+        lname: string,
+        pronouns: string,
         number: number,
-        hall: String,
+        hall: string,
         room: number,
-        wing: String,
+        wing: string,
     }
     
     export interface EditUser {
-        uuid: String,
-        field: String,
-        str_field: String,
+        uuid: string,
+        field: string,
+        str_field: string,
     }
 
     export interface SearchStudent {
@@ -54,27 +54,27 @@ export namespace ApiRequestObjects {
 
 export namespace Tables {
     export interface StudentInfo {
-        uuid: String,
+        uuid: string,
         number: number,
     }
     
     export interface Residencies {
-        uuid: String,
-        hall: String,
+        uuid: string,
+        hall: string,
         room: number,
-        wing: String,
+        wing: string,
     }
     
     export interface StudentActivities {
-        uuid: String,
+        uuid: string,
         date: number,
-        activity: String,
+        activity: string,
     }
     
     export interface Activities {
-        activity: String,
+        activity: string,
         date: number,
-        staff: String[]
+        staff: string[]
     }
     
     export interface Tokens {
@@ -85,10 +85,10 @@ export namespace Tables {
     }
     
     export interface Users {
-        uuid: String,
-        fname: String,
-        lname: String,
-        role: String
+        uuid: string,
+        fname: string,
+        lname: string,
+        role: string
     }
 
     export type AnyTable = StudentInfo | Residencies | StudentActivities | Activities | Users | Tokens;

@@ -1,5 +1,7 @@
 import { Http } from '../../axios/axios'
 import type { ApiRequestObjects, ApiResponseObjects } from '../../axios/structs'
+import { formatProperly } from '../../components/Format'
+import { Modal, prompt } from '../../components/Modal'
 import './search.css'
 import { useState, type JSX } from 'react'
 
@@ -15,6 +17,7 @@ export default function Search(): JSX.Element {
     ]
     return (
         <>
+            <Modal />
             <div className="title">
                 <h1>Search</h1>
             </div>
@@ -46,12 +49,22 @@ export default function Search(): JSX.Element {
 
 function RenderSearchResults(students: ApiResponseObjects.FullStudent[]): JSX.Element[] {
     let html: JSX.Element[] = [];
-
+    
     students.forEach(e => {
         html.push(<>
-            {e.fname} {e.lname} <br />
+            <button className="searchresult" onClick={async() => {await prompt.show("", <StudentModal student={e} />)}}>{e.fname} {e.lname}</button><br />
         </>)
     })
-
+    
     return html;
+}
+
+function StudentModal({student}: {student: ApiResponseObjects.FullStudent}): JSX.Element {
+    return <div className="studentModal">
+        <label>{student.fname} {student.lname}</label> <br />
+        <label>{student.pronouns}</label> <br />
+        <label>Student #{student.number}</label> <br />
+        <label>{formatProperly(student.hall)} Hall, Room {student.room}</label> <br />
+        <label>{formatProperly(student.wing)} Wing</label>
+    </div>
 }
