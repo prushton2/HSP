@@ -6,35 +6,50 @@ use crate::database::Error;
 
 #[async_trait]
 pub trait StudentRepository: Send + Sync {
-    async fn insert_studentinfo(&mut self, uuid: &str, student: &CreateInfo) -> Result<(), Error>;
-    async fn update_studentinfo(&mut self, uuid: &str, update: &InfoUpdate) -> Result<(), Error>;
+    async fn insert_studentinfo(&mut self, student: &StudentInfo) -> Result<(), Error>;
+    async fn update_studentinfo(&mut self, update: &UpdateStudentInfo) -> Result<(), Error>;
     async fn delete_studentinfo(&mut self, uuid: &str) -> Result<(), Error>;
     async fn get_studentinfo   (&mut self, uuid: &str) -> Result<StudentInfo, Error>;
-    async fn getall_studentinfo(&mut self) -> Result<Vec<StudentInfo>, Error>;
+    async fn search_studentinfo(&mut self, params: &SearchStudentInfo) -> Result<Vec<StudentInfo>, Error>;
 
-    async fn insert_encrypted(&mut self, uuid: &str, data: &str) -> Result<(), Error>;
-    async fn update_encrypted(&mut self, uuid: &str, data: &str) -> Result<(), Error>;
+    async fn insert_encrypted(&mut self, data: &EncryptedInfo) -> Result<(), Error>;
+    async fn update_encrypted(&mut self, update: &UpdateEncryptedInfo) -> Result<(), Error>;
     async fn delete_encrypted(&mut self, uuid: &str) -> Result<(), Error>;
     async fn get_encrypted   (&mut self, uuid: &str) -> Result<EncryptedInfo, Error>;
     async fn getall_encrypted(&mut self) -> Result<Vec<EncryptedInfo>, Error>;
     
-    async fn insert_residence(&mut self, uuid: &str, user: &FullStudent) -> Result<(), Error>;
-    async fn update_residence(&mut self, uuid: &str, update: &ResidenceUpdate) -> Result<(), Error>;
+    async fn insert_residence(&mut self, user: &ResidenceInfo) -> Result<(), Error>;
+    async fn update_residence(&mut self, update: &UpdateResidenceInfo) -> Result<(), Error>;
     async fn delete_residence(&mut self, uuid: &str) -> Result<(), Error>;
     async fn get_residence   (&mut self, uuid: &str) -> Result<ResidenceInfo, Error>;
-    async fn getall_residence(&mut self) -> Result<Vec<ResidenceInfo>, Error>;
+    async fn search_residence(&mut self, params: &SearchResidenceInfo) -> Result<Vec<ResidenceInfo>, Error>;
 }
 #[derive(Serialize, Deserialize)]
 pub struct StudentInfo {
-    pub uuid: String,
+    pub uuid:   String,
     pub number: i32,
-    pub fname: String,
-    pub lname: String,
+    pub fname:  String,
+    pub lname:  String,
 }
+
+pub struct UpdateStudentInfo {
+    pub uuid:   String,
+    pub fname:  Option<String>,
+    pub lname:  Option<String>,
+    pub number: Option<i32>,
+}
+
+pub type SearchStudentInfo = UpdateStudentInfo;
+
 #[derive(Serialize, Deserialize)]
 pub struct EncryptedInfo {
     pub uuid: String,
     pub data: String
+}
+
+pub struct UpdateEncryptedInfo {
+    pub uuid: String,
+    pub data: Option<String>
 }
 
 #[derive(Serialize, Deserialize)]
@@ -45,23 +60,14 @@ pub struct ResidenceInfo {
     pub wing: String
 }
 
-pub struct ResidenceUpdate {
+pub struct UpdateResidenceInfo {
+    pub uuid: String,
     pub hall: Option<String>,
     pub room: Option<i32>,
     pub wing: Option<String>,
 }
 
-pub struct InfoUpdate {
-    pub fname:  Option<String>,
-    pub lname:  Option<String>,
-    pub number: Option<i32>,
-}
-
-pub struct CreateInfo {
-    pub fname:  String,
-    pub lname:  String,
-    pub number: i32,
-}
+pub type SearchResidenceInfo = UpdateResidenceInfo;
 
 #[derive(Serialize, Deserialize)]
 pub struct FullStudent {

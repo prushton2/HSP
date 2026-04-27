@@ -3,7 +3,7 @@
 use uuid::Uuid;
 
 use crate::repository::StudentRepository;
-use crate::repository::student_repository::{self, CreateInfo, FullStudent, InfoUpdate, ResidenceUpdate};
+use crate::repository::student_repository::{self, EncryptedInfo, FullStudent, ResidenceInfo, StudentInfo, UpdateEncryptedInfo, UpdateResidenceInfo, UpdateStudentInfo};
 
 use crate::encryption::{Encryption, EncryptedContents};
 
@@ -26,7 +26,14 @@ impl StudentService {
     pub async fn create_student(&mut self, student: &student_repository::FullStudent) -> Result<(), Error> {
         let uuid = Uuid::new_v4().to_string();
 
-        match self.repo.insert_residence(&uuid, student).await {
+        let residence = ResidenceInfo {
+            uuid: uuid.clone(),
+            hall: student.hall.clone(),
+            room: student.room,
+            wing: student.wing.clone()
+        };
+
+        match self.repo.insert_residence(&residence).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Inserting Residence".to_owned(), Box::new(t)))
         };
@@ -37,16 +44,24 @@ impl StudentService {
             pronouns: student.pronouns.clone()
         });
 
-        match self.repo.insert_encrypted(&uuid, &encrypted).await {
+        let encrypted_info = EncryptedInfo {
+            uuid: uuid.clone(),
+            data: encrypted
+        };
+
+        match self.repo.insert_encrypted(&encrypted_info).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Insert Encrypted".to_owned(), Box::new(t)))
         };
 
-        match self.repo.insert_studentinfo(&uuid, &CreateInfo {
+        let student_info = StudentInfo {
+            uuid: uuid,
             fname: self.encryption.hash(&student.fname, ""),
             lname: self.encryption.hash(&student.lname, ""),
             number: student.number
-        }).await {
+        };
+
+        match self.repo.insert_studentinfo(&student_info).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Inserting info".to_owned(), Box::new(t)))
         }
@@ -68,33 +83,40 @@ impl StudentService {
 
             let encrypted = self.encryption.encrypt(&current_info);
 
-            match self.repo.update_encrypted(uuid, &encrypted).await {
+            let new_encrypted = UpdateEncryptedInfo {
+                uuid: uuid.to_string(),
+                data: Some(encrypted)
+            };
+
+            match self.repo.update_encrypted(&new_encrypted).await {
                 Ok(_) => {},
                 Err(t) => return Err(Error::ErrorDuring("Updaing encrypted data".to_owned(), Box::new(t)))
             };
         }
 
         if update.number.is_some() || update.fname.is_some() || update.lname.is_some() {
-            let new_info = InfoUpdate {
+            let new_info = UpdateStudentInfo {
+                uuid: uuid.to_string(),
                 number: if update.number.is_some() { update.number } else { None },
                 fname: if update.fname.is_some() { update.fname.clone() } else { None },
                 lname: if update.lname.is_some() { update.lname.clone() } else { None }
             };
 
-            match self.repo.update_studentinfo(uuid, &new_info).await {
+            match self.repo.update_studentinfo(&new_info).await {
                 Ok(_) => {},
                 Err(t) => return Err(Error::ErrorDuring("Updating info".to_owned(), Box::new(t)))
             }
         }
 
         if update.room.is_some() || update.wing.is_some() || update.hall.is_some() {
-            let new_info = ResidenceUpdate {
+            let new_info = UpdateResidenceInfo {
+                uuid: uuid.to_string(),
                 room: update.room.clone(),
                 wing: update.wing.clone(),
                 hall: update.hall.clone()
             };
 
-            match self.repo.update_residence(uuid, &new_info).await {
+            match self.repo.update_residence(&new_info).await {
                 Ok(_) => {},
                 Err(t) => return Err(Error::ErrorDuring("Updating Residence".to_owned(), Box::new(t)))
             }

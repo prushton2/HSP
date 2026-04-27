@@ -75,8 +75,8 @@ pub async fn edit_student(State(state): State<Arc<super::Services>>, jar: Cookie
         "pronouns"   => {update.pronouns = Some(body.str_field)},
         "number"     => {update.number   = Some(body.int_field)},
         "hall"       => {update.hall     = Some(body.str_field)},
-        "wing"       => {update.room     = Some(body.int_field)},
-        "room"       => {update.wing     = Some(body.str_field)},
+        "wing"       => {update.wing     = Some(body.str_field)},
+        "room"       => {update.room     = Some(body.int_field)},
         _            => { return (StatusCode::BAD_REQUEST, "Invalid Field".to_string())}
     }
 

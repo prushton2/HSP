@@ -8,7 +8,7 @@ use crate::database::Error;
 
 use crate::repository::Repository;
 use crate::repository::auth_repository::{FullUser, TokenInfo};
-use crate::repository::student_repository::{EncryptedInfo, ResidenceInfo, StudentInfo};
+use crate::repository::student_repository::{EncryptedInfo, ResidenceInfo, SearchResidenceInfo, SearchStudentInfo, StudentInfo};
 
 pub struct AdminService {
     repo: Box<dyn Repository>,
@@ -24,9 +24,10 @@ impl AdminService {
     }
 
     pub async fn get_all_tables(&mut self) -> Result<AllTables, Error> {
+
         Ok(AllTables {
-            residence: self.repo.getall_residence().await?,
-            studentinfo: self.repo.getall_studentinfo().await?,
+            residence: self.repo.search_residence(&SearchResidenceInfo{uuid: String::from(""), hall: None, wing: None, room: None}).await?,
+            studentinfo: self.repo.search_studentinfo(&SearchStudentInfo{uuid: String::from(""), fname: None, lname: None, number: None}).await?,
             encryptedinfo: self.repo.getall_encrypted().await?,
             users: self.repo.getall_user().await?,
             tokens: self.repo.getall_token().await?
