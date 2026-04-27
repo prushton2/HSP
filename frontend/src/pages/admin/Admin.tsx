@@ -5,6 +5,7 @@ import { type ApiRequestObjects, type ApiResponseObjects, type Tables, DefaultAl
 import { Modal, prompt } from '../../components/Modal';
 import HoverDropdown from '../../components/HoverDropdown';
 import RenderTable from './RenderTable';
+import { Toast } from '../../components/toast';
 
 function Admin() {
     const [studentInfo, setStudentInfo] = useState<ApiResponseObjects.AllTables>({} as ApiResponseObjects.AllTables);
@@ -98,7 +99,9 @@ function EditStudent({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>uuid  </td><td><input  value={uuid} onChange={(e) => setUuid(e.target.value)}/> </td></tr>
             <tr><td>field </td><td><select onChange={(e) => setField(e.target.value)}>{Options()}</select></td></tr>
             <tr><td>value </td><td><input  onChange={(e) => setValue(e.target.value)}/>  </td></tr>
-            <tr><td></td><td><button onClick={() => {Http.Student.Edit(editData)}}>Submit Edit</button></td></tr>
+            <tr><td></td><td><button onClick={async () => {
+                    await Toast.WrapFunction(() => Http.Student.Edit(editData), "Student Edited")
+                }}>Submit Edit</button></td></tr>
         </tbody>
         </table>
     </>
@@ -117,7 +120,9 @@ function CreateStudent(): JSX.Element {
             <tr><td>hall  </td><td><input onChange={(e) => setState({...state, hall:   e.target.value})} /> </td></tr>
             <tr><td>room  </td><td><input onChange={(e) => setState({...state, room:   parseInt(e.target.value)})} type="number" /> </td></tr>
             <tr><td>wing  </td><td><input onChange={(e) => setState({...state, wing:   e.target.value})} /> </td></tr>
-            <tr><td></td><td><button onClick={() => Http.Student.Create(state)}>Create Student</button></td></tr>
+            <tr><td></td><td><button onClick={async () => 
+                    await Toast.WrapFunction(() => Http.Student.Create(state), "Student Created")
+                }>Create Student</button></td></tr>
         </tbody>
         </table>
     </>
@@ -125,14 +130,15 @@ function CreateStudent(): JSX.Element {
 
 function GetStudent({init_uuid}: {init_uuid: string}): JSX.Element {
     const [uuid, setUuid] = useState(init_uuid)
-    const [info, setInfo] = useState(DefaultAllStudentInfo())
+    const [info, setInfo] = useState<ApiResponseObjects.FullStudent>(DefaultAllStudentInfo())
 
     useEffect(() => {
         async function init() {
             if(uuid == "") {
                 return
             }
-            setInfo(await Http.Student.Get(uuid, true))
+            let result = await Toast.WrapErr<ApiResponseObjects.FullStudent, string>(() => Http.Student.Get(uuid, true))
+            if(result.is_ok()) {setInfo(result.into_ok())}
         }
         init()
     }, [])
@@ -148,7 +154,10 @@ function GetStudent({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>hall       </td><td>{info.hall}</td></tr>
             <tr><td>room       </td><td>{info.room}</td></tr>
             <tr><td>wing       </td><td>{info.wing}</td></tr>
-            <tr><td></td><td><button onClick={async () => {setInfo(await Http.Student.Get(uuid, true))}}>Get</button></td></tr>
+            <tr><td></td><td><button onClick={async () => {
+                    let result = await Toast.WrapErr<ApiResponseObjects.FullStudent, string>(() => Http.Student.Get(uuid, true))
+                    if(result.is_ok()) {setInfo(result.into_ok())}
+                }}>Get</button></td></tr>
         </tbody>
         </table>
     </>
@@ -164,7 +173,9 @@ function DeleteStudent({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>UUID         </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
             <tr><td>Are you sure?</td><td><input type="checkbox" onChange={(e) => setChecked(e.target.checked)} /></td></tr>
             {!checked ? <></> : 
-            <tr><td></td><td><button onClick={() => Http.Student.Delete(uuid)}>Confirm</button></td></tr>
+            <tr><td></td><td><button onClick={async () => 
+                    await Toast.WrapFunction<null, string>(() => Http.Student.Delete(uuid))
+                }>Confirm</button></td></tr>
             }
         </tbody>
         </table>

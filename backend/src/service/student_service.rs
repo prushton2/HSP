@@ -29,6 +29,18 @@ impl StudentService {
     pub async fn create_student(&self, student: &FullStudent) -> Result<(), Error> {
         let uuid = Uuid::new_v4().to_string();
 
+        let student_info = StudentInfo {
+            uuid: uuid.clone(),
+            fname: self.encryption.hash(&student.fname.to_ascii_lowercase(), ""),
+            lname: self.encryption.hash(&student.lname.to_ascii_lowercase(), ""),
+            number: student.number
+        };
+
+        match self.repo.insert_studentinfo(&student_info).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::ErrorDuring("Inserting info".to_owned(), Box::new(t)))
+        }
+
         let residence = ResidenceInfo {
             uuid: uuid.clone(),
             hall: student.hall.clone(),
@@ -48,7 +60,7 @@ impl StudentService {
         });
 
         let encrypted_info = EncryptedInfo {
-            uuid: uuid.clone(),
+            uuid: uuid,
             data: encrypted
         };
 
@@ -56,18 +68,6 @@ impl StudentService {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Insert Encrypted".to_owned(), Box::new(t)))
         };
-
-        let student_info = StudentInfo {
-            uuid: uuid,
-            fname: self.encryption.hash(&student.fname.to_ascii_lowercase(), ""),
-            lname: self.encryption.hash(&student.lname.to_ascii_lowercase(), ""),
-            number: student.number
-        };
-
-        match self.repo.insert_studentinfo(&student_info).await {
-            Ok(_) => {},
-            Err(t) => return Err(Error::ErrorDuring("Inserting info".to_owned(), Box::new(t)))
-        }
 
         Ok(())
     }
