@@ -33,7 +33,7 @@ impl PSQLDB {
         return db;
     }
 
-    pub async fn init_if_uninitialized(&mut self) -> Result<(), Error> {
+    pub async fn init_if_uninitialized(&self) -> Result<(), Error> {
         let result = self.client.batch_execute("
             CREATE TABLE IF NOT EXISTS EncryptedData (
                 UUID varchar(36) PRIMARY KEY,

@@ -1,4 +1,4 @@
-use tokio::sync::Mutex;
+use tokio::sync::RwLock;
 
 use crate::service;
 
@@ -7,7 +7,7 @@ pub mod admin;
 pub mod auth;
 
 pub struct Services {
-    pub student: Mutex<service::StudentService>,
-    pub admin: Mutex<service::AdminService>,
-    pub auth: Mutex<service::AuthService>
+    pub student: RwLock<service::StudentService>,
+    pub admin: RwLock<service::AdminService>,
+    pub auth: RwLock<service::AuthService>
 }

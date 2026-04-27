@@ -27,7 +27,7 @@ impl AuthService {
         }
     }
 
-    pub async fn is_authenticated(&mut self, jar: &CookieJar, permission: &Role, action: &str) -> bool {
+    pub async fn is_authenticated(&self, jar: &CookieJar, permission: &Role, action: &str) -> bool {
         let token = match jar.get("token") {
             Some(t) => t.value(),
             None => return false
@@ -52,7 +52,7 @@ impl AuthService {
         success
     }
 
-    pub async fn create_user(&mut self, user: &FullUser) -> Result<String, Error> {
+    pub async fn create_user(&self, user: &FullUser) -> Result<String, Error> {
         let new_user = FullUser {
             fname: user.fname.clone(),
             lname: user.lname.clone(),
@@ -78,7 +78,7 @@ impl AuthService {
         Ok(signup_hash)
     }
 
-    pub async fn signup(&mut self, signup_hash: &str) -> Result<String, Error> {
+    pub async fn signup(&self, signup_hash: &str) -> Result<String, Error> {
         if signup_hash == "" {
             return Err(Error::InvalidParameter("signup_hash".to_owned(), "".to_owned()));
         }
@@ -104,14 +104,14 @@ impl AuthService {
         Ok(unhashed_token)
     }
 
-    pub async fn update_user(&mut self, uuid: &str, update: &UpdateUser) -> Result<(), Error> {
+    pub async fn update_user(&self, uuid: &str, update: &UpdateUser) -> Result<(), Error> {
         match self.repo.update_user(&uuid, &update).await {
             Ok(()) => Ok(()),
             Err(t) => return Err(Error::ErrorDuring("Updating User".to_owned(), Box::new(t)))
         }
     }
 
-    pub async fn delete_user(&mut self, uuid: &str) -> Result<(), Error>{
+    pub async fn delete_user(&self, uuid: &str) -> Result<(), Error>{
         match self.repo.delete_user(uuid).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Deleting User".to_owned(), Box::new(t)))
@@ -125,14 +125,14 @@ impl AuthService {
         Ok(())
     }
 
-    pub async fn revoke_tokens(&mut self, uuid: &str) -> Result<(), Error> {
+    pub async fn revoke_tokens(&self, uuid: &str) -> Result<(), Error> {
         match self.repo.delete_tokens(uuid).await {
             Ok(_) => {Ok(())},
             Err(t) => Err(Error::ErrorDuring("Deleting Tokens".to_owned(), Box::new(t)))
         }
     }
 
-    pub async fn grant_token(&mut self, uuid: &str) -> Result<String, Error>{
+    pub async fn grant_token(&self, uuid: &str) -> Result<String, Error>{
         let token = self.encryption.random_string(32);
         let signup_hash = self.encryption.random_string(32);
 

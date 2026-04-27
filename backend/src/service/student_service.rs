@@ -23,7 +23,7 @@ impl StudentService {
         }
     }
 
-    pub async fn create_student(&mut self, student: &student_repository::FullStudent) -> Result<(), Error> {
+    pub async fn create_student(&self, student: &student_repository::FullStudent) -> Result<(), Error> {
         let uuid = Uuid::new_v4().to_string();
 
         let residence = ResidenceInfo {
@@ -69,7 +69,7 @@ impl StudentService {
         Ok(())
     }
 
-    pub async fn update_student(&mut self, uuid: &str, update: &StudentUpdate) -> Result<(), Error> {
+    pub async fn update_student(&self, uuid: &str, update: &StudentUpdate) -> Result<(), Error> {
         if update.fname.is_some() || update.lname.is_some() || update.pronouns.is_some() {
             // Update these encrypted values
             let mut current_info = match self.repo.get_encrypted(uuid).await {
@@ -124,7 +124,7 @@ impl StudentService {
         Ok(())
     }
 
-    pub async fn delete_student(&mut self, uuid: &str) -> Result<(), Error> {
+    pub async fn delete_student(&self, uuid: &str) -> Result<(), Error> {
         match self.repo.delete_encrypted(uuid).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Deleting Encrypted".to_owned(), Box::new(t)))
@@ -143,7 +143,7 @@ impl StudentService {
         Ok(())
     }
 
-    pub async fn get_student(&mut self, uuid: &str, decrypt: bool) -> Result<FullStudent, Error> {
+    pub async fn get_student(&self, uuid: &str, decrypt: bool) -> Result<FullStudent, Error> {
         let mut student = FullStudent::default();
 
         if decrypt {

@@ -1,5 +1,5 @@
-use std::sync::{Arc};
-use tokio::sync::Mutex;
+use std::sync::Arc;
+use tokio::sync::RwLock;
 use axum::{Router, routing::{get, post}};
 use uuid::Uuid;
 
@@ -38,15 +38,15 @@ async fn main() {
 
     let state = Arc::new(
         endpoints::Services { 
-            student: Mutex::new(service::StudentService::new(
+            student: RwLock::new(service::StudentService::new(
                 Box::new(database::PSQLDB::new(&dbinfo).await),
                 Box::new(encryption::PlaintextEncryption::new())
             )),
-            admin: Mutex::new(service::AdminService::new(
+            admin: RwLock::new(service::AdminService::new(
                 Box::new(database::PSQLDB::new(&dbinfo).await),
                 Box::new(encryption::PlaintextEncryption::new())
             )),
-            auth: Mutex::new(service::AuthService::new(
+            auth: RwLock::new(service::AuthService::new(
                 Box::new(database::PSQLDB::new(&dbinfo).await),
                 Box::new(encryption::PlaintextEncryption::new())
             )),
@@ -57,7 +57,7 @@ async fn main() {
         Some("bootstrap-owner") => {
             let fname = std::env::args().nth(2).expect("usage: bootstrap-owner <fname> <lname>");
             let lname = std::env::args().nth(3).expect("usage: bootstrap-owner <fname> <lname>");
-            let mut service = state.auth.lock().await;
+            let service = state.auth.write().await;
             let signup_hash = service.create_user(&FullUser {
                 uuid: Uuid::new_v4().to_string(),
                 fname: fname, 

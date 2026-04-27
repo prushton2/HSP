@@ -20,7 +20,7 @@ pub struct CreateUser {
 }
 
 pub async fn create_user(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<CreateUser>) -> (StatusCode, String) {
-    let mut service = state.auth.lock().await;
+    let service = state.auth.read().await;
     if !service.is_authenticated(&jar, &Role::Owner, "create_user").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
 
     let new_user = FullUser {
@@ -43,7 +43,7 @@ pub struct LoginRequest {
     pub signup_hash: String
 }
 pub async fn signup(State(state): State<Arc<super::Services>>, Json(body): Json<LoginRequest>) -> impl IntoResponse {
-    let mut service = state.auth.lock().await;
+    let service = state.auth.read().await;
 
     let token = match service.signup(&body.signup_hash).await {
         Ok(t) => t,
@@ -66,7 +66,7 @@ pub struct HttpUpdateUser {
     pub str_field: String,
 }
 pub async fn update_user(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpUpdateUser>) -> (StatusCode, String) {
-    let mut service = state.auth.lock().await;
+    let service = state.auth.read().await;
     if !service.is_authenticated(&jar, &Role::Owner, "update_user").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
 
     let mut update = UpdateUser {
@@ -94,7 +94,7 @@ pub struct HttpDeleteUser {
     uuid: String
 }
 pub async fn delete_user(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpDeleteUser>) -> (StatusCode, String) {
-    let mut service = state.auth.lock().await;
+    let service = state.auth.read().await;
     if !service.is_authenticated(&jar, &Role::Owner, "delete_user").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
 
     match service.delete_user(body.uuid.as_str()).await {
@@ -108,7 +108,7 @@ pub struct HttpRevokeTokens {
     uuid: String
 }
 pub async fn revoke_tokens(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpRevokeTokens>) -> (StatusCode, String) {
-    let mut service = state.auth.lock().await;
+    let service = state.auth.read().await;
     if !service.is_authenticated(&jar, &Role::Owner, "revoke_tokens").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
 
     match service.revoke_tokens(body.uuid.as_str()).await {
@@ -122,7 +122,7 @@ pub struct HttpGrantToken {
     uuid: String
 }
 pub async fn grant_token(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpGrantToken>) -> (StatusCode, String) {
-    let mut service = state.auth.lock().await;
+    let service = state.auth.read().await;
     if !service.is_authenticated(&jar, &Role::Owner, "grant_token").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
 
     match service.grant_token(body.uuid.as_str()).await {

@@ -7,12 +7,12 @@ use crate::types::Role;
 
 
 pub async fn get_all_tables(State(state): State<Arc<super::Services>>, jar: CookieJar) -> (StatusCode, String) {
-    let mut auth = state.auth.lock().await;
+    let auth = state.auth.read().await;
     if !auth.is_authenticated(&jar, &Role::Admin, "get_all_tables").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
     drop(auth);
 
 
-    let mut service = state.admin.lock().await;
+    let service = state.admin.read().await;
 
     let tables = match service.get_all_tables().await {
         Ok(t) => t,

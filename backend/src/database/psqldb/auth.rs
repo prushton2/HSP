@@ -8,7 +8,7 @@ use crate::repository::auth_repository::{FullUser, TokenInfo, UpdateUser};
 
 #[async_trait]
 impl AuthRepository for super::PSQLDB {
-    async fn insert_user(&mut self, user: &FullUser) -> Result<(), Error> {
+    async fn insert_user(&self, user: &FullUser) -> Result<(), Error> {
         let role = String::from(&user.role);
         match self.client.execute(
             "INSERT INTO Users (UUID, first_name, last_name, role) VALUES ($1, $2, $3, $4)",
@@ -19,7 +19,7 @@ impl AuthRepository for super::PSQLDB {
         }
     }
 
-    async fn update_user(&mut self, uuid: &str, update: &UpdateUser) -> Result<(), Error> {
+    async fn update_user(&self, uuid: &str, update: &UpdateUser) -> Result<(), Error> {
         if let Some(ref fname) = update.fname {
             match self.client.execute(
                 "UPDATE Users SET first_name = $1 WHERE UUID = $2",
@@ -54,7 +54,7 @@ impl AuthRepository for super::PSQLDB {
         Ok(())
     }
 
-    async fn delete_user(&mut self, uuid: &str) -> Result<(), Error> {
+    async fn delete_user(&self, uuid: &str) -> Result<(), Error> {
         match self.client.execute(
             "DELETE FROM Users WHERE UUID = $1",
             &[&uuid]
@@ -64,7 +64,7 @@ impl AuthRepository for super::PSQLDB {
         }
     }
 
-    async fn get_user(&mut self, uuid: &str) -> Result<(FullUser, Vec<TokenInfo>), Error> {
+    async fn get_user(&self, uuid: &str) -> Result<(FullUser, Vec<TokenInfo>), Error> {
         let user = match self.client.query_opt(
             "SELECT * FROM Users WHERE UUID = $1",
             &[&uuid]
@@ -96,7 +96,7 @@ impl AuthRepository for super::PSQLDB {
         Ok((user, users_tokens))
     }
 
-    async fn getall_user(&mut self) -> Result<Vec<FullUser>, Error> {
+    async fn getall_user(&self) -> Result<Vec<FullUser>, Error> {
         match self.client.query("SELECT * FROM Users", &[]).await {
             Ok(rows) => Ok(rows.iter().map(|row| FullUser {
                 uuid:  row.get::<&str, &str>("UUID").to_string(),
@@ -108,7 +108,7 @@ impl AuthRepository for super::PSQLDB {
         }
     }
 
-    async fn insert_token(&mut self, uuid: &str, plain_token: &str, signup_hash: &str, expiry: i64) -> Result<(), Error> {
+    async fn insert_token(&self, uuid: &str, plain_token: &str, signup_hash: &str, expiry: i64) -> Result<(), Error> {
         let datetime_expiry = DateTime::from_timestamp(Utc::now().timestamp() + expiry, 0).unwrap().timestamp();
 
         match self.client.execute(
@@ -120,7 +120,7 @@ impl AuthRepository for super::PSQLDB {
         }
     }
 
-    async fn update_token(&mut self, uuid: &str, old_token: &str, new_token: Option<&str>, new_signup_hash: Option<&str>, new_expiry: Option<i64>) -> Result<(), Error> {
+    async fn update_token(&self, uuid: &str, old_token: &str, new_token: Option<&str>, new_signup_hash: Option<&str>, new_expiry: Option<i64>) -> Result<(), Error> {
         if let Some(signup_hash) = new_signup_hash {
             match self.client.execute(
                 "UPDATE Tokens SET signup_hash = $1 WHERE UUID = $2 and token = $3",
@@ -157,7 +157,7 @@ impl AuthRepository for super::PSQLDB {
         Ok(())
     }
 
-    async fn delete_token(&mut self, uuid: &str, hashed_token: &str) -> Result<(), Error> {
+    async fn delete_token(&self, uuid: &str, hashed_token: &str) -> Result<(), Error> {
         match self.client.execute(
             "DELETE FROM Tokens WHERE UUID = $1 AND token = $2",
             &[&uuid, &hashed_token]
@@ -167,7 +167,7 @@ impl AuthRepository for super::PSQLDB {
         }
     }
 
-    async fn delete_tokens(&mut self, uuid: &str) -> Result<(), Error> {
+    async fn delete_tokens(&self, uuid: &str) -> Result<(), Error> {
         match self.client.execute(
             "DELETE FROM Tokens WHERE UUID = $1",
             &[&uuid]
@@ -177,7 +177,7 @@ impl AuthRepository for super::PSQLDB {
         }
     }
 
-    async fn get_token_hash(&mut self, signup_hash: &str) -> Result<TokenInfo, Error> {
+    async fn get_token_hash(&self, signup_hash: &str) -> Result<TokenInfo, Error> {
         match self.client.query_one(
             "SELECT * FROM tokens WHERE signup_hash = $1",
             &[&signup_hash]).await
@@ -192,7 +192,7 @@ impl AuthRepository for super::PSQLDB {
         }
     }
 
-    async fn get_token(&mut self, token: &str) -> Result<TokenInfo, Error> {
+    async fn get_token(&self, token: &str) -> Result<TokenInfo, Error> {
         match self.client.query_one(
             "SELECT * FROM tokens WHERE token = $1",
             &[&token]).await
@@ -208,7 +208,7 @@ impl AuthRepository for super::PSQLDB {
     }
 
 
-    async fn getall_token(&mut self) -> Result<Vec<TokenInfo>, Error> {
+    async fn getall_token(&self) -> Result<Vec<TokenInfo>, Error> {
         match self.client.query("SELECT * FROM Tokens", &[]).await {
             Ok(rows) => Ok(rows.iter().map(|row| TokenInfo {
                 uuid:         row.get::<&str, &str>("UUID").to_string(),

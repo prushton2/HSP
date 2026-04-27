@@ -8,20 +8,20 @@ use crate::types::Role;
 #[allow(dead_code)]
 #[async_trait]
 pub trait AuthRepository: Send + Sync {
-    async fn insert_user(&mut self, user: &FullUser) -> Result<(), Error>;
-    async fn update_user(&mut self, uuid: &str, update: &UpdateUser) -> Result<(), Error>;
-    async fn delete_user(&mut self, uuid: &str) -> Result<(), Error>;
-    async fn get_user   (&mut self, uuid: &str) -> Result<(FullUser, Vec<TokenInfo>), Error>;
-    async fn getall_user(&mut self) -> Result<Vec<FullUser>, Error>;
+    async fn insert_user(&self, user: &FullUser) -> Result<(), Error>;
+    async fn update_user(&self, uuid: &str, update: &UpdateUser) -> Result<(), Error>;
+    async fn delete_user(&self, uuid: &str) -> Result<(), Error>;
+    async fn get_user   (&self, uuid: &str) -> Result<(FullUser, Vec<TokenInfo>), Error>;
+    async fn getall_user(&self) -> Result<Vec<FullUser>, Error>;
 
-    async fn insert_token(&mut self, uuid: &str, plain_token: &str, signup_hash: &str, expiry: i64) -> Result<(), Error>;
-    async fn update_token(&mut self, uuid: &str, old_token: &str, new_token: Option<&str>, new_signup_hash: Option<&str>, new_expiry: Option<i64>) -> Result<(), Error>;
-    async fn delete_token(&mut self, uuid: &str, token: &str) -> Result<(), Error>;
-    async fn get_token   (&mut self, token: &str) -> Result<TokenInfo, Error>; 
-    async fn getall_token(&mut self) -> Result<Vec<TokenInfo>, Error>;
+    async fn insert_token(&self, uuid: &str, plain_token: &str, signup_hash: &str, expiry: i64) -> Result<(), Error>;
+    async fn update_token(&self, uuid: &str, old_token: &str, new_token: Option<&str>, new_signup_hash: Option<&str>, new_expiry: Option<i64>) -> Result<(), Error>;
+    async fn delete_token(&self, uuid: &str, token: &str) -> Result<(), Error>;
+    async fn get_token   (&self, token: &str) -> Result<TokenInfo, Error>; 
+    async fn getall_token(&self) -> Result<Vec<TokenInfo>, Error>;
     
-    async fn get_token_hash(&mut self, signup_hash: &str) -> Result<TokenInfo, Error>;
-    async fn delete_tokens(&mut self, uuid: &str) -> Result<(), Error>;
+    async fn get_token_hash(&self, signup_hash: &str) -> Result<TokenInfo, Error>;
+    async fn delete_tokens (&self, uuid: &str) -> Result<(), Error>;
 }
 
 // Heres the signup flow:

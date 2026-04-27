@@ -8,7 +8,7 @@ use tokio_postgres::types::ToSql;
 
 #[async_trait]
 impl StudentRepository for super::PSQLDB {
-    async fn insert_studentinfo(&mut self, student: &StudentInfo ) -> Result<(), Error> {
+    async fn insert_studentinfo(&self, student: &StudentInfo ) -> Result<(), Error> {
         return match self.client.execute("insert into studentinfo (UUID, number, first_name_hash, last_name_hash) values ($1, $2, $3, $4)", 
             &[&student.uuid, &student.number, &student.fname, &student.lname]).await {
             Ok(_) => Ok(()),
@@ -16,7 +16,7 @@ impl StudentRepository for super::PSQLDB {
         };
     }
 
-    async fn update_studentinfo(&mut self, update: &UpdateStudentInfo) -> Result<(), Error> {
+    async fn update_studentinfo(&self, update: &UpdateStudentInfo) -> Result<(), Error> {
         // Build a dynamic UPDATE that only touches fields that are Some.
         let mut set_clauses: Vec<String> = Vec::new();
         let mut params: Vec<Box<dyn ToSql + Sync + Send>> = Vec::new();
@@ -53,14 +53,14 @@ impl StudentRepository for super::PSQLDB {
         };
     }
 
-    async fn delete_studentinfo(&mut self, uuid: &str) -> Result<(), Error> {
+    async fn delete_studentinfo(&self, uuid: &str) -> Result<(), Error> {
         return match self.client.execute("delete from studentinfo where UUID = $1", &[&uuid]).await {
             Ok(_) => Ok(()),
             Err(t) => Err(Error::ErrorDuring("Deleting info".to_owned(), Box::new(Error::PostgresError(t))))
         };
     }
 
-    async fn get_studentinfo(&mut self, uuid: &str) -> Result<StudentInfo, Error> {
+    async fn get_studentinfo(&self, uuid: &str) -> Result<StudentInfo, Error> {
         let row = match self.client.query_one("select number, first_name_hash, last_name_hash from studentinfo where UUID = $1", &[&uuid]).await {
             Ok(t) => t,
             Err(t) => return Err(Error::ErrorDuring("Getting info".to_owned(), Box::new(Error::PostgresError(t))))
@@ -74,7 +74,7 @@ impl StudentRepository for super::PSQLDB {
         })
     }
 
-    async fn search_studentinfo(&mut self, params: &SearchStudentInfo) -> Result<Vec<StudentInfo>, Error> {
+    async fn search_studentinfo(&self, params: &SearchStudentInfo) -> Result<Vec<StudentInfo>, Error> {
         // Dynamically build query
         let mut clauses: Vec<String> = Vec::new();
         let mut query_params: Vec<Box<dyn ToSql + Sync + Send>> = Vec::new();
@@ -119,14 +119,14 @@ impl StudentRepository for super::PSQLDB {
         Ok(vec)
     }
 
-    async fn insert_encrypted(&mut self, data: &EncryptedInfo) -> Result<(), Error> {
+    async fn insert_encrypted(&self, data: &EncryptedInfo) -> Result<(), Error> {
         return match self.client.execute("insert into encrypteddata (UUID, encrypted) values ($1, $2)", &[&data.uuid, &data.data]).await {
             Ok(_) => Ok(()),
             Err(t) => Err(Error::ErrorDuring("Inserting encrypted".to_owned(), Box::new(Error::PostgresError(t))))
         };
     }
 
-    async fn update_encrypted(&mut self, update: &UpdateEncryptedInfo) -> Result<(), Error> {
+    async fn update_encrypted(&self, update: &UpdateEncryptedInfo) -> Result<(), Error> {
         if update.data.is_none() {
             return Ok(())
         }
@@ -136,14 +136,14 @@ impl StudentRepository for super::PSQLDB {
         };
     }
 
-    async fn delete_encrypted(&mut self, uuid: &str) -> Result<(), Error> {
+    async fn delete_encrypted(&self, uuid: &str) -> Result<(), Error> {
         return match self.client.execute("delete from encrypteddata where UUID = $1", &[&uuid]).await {
             Ok(_) => Ok(()),
             Err(t) => Err(Error::ErrorDuring("Deleting encrypted".to_owned(), Box::new(Error::PostgresError(t))))
         };
     }
 
-    async fn get_encrypted(&mut self, uuid: &str) -> Result<EncryptedInfo, Error> {
+    async fn get_encrypted(&self, uuid: &str) -> Result<EncryptedInfo, Error> {
         let row = match self.client.query_one("select encrypted from encrypteddata where UUID = $1", &[&uuid]).await {
             Ok(t) => t,
             Err(t) => return Err(Error::ErrorDuring("Getting encrypted".to_owned(), Box::new(Error::PostgresError(t))))
@@ -155,7 +155,7 @@ impl StudentRepository for super::PSQLDB {
         })
     }
 
-    async fn getall_encrypted(&mut self) -> Result<Vec<EncryptedInfo>, Error> {
+    async fn getall_encrypted(&self) -> Result<Vec<EncryptedInfo>, Error> {
         let mut vec: Vec<EncryptedInfo> = vec![];
 
         let rows = match self.client.query("select * from encrypteddata", &[]).await {
@@ -174,7 +174,7 @@ impl StudentRepository for super::PSQLDB {
     }
 
 
-    async fn insert_residence(&mut self, user: &ResidenceInfo) -> Result<(), Error> {
+    async fn insert_residence(&self, user: &ResidenceInfo) -> Result<(), Error> {
         return match self.client.execute("insert into residencies (UUID, hall, room, wing) values ($1, $2, $3, $4)",
             &[&user.uuid, &user.hall, &user.room, &user.wing]).await {
             Ok(_) => Ok(()),
@@ -182,7 +182,7 @@ impl StudentRepository for super::PSQLDB {
         };
     }
 
-    async fn update_residence(&mut self, update: &UpdateResidenceInfo) -> Result<(), Error> {
+    async fn update_residence(&self, update: &UpdateResidenceInfo) -> Result<(), Error> {
         let mut set_clauses: Vec<String> = Vec::new();
         let mut params: Vec<Box<dyn ToSql + Sync + Send>> = Vec::new();
         let mut idx = 1;
@@ -218,14 +218,14 @@ impl StudentRepository for super::PSQLDB {
         };
     }
 
-    async fn delete_residence(&mut self, uuid: &str) -> Result<(), Error> {
+    async fn delete_residence(&self, uuid: &str) -> Result<(), Error> {
         return match self.client.execute("delete from residencies where UUID = $1", &[&uuid]).await {
             Ok(_) => Ok(()),
             Err(t) => Err(Error::ErrorDuring("Deleting residence".to_owned(), Box::new(Error::PostgresError(t))))
         };
     }
 
-    async fn get_residence(&mut self, uuid: &str) -> Result<ResidenceInfo, Error> {
+    async fn get_residence(&self, uuid: &str) -> Result<ResidenceInfo, Error> {
         let row = match self.client.query_one("select * from residencies where UUID = $1", &[&uuid]).await {
             Ok(t) => t,
             Err(t) => return Err(Error::ErrorDuring("Getting residence".to_owned(), Box::new(Error::PostgresError(t))))
@@ -239,7 +239,7 @@ impl StudentRepository for super::PSQLDB {
         })
     }
 
-    async fn search_residence(&mut self, params: &SearchResidenceInfo) -> Result<Vec<ResidenceInfo>, Error> {
+    async fn search_residence(&self, params: &SearchResidenceInfo) -> Result<Vec<ResidenceInfo>, Error> {
         // Dynamically build query
         let mut clauses: Vec<String> = Vec::new();
         let mut query_params: Vec<Box<dyn ToSql + Sync + Send>> = Vec::new();

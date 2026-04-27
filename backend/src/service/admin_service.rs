@@ -23,7 +23,7 @@ impl AdminService {
         }
     }
 
-    pub async fn get_all_tables(&mut self) -> Result<AllTables, Error> {
+    pub async fn get_all_tables(&self) -> Result<AllTables, Error> {
 
         Ok(AllTables {
             residence: self.repo.search_residence(&SearchResidenceInfo{uuid: String::from(""), hall: None, wing: None, room: None}).await?,
