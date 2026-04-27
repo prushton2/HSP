@@ -77,6 +77,7 @@ async fn main() {
         .route("/student/edit",  post(endpoints::student::edit_student))
         .route("/student/delete",post(endpoints::student::delete_student))
         .route("/student/get",   post(endpoints::student::get_student))
+        .route("/student/search",post(endpoints::student::search_students))
 
         .route("/auth/create", post(endpoints::auth::create_user))
         .route("/auth/signup", post(endpoints::auth::signup))

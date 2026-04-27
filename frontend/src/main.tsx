@@ -6,6 +6,7 @@ import App from './App.tsx'
 import Admin from './pages/admin/Admin.tsx';
 import Signup from './pages/signup/signup.tsx';
 import Nursing from './pages/nursing/nursing.tsx';
+import Search from './pages/search/search.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/admin" element={<Admin />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/nursing" element={<Nursing />} />
+        <Route path="/search" element={<Search />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

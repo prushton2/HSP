@@ -4,8 +4,7 @@ use axum::{Json, extract::State, http::StatusCode};
 use axum_extra::extract::CookieJar;
 use serde::Deserialize;
 
-use crate::repository::student_repository;
-use crate::service::student_service;
+use crate::service::student_service::{self, FullStudent, SearchStudent};
 use crate::types::Role;
 
 
@@ -26,14 +25,14 @@ pub async fn new_sudent(State(state): State<Arc<super::Services>>, jar: CookieJa
 
     let service = state.student.read().await;
     
-    let student = student_repository::FullStudent {
+    let student = FullStudent {
         fname:    body.fname,
         lname:    body.lname,
         pronouns: body.pronouns,
         number:   body.number,
-        hall:     body.hall,
+        hall:     body.hall.to_ascii_lowercase(),
         room:     body.room,
-        wing:     body.wing,
+        wing:     body.wing.to_ascii_lowercase(),
     };
 
     let response = match service.create_student(&student).await {
@@ -74,8 +73,8 @@ pub async fn edit_student(State(state): State<Arc<super::Services>>, jar: Cookie
         "last name"  => {update.lname    = Some(body.str_field)},
         "pronouns"   => {update.pronouns = Some(body.str_field)},
         "number"     => {update.number   = Some(body.int_field)},
-        "hall"       => {update.hall     = Some(body.str_field)},
-        "wing"       => {update.wing     = Some(body.str_field)},
+        "hall"       => {update.hall     = Some(body.str_field.to_ascii_lowercase())},
+        "wing"       => {update.wing     = Some(body.str_field.to_ascii_lowercase())},
         "room"       => {update.room     = Some(body.int_field)},
         _            => { return (StatusCode::BAD_REQUEST, "Invalid Field".to_string())}
     }
@@ -123,4 +122,17 @@ pub async fn delete_student(State(state): State<Arc<super::Services>>, jar: Cook
     };
 
     return response;
+}
+
+pub async fn search_students(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<SearchStudent>) -> (StatusCode, String) {
+    let auth = state.auth.read().await;
+    if !auth.is_authenticated(&jar, &Role::Staff, "search_students").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    drop(auth);
+
+    let service = state.student.read().await;
+    
+    return match service.search_students(&body).await {
+        Ok(t) => (StatusCode::OK, serde_json::to_string(&t).unwrap()),
+        Err(t) => (StatusCode::BAD_REQUEST, String::from(t))
+    };
 }

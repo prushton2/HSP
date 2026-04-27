@@ -7,6 +7,16 @@ export namespace ApiResponseObjects {
         users: Tables.Users[],
         tokens: Tables.Tokens[]
     }
+    
+    export interface FullStudent {
+        fname: String,
+        lname: String,
+        pronouns: String,
+        number: number,
+        hall: String,
+        room: number,
+        wing: String,
+    }
 }
 
 export namespace ApiRequestObjects {
@@ -31,6 +41,14 @@ export namespace ApiRequestObjects {
         uuid: String,
         field: String,
         str_field: String,
+    }
+
+    export interface SearchStudent {
+        fname:  string | null,
+        lname:  string | null,
+        number: number | null,
+        hall:   string | null,
+        room:   number | null,
     }
 }
 

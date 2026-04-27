@@ -26,10 +26,10 @@ pub trait StudentRepository: Send + Sync {
 }
 #[derive(Serialize, Deserialize)]
 pub struct StudentInfo {
-    pub uuid:   String,
-    pub number: i32,
-    pub fname:  String,
-    pub lname:  String,
+    pub uuid:     String,
+    pub number:   i32,
+    pub fname:    String,
+    pub lname:    String,
 }
 
 pub struct UpdateStudentInfo {
@@ -69,27 +69,3 @@ pub struct UpdateResidenceInfo {
 
 pub type SearchResidenceInfo = UpdateResidenceInfo;
 
-#[derive(Serialize, Deserialize)]
-pub struct FullStudent {
-    pub fname: String,
-    pub lname: String,
-    pub pronouns: String,
-    pub number: i32,
-    pub hall: String,
-    pub room: i32,
-    pub wing: String,
-}
-
-impl Default for FullStudent {
-    fn default() -> Self {
-        Self {
-            fname:    String::new(),
-            lname:    String::new(),
-            pronouns: String::new(),
-            hall:     String::new(),
-            wing:     String::new(),
-            number:   0,
-            room:     0,
-        }
-    }
-}

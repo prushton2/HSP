@@ -1,9 +1,12 @@
 // The service handles the actual logic to doing stuff to the database.
 
+use std::collections::HashSet;
+
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::repository::StudentRepository;
-use crate::repository::student_repository::{self, EncryptedInfo, FullStudent, ResidenceInfo, StudentInfo, UpdateEncryptedInfo, UpdateResidenceInfo, UpdateStudentInfo};
+use crate::repository::student_repository::{EncryptedInfo, ResidenceInfo, SearchResidenceInfo, SearchStudentInfo, StudentInfo, UpdateEncryptedInfo, UpdateResidenceInfo, UpdateStudentInfo};
 
 use crate::encryption::{Encryption, EncryptedContents};
 
@@ -23,7 +26,7 @@ impl StudentService {
         }
     }
 
-    pub async fn create_student(&self, student: &student_repository::FullStudent) -> Result<(), Error> {
+    pub async fn create_student(&self, student: &FullStudent) -> Result<(), Error> {
         let uuid = Uuid::new_v4().to_string();
 
         let residence = ResidenceInfo {
@@ -56,8 +59,8 @@ impl StudentService {
 
         let student_info = StudentInfo {
             uuid: uuid,
-            fname: self.encryption.hash(&student.fname, ""),
-            lname: self.encryption.hash(&student.lname, ""),
+            fname: self.encryption.hash(&student.fname.to_ascii_lowercase(), ""),
+            lname: self.encryption.hash(&student.lname.to_ascii_lowercase(), ""),
             number: student.number
         };
 
@@ -98,8 +101,8 @@ impl StudentService {
             let new_info = UpdateStudentInfo {
                 uuid: uuid.to_string(),
                 number: if update.number.is_some() { update.number } else { None },
-                fname: if update.fname.is_some() { update.fname.clone() } else { None },
-                lname: if update.lname.is_some() { update.lname.clone() } else { None }
+                fname: if update.fname.is_some() { Some(update.fname.as_ref().unwrap().to_ascii_lowercase()) } else { None },
+                lname: if update.lname.is_some() { Some(update.lname.as_ref().unwrap().to_ascii_lowercase()) } else { None }
             };
 
             match self.repo.update_studentinfo(&new_info).await {
@@ -175,6 +178,75 @@ impl StudentService {
 
         Ok(student)
     }
+
+    pub async fn search_students(&self, params: &SearchStudent) -> Result<Vec<FullStudent>, Error> {
+        let mut uuids: HashSet<String> = [].into();
+
+        let student_info_params = SearchStudentInfo {
+            uuid: String::from(""),
+            fname: params.fname.clone(),
+            lname: params.lname.clone(),
+            number: params.number,
+        };
+
+        let residence_info_params = SearchResidenceInfo {
+            uuid: String::from(""),
+            hall: params.hall.clone(),
+            room: params.room,
+            wing: None
+        };
+
+        if student_info_params.fname.is_some() || student_info_params.lname.is_some() || student_info_params.number.is_some() {
+            match self.repo.search_studentinfo(&student_info_params).await {
+                Ok(t) => t,
+                Err(t) => return Err(Error::ErrorDuring("Searching student info".to_owned(), Box::new(t)))
+            }.iter().for_each(|f| {uuids.insert(f.uuid.clone());});
+        }
+
+        if residence_info_params.hall.is_some() || residence_info_params.room.is_some() {
+            match self.repo.search_residence(&residence_info_params).await {
+                Ok(t) => t,
+                Err(t) => return Err(Error::ErrorDuring("Searching residence info".to_owned(), Box::new(t)))
+            }.iter().for_each(|f| {uuids.insert(f.uuid.clone());});
+        }
+
+        let mut student_info: Vec<FullStudent> = vec![];
+
+        for uuid in uuids {
+            let mut student = FullStudent::default();
+
+            let info = match self.repo.get_encrypted(&uuid).await {
+                Ok(t) => t,
+                Err(t) => return Err(Error::ErrorDuring("Searching residence info".to_owned(), Box::new(t)))
+            };
+
+            let decrypted = self.encryption.decrypt(&info.data);
+
+            student.fname = decrypted.first_name;
+            student.lname = decrypted.last_name;
+            student.pronouns = decrypted.pronouns;
+
+            let info = match self.repo.get_studentinfo(&uuid).await {
+                Ok(t) => t,
+                Err(t) => return Err(Error::ErrorDuring("Searching residence info".to_owned(), Box::new(t)))
+            };
+
+            student.number = info.number;
+
+            let info = match self.repo.get_residence(&uuid).await {
+                Ok(t) => t,
+                Err(t) => return Err(Error::ErrorDuring("Searching residence info".to_owned(), Box::new(t)))
+            };
+
+            student.hall = info.hall;
+            student.wing = info.wing;
+            student.room = info.room;
+
+            student_info.push(student);
+        }
+
+        Ok(student_info)
+    }
 }
 
 pub struct StudentUpdate {
@@ -185,4 +257,38 @@ pub struct StudentUpdate {
     pub hall:     Option<String>,
     pub room:     Option<i32>,
     pub wing:     Option<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SearchStudent {
+    pub fname:    Option<String>,
+    pub lname:    Option<String>,
+    pub number:   Option<i32>,
+    pub hall:     Option<String>,
+    pub room:     Option<i32>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct FullStudent {
+    pub fname: String,
+    pub lname: String,
+    pub pronouns: String,
+    pub number: i32,
+    pub hall: String,
+    pub room: i32,
+    pub wing: String,
+}
+
+impl Default for FullStudent {
+    fn default() -> Self {
+        Self {
+            fname:    String::new(),
+            lname:    String::new(),
+            pronouns: String::new(),
+            hall:     String::new(),
+            wing:     String::new(),
+            number:   0,
+            room:     0,
+        }
+    }
 }

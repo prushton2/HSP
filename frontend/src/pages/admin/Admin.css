@@ -60,14 +60,7 @@ thead {
 
 .context_menu button {
   width: 100%;
-  border: none;
-  padding: 10px;
   margin-top: 10px;
-}
-
-.context_menu input {
-  border: none;
-  padding: 5px;
 }
 
 .context_menu select {

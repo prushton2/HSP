@@ -1,0 +1,33 @@
+.title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.searchtable {
+  margin-top: auto;
+}
+
+.searchtable td {
+  /* border: 1px solid blue; */
+}
+
+.searchtable .lefttd {
+  /* border: 1px solid green; */
+  width: min-content;
+}
+
+.searchtable input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.searchtable button {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.searchtable select {
+  width: 100%;
+  box-sizing: border-box;
+}
