@@ -1,6 +1,6 @@
 import axios from "axios";
 import type { ApiRequestObjects, ApiResponseObjects, Tables } from "./structs";
-import { NewResult, type Result } from "../components/Result";
+import { NewResult, Result } from "../components/Result";
 
 export namespace Http {
     export namespace Admin {
@@ -16,7 +16,7 @@ export namespace Http {
                 return NewResult.from_ok(null);
             } catch (err) {
                 if(!axios.isAxiosError(err)) { return NewResult.from_err<null, string>("Non Axios Error"); }
-                return NewResult.from_err<null, string>(err.response?.data || "");
+                return NewResult.from_err<null, string>(err.response?.data);
             }
         }
         
@@ -26,7 +26,7 @@ export namespace Http {
                 return NewResult.from_ok(null);
             } catch (err) {
                 if(!axios.isAxiosError(err)) { return NewResult.from_err<null, string>("Non Axios Error"); }
-                return NewResult.from_err<null, string>(err.response?.data || "");
+                return NewResult.from_err<null, string>(err.response?.data);
             }
         }
         
@@ -36,7 +36,7 @@ export namespace Http {
                 return NewResult.from_ok<ApiResponseObjects.FullStudent, string>(response.data);
             } catch (err) {
                 if(!axios.isAxiosError(err)) { return NewResult.from_err<ApiResponseObjects.FullStudent, string>("Non Axios Error"); }
-                return NewResult.from_err<ApiResponseObjects.FullStudent, string>(err.response?.data || "");
+                return NewResult.from_err<ApiResponseObjects.FullStudent, string>(err.response?.data);
             }
         }
         
@@ -46,7 +46,7 @@ export namespace Http {
                 return NewResult.from_ok<null, string>(null);
             } catch (err) {
                 if(!axios.isAxiosError(err)) { return NewResult.from_err<null, string>("Non Axios Error"); }
-                return NewResult.from_err<null, string>(err.response?.data || "");
+                return NewResult.from_err<null, string>(err.response?.data);
             }
         }
 
@@ -57,31 +57,58 @@ export namespace Http {
     }
 
     export namespace User {
-        export async function Create(user: Tables.Users): Promise<{token: string}> {
-            const response = await axios.post("/api/auth/create", {device: "", ...user});
-            return response.data as {token: string}
+        export async function Create(user: Tables.Users): Promise<Result<{token: string}, string>> {
+            try {
+                const response = await axios.post("/api/auth/create", {device: "", ...user});
+                return NewResult.from_ok<{token: string}, string>(response.data)
+            } catch (err) {
+                if(!axios.isAxiosError(err)) { return NewResult.from_err<{token: string}, string>("Non Axios Error"); }
+                return NewResult.from_err<{token: string}, string>(err.response?.data)
+            }
         }
         
-        export async function Update(user: ApiRequestObjects.EditUser) {
-            await axios.post("/api/auth/update", user);
+        export async function Update(user: ApiRequestObjects.EditUser): Promise<Result<null, string>> {
+            try {
+                await axios.post("/api/auth/update", user);
+                return NewResult.from_ok<null, string>(null)
+            } catch (err) {
+                if(!axios.isAxiosError(err)) { return NewResult.from_err<null, string>("Non Axios Error"); }
+                return NewResult.from_err<null, string>(err.response?.data);
+            }
         }
         
         export async function Signup(signup_hash: string) {
             await axios.post("/api/auth/signup", {signup_hash});
         }
         
-        export async function Delete(uuid: string) {
-            await axios.post("/api/auth/delete", {"uuid": uuid});
+        export async function Delete(uuid: string): Promise<Result<null, string>> {
+            try {
+                await axios.post("/api/auth/delete", {"uuid": uuid});
+                return NewResult.from_ok<null, string>(null)
+            } catch (err) {
+                if(!axios.isAxiosError(err)) { return NewResult.from_err<null, string>("Non Axios Error"); }
+                return NewResult.from_err<null, string>(err.response?.data)
+            }
         }
         export namespace Token {
-            export async function Grant(uuid: string): Promise<{token: string}> {
-                const response = await axios.post("/api/auth/grant", {uuid: uuid});
-                return response.data as {token: string}
+            export async function Grant(uuid: string): Promise<Result<{token: string}, string>> {
+                try {
+                    const response = await axios.post("/api/auth/grant", {uuid: uuid});
+                    return NewResult.from_ok<{token: string}, string>(response.data)
+                } catch (err) {
+                    if(!axios.isAxiosError(err)) { return NewResult.from_err<{token: string}, string>("Non Axios Error"); }
+                    return NewResult.from_ok<{token: string}, string>(err.response?.data);
+                }
             }
             
-            export async function Revoke(uuid: string) {
-                const response = await axios.post("/api/auth/revoke", {uuid: uuid});
-                console.log(response);
+            export async function Revoke(uuid: string): Promise<Result<null, string>> {
+                try {
+                    await axios.post("/api/auth/revoke", {uuid: uuid});
+                    return NewResult.from_ok<null, string>(null)
+                } catch (err) {
+                    if(!axios.isAxiosError(err)) { return NewResult.from_err<null, string>("Non Axios Error"); }
+                    return NewResult.from_err<null, string>(err.response?.data)
+                }
             }
         }
     }

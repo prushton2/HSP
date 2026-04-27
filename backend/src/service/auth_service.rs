@@ -1,6 +1,7 @@
 // The service handles the actual logic to doing stuff to the database.
 
 use chrono::Utc;
+use tokio::sync::Mutex;
 use uuid::Uuid;
 use axum_extra::extract::CookieJar;
 
@@ -16,14 +17,16 @@ use crate::types::Role;
 // #[derive(Clone)]
 pub struct AuthService {
     repo: Box<dyn Repository>,
-    encryption: Box<dyn Encryption>
+    encryption: Box<dyn Encryption>,
+    signup_mutex: Mutex<bool> // load bearing drywall that determines if someone is signing up (one signup at a time)
 }
 
 impl AuthService {
     pub fn new(repo: Box<dyn Repository>, encryption: Box<dyn Encryption>) -> Self {
         Self {
             repo: repo,
-            encryption: encryption
+            encryption: encryption,
+            signup_mutex: Mutex::new(false),
         }
     }
 
@@ -79,13 +82,15 @@ impl AuthService {
     }
 
     pub async fn signup(&self, signup_hash: &str) -> Result<String, Error> {
+        let _lock = self.signup_mutex.lock().await;
+
         if signup_hash == "" {
             return Err(Error::InvalidParameter("signup_hash".to_owned(), "".to_owned()));
         }
 
         let token = match self.repo.get_token_hash(signup_hash).await {
             Ok(t) => t,
-            Err(t) => return Err(Error::ErrorDuring("Fetching token for singup".to_owned(), Box::new(t)))
+            Err(t) => return Err(Error::ErrorDuring("Fetching token for signup".to_owned(), Box::new(t)))
         };
 
         if token.expiry < Utc::now().timestamp() {
