@@ -29,7 +29,7 @@ async fn main() {
     };
 
     {
-        let mut db = database::PSQLDB::new(&dbinfo).await;
+        let db = database::PSQLDB::new(&dbinfo).await;
         match db.init_if_uninitialized().await {
             Ok(_)         => println!("Database initialized"),
             Err(t) => println!("{}", String::from(t))
