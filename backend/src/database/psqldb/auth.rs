@@ -1,6 +1,7 @@
 use axum::async_trait;
 
 use chrono::{DateTime, Utc};
+use tokio_postgres::types::ToSql;
 
 use crate::database::Error;
 use crate::repository::AuthRepository;
@@ -121,40 +122,40 @@ impl AuthRepository for super::PSQLDB {
     }
 
     async fn update_token(&self, uuid: &str, old_token: &str, new_token: Option<&str>, new_signup_hash: Option<&str>, new_expiry: Option<i64>) -> Result<(), Error> {
-        if let Some(signup_hash) = new_signup_hash {
-            match self.client.execute(
-                "UPDATE Tokens SET signup_hash = $1 WHERE UUID = $2 and token = $3",
-                &[&signup_hash, &uuid, &old_token]
-            ).await {
-                Ok(_) => {},
-                Err(t) => return Err(Error::ErrorDuring("Updating token signup hash".to_owned(), Box::new(Error::PostgresError(t))))
-            }
-        }
+        let mut set_clauses: Vec<String> = Vec::new();
+        let mut params: Vec<Box<dyn ToSql + Sync + Send>> = Vec::new();
+        let mut idx = 1;
 
-        if let Some(expiry) = new_expiry {
-            let datetime_expiry = DateTime::from_timestamp(Utc::now().timestamp() + expiry, 0).unwrap().timestamp();
-
-            match self.client.execute(
-                "UPDATE Tokens SET expiry = $1 WHERE UUID = $2 and token = $3",
-                &[&datetime_expiry, &uuid, &old_token]
-            ).await {
-                Ok(_) => {},
-                Err(t) => return Err(Error::ErrorDuring("Updating token expiry".to_owned(), Box::new(Error::PostgresError(t))))
-            }
-        }
-        
-        // update the token last since its used to identify the other fields
         if let Some(token) = new_token {
-            match self.client.execute(
-                "UPDATE Tokens SET token = $1 WHERE UUID = $2 and token = $3",
-                &[&token, &uuid, &old_token]
-            ).await {
-                Ok(_) => {},
-                Err(t) => return Err(Error::ErrorDuring("Updating token".to_owned(), Box::new(Error::PostgresError(t))))
-            }
+            set_clauses.push(format!("token = ${}", idx));
+            params.push(Box::new(token));
+            idx += 1;
+        }
+        if let Some(signup_hash) = new_signup_hash {
+            set_clauses.push(format!("signup_hash = ${}", idx));
+            params.push(Box::new(signup_hash));
+            idx += 1;
+        }
+        if let Some(expiry) = new_expiry {
+            set_clauses.push(format!("expiry = ${}", idx));
+            params.push(Box::new(expiry));
+            idx += 1;
         }
 
-        Ok(())
+        if set_clauses.is_empty() {
+            return Ok(());
+        }
+
+        params.push(Box::new(uuid.to_owned()));
+        params.push(Box::new(old_token.to_owned()));
+        let query = format!("update tokens set {} where uuid = ${} and token = ${}", set_clauses.join(", "), idx, idx + 1);
+
+        let param_refs: Vec<&(dyn ToSql + Sync)> = params.iter().map(|p| p.as_ref() as &(dyn ToSql + Sync)).collect();
+
+        return match self.client.execute(&query, &param_refs[..]).await {
+            Ok(_) => Ok(()),
+            Err(t) => Err(Error::ErrorDuring("Updating token".to_owned(), Box::new(Error::PostgresError(t))))
+        };
     }
 
     async fn delete_token(&self, uuid: &str, hashed_token: &str) -> Result<(), Error> {
