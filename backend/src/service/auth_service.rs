@@ -28,15 +28,6 @@ impl AuthService {
     }
 
     pub async fn is_authenticated(&mut self, jar: &CookieJar, permission: &Role, action: &str) -> bool {
-        match jar.get("override") {
-            Some(t) => {
-                if t.value() == std::env::var("OVERRIDE_PASSWORD").expect("No override password set") {
-                    return true
-                }
-            },
-            None => {}
-        };
-
         let token = match jar.get("token") {
             Some(t) => t.value(),
             None => return false
@@ -69,7 +60,6 @@ impl AuthService {
             role: user.role.clone()
         };
 
-        let token = self.encryption.random_string(32);
         let signup_hash = self.encryption.random_string(32);
 
         match self.repo.insert_user(&new_user).await {
@@ -77,7 +67,10 @@ impl AuthService {
             Err(t) => return Err(Error::ErrorDuring("Inserting user".to_owned(), Box::new(t)))
         };
 
-        match self.repo.insert_token(&new_user.uuid, &token, &signup_hash, 86400).await {
+        // this placeholder token ensures that the entry can be uniquely identified. It is NOT used in any authentication
+        let placeholder_token = self.encryption.random_string(32);
+
+        match self.repo.insert_token(&new_user.uuid, &placeholder_token, &signup_hash, 86400).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Inserting token".to_owned(), Box::new(t)))
         };
@@ -100,14 +93,15 @@ impl AuthService {
             return Err(Error::ExpiredError)
         }
 
-        let hashed_token = self.encryption.hash(&token.token.as_str(), "");
+        let unhashed_token = self.encryption.random_string(32);
+        let hashed_token = self.encryption.hash(&unhashed_token, "");
 
         match self.repo.update_token(&token.uuid, &token.token, Some(hashed_token.as_str()), Some(""), Some(3024000)).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Updating token".to_owned(), Box::new(t)))
         };
 
-        Ok(token.token)
+        Ok(unhashed_token)
     }
 
     pub async fn update_user(&mut self, uuid: &str, update: &UpdateUser) -> Result<(), Error> {

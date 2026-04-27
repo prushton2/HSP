@@ -40,9 +40,9 @@ function Admin() {
             ]}/>
 
             <HoverDropdown title="Users" buttons={[
-                ["Create",   async () => {await prompt.show("Create User",    <GrantAccess />)}],
-                ["Update",   async () => {await prompt.show("Update User",    <EditUser    init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-                ["Delete",   async () => {await prompt.show("Delete Student", <DeleteUser  init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Create",   async () => {await prompt.show("Create User", <GrantAccess />)}],
+                ["Update",   async () => {await prompt.show("Update User", <EditUser    init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Delete",   async () => {await prompt.show("Delete User", <DeleteUser  init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
             ]}/>
 
             <HoverDropdown title="Tokens" buttons={[

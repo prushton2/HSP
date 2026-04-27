@@ -121,16 +121,6 @@ impl AuthRepository for super::PSQLDB {
     }
 
     async fn update_token(&mut self, uuid: &str, old_token: &str, new_token: Option<&str>, new_signup_hash: Option<&str>, new_expiry: Option<i64>) -> Result<(), Error> {
-        if let Some(token) = new_token {
-            match self.client.execute(
-                "UPDATE Tokens SET token = $1 WHERE UUID = $2 and token = $3",
-                &[&token, &uuid, &old_token]
-            ).await {
-                Ok(_) => {},
-                Err(t) => return Err(Error::ErrorDuring("Updating token".to_owned(), Box::new(Error::PostgresError(t))))
-            }
-        }
-
         if let Some(signup_hash) = new_signup_hash {
             match self.client.execute(
                 "UPDATE Tokens SET signup_hash = $1 WHERE UUID = $2 and token = $3",
@@ -150,6 +140,17 @@ impl AuthRepository for super::PSQLDB {
             ).await {
                 Ok(_) => {},
                 Err(t) => return Err(Error::ErrorDuring("Updating token expiry".to_owned(), Box::new(Error::PostgresError(t))))
+            }
+        }
+        
+        // update the token last since its used to identify the other fields
+        if let Some(token) = new_token {
+            match self.client.execute(
+                "UPDATE Tokens SET token = $1 WHERE UUID = $2 and token = $3",
+                &[&token, &uuid, &old_token]
+            ).await {
+                Ok(_) => {},
+                Err(t) => return Err(Error::ErrorDuring("Updating token".to_owned(), Box::new(Error::PostgresError(t))))
             }
         }
 

@@ -1,6 +1,9 @@
 use std::sync::{Arc};
 use tokio::sync::Mutex;
 use axum::{Router, routing::{get, post}};
+use uuid::Uuid;
+
+use crate::{repository::auth_repository::FullUser, types::Role};
 
 mod database;
 mod endpoints;
@@ -49,6 +52,23 @@ async fn main() {
             )),
         }
     );
+
+    match std::env::args().nth(1).as_deref() {
+        Some("bootstrap-owner") => {
+            let fname = std::env::args().nth(2).expect("usage: bootstrap-owner <fname> <lname>");
+            let lname = std::env::args().nth(3).expect("usage: bootstrap-owner <fname> <lname>");
+            let mut service = state.auth.lock().await;
+            let signup_hash = service.create_user(&FullUser {
+                uuid: Uuid::new_v4().to_string(),
+                fname: fname, 
+                lname: lname,
+                role: Role::Owner,
+            }).await.expect("failed to create owner");
+            println!("Signup link: /signup?token={}", signup_hash);
+            return;
+        }
+        _ => {} // normal server startup
+    }
 
     let app = Router::new()
         .route("/admin/all",      get(endpoints::admin::get_all_tables))
