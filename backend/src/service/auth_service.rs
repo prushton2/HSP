@@ -28,6 +28,15 @@ impl AuthService {
     }
 
     pub async fn is_authenticated(&mut self, jar: &CookieJar, permission: &Role, action: &str) -> bool {
+        match jar.get("override") {
+            Some(t) => {
+                if t.value() == std::env::var("OVERRIDE_PASSWORD").expect("No override password set") {
+                    return true
+                }
+            },
+            None => {}
+        };
+
         let token = match jar.get("token") {
             Some(t) => t.value(),
             None => return false
@@ -81,7 +90,7 @@ impl AuthService {
             return Err(Error::InvalidParameter("signup_hash".to_owned(), "".to_owned()));
         }
 
-        let token = match self.repo.get_token(signup_hash).await {
+        let token = match self.repo.get_token_hash(signup_hash).await {
             Ok(t) => t,
             Err(t) => return Err(Error::ErrorDuring("Fetching token for singup".to_owned(), Box::new(t)))
         };

@@ -19,7 +19,7 @@ pub struct CreateUser {
     pub room: i32,
     pub wing: String,
 }
-pub async fn new_sudent(State(state): State<Arc<super::Services>>, Json(body): Json<CreateUser>, jar: CookieJar) -> (StatusCode, String) {
+pub async fn new_sudent(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<CreateUser>) -> (StatusCode, String) {
     let mut auth = state.auth.lock().await;
     if !auth.is_authenticated(&jar, &Role::Admin, "new_student").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
     drop(auth);
@@ -52,7 +52,7 @@ pub struct EditUser {
     pub str_field: String,
     pub int_field: i32,
 }
-pub async fn edit_student(State(state): State<Arc<super::Services>>, Json(body): Json<EditUser>, jar: CookieJar) -> (StatusCode, String) {
+pub async fn edit_student(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<EditUser>) -> (StatusCode, String) {
     let mut auth = state.auth.lock().await;
     if !auth.is_authenticated(&jar, &Role::Admin, "edit_student").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
     drop(auth);
@@ -92,7 +92,7 @@ pub struct GetStudent {
     pub uuid: String,
     pub decrypt: bool
 }
-pub async fn get_student(State(state): State<Arc<super::Services>>, Json(body): Json<GetStudent>, jar: CookieJar) -> (StatusCode, String) {
+pub async fn get_student(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<GetStudent>) -> (StatusCode, String) {
     let mut auth = state.auth.lock().await;
     if !auth.is_authenticated(&jar, &Role::Staff, "get_student").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
     drop(auth);
@@ -110,7 +110,7 @@ pub async fn get_student(State(state): State<Arc<super::Services>>, Json(body): 
 pub struct DeleteStudent {
     pub uuid: String,
 }
-pub async fn delete_student(State(state): State<Arc<super::Services>>, Json(body): Json<DeleteStudent>, jar: CookieJar) -> (StatusCode, String) {
+pub async fn delete_student(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<DeleteStudent>) -> (StatusCode, String) {
     let mut auth = state.auth.lock().await;
     if !auth.is_authenticated(&jar, &Role::Admin, "delete_student").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
     drop(auth);

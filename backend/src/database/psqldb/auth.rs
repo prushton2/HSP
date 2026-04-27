@@ -86,7 +86,7 @@ impl AuthRepository for super::PSQLDB {
                         uuid:        row.get("uuid"),
                         token:       row.get("token"),
                         signup_hash: row.get("signup_hash"),
-                        expiry:      row.get::<&str, DateTime<Utc>>("expiry").timestamp()
+                        expiry:      row.get("expiry")
                     }
                 }).collect::<Vec<TokenInfo>>()
             },

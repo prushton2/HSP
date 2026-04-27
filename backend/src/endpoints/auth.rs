@@ -4,6 +4,7 @@ use axum::http::HeaderValue;
 use axum::http::header::SET_COOKIE;
 use axum::response::IntoResponse;
 use axum::{Json, extract::State, http::StatusCode};
+use axum_extra::extract::CookieJar;
 use serde::Deserialize;
 
 use crate::TOKEN_EXPIRY;
@@ -18,8 +19,9 @@ pub struct CreateUser {
     pub role: String,
 }
 
-pub async fn create_user(State(state): State<Arc<super::Services>>, Json(body): Json<CreateUser>) -> (StatusCode, String) {
+pub async fn create_user(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<CreateUser>) -> (StatusCode, String) {
     let mut service = state.auth.lock().await;
+    if !service.is_authenticated(&jar, &Role::Owner, "create_user").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
 
     let new_user = FullUser {
         uuid: String::from(""),
@@ -63,7 +65,10 @@ pub struct HttpUpdateUser {
     pub field: String,
     pub str_field: String,
 }
-pub async fn update_user(State(state): State<Arc<super::Services>>, Json(body): Json<HttpUpdateUser>) -> (StatusCode, String) {
+pub async fn update_user(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpUpdateUser>) -> (StatusCode, String) {
+    let mut service = state.auth.lock().await;
+    if !service.is_authenticated(&jar, &Role::Owner, "update_user").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+
     let mut update = UpdateUser {
         fname: None,
         lname: None,
@@ -77,7 +82,6 @@ pub async fn update_user(State(state): State<Arc<super::Services>>, Json(body): 
         _            => return (StatusCode::BAD_REQUEST, "Invalid Field".to_string())
     }
 
-    let mut service = state.auth.lock().await;
 
     match service.update_user(&body.uuid, &update).await {
         Ok(_) => (StatusCode::OK, String::from("")),
@@ -89,8 +93,9 @@ pub async fn update_user(State(state): State<Arc<super::Services>>, Json(body): 
 pub struct HttpDeleteUser {
     uuid: String
 }
-pub async fn delete_user(State(state): State<Arc<super::Services>>, Json(body): Json<HttpDeleteUser>) -> (StatusCode, String) {
+pub async fn delete_user(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpDeleteUser>) -> (StatusCode, String) {
     let mut service = state.auth.lock().await;
+    if !service.is_authenticated(&jar, &Role::Owner, "delete_user").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
 
     match service.delete_user(body.uuid.as_str()).await {
         Ok(_) => (StatusCode::OK, String::from("")),
@@ -102,8 +107,9 @@ pub async fn delete_user(State(state): State<Arc<super::Services>>, Json(body): 
 pub struct HttpRevokeTokens {
     uuid: String
 }
-pub async fn revoke_tokens(State(state): State<Arc<super::Services>>, Json(body): Json<HttpRevokeTokens>) -> (StatusCode, String) {
+pub async fn revoke_tokens(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpRevokeTokens>) -> (StatusCode, String) {
     let mut service = state.auth.lock().await;
+    if !service.is_authenticated(&jar, &Role::Owner, "revoke_tokens").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
 
     match service.revoke_tokens(body.uuid.as_str()).await {
         Ok(_) => (StatusCode::OK, String::from("")),
@@ -115,8 +121,9 @@ pub async fn revoke_tokens(State(state): State<Arc<super::Services>>, Json(body)
 pub struct HttpGrantToken {
     uuid: String
 }
-pub async fn grant_token(State(state): State<Arc<super::Services>>, Json(body): Json<HttpGrantToken>) -> (StatusCode, String) {
+pub async fn grant_token(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpGrantToken>) -> (StatusCode, String) {
     let mut service = state.auth.lock().await;
+    if !service.is_authenticated(&jar, &Role::Owner, "grant_token").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
 
     match service.grant_token(body.uuid.as_str()).await {
         Ok(t) => (StatusCode::OK, format!("{{\"token\": \"{}\"}}", t)),

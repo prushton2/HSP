@@ -14,12 +14,15 @@ const SIGNUP_HASH_EXPIRY: i64 = 86400;
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().ok(); // ignore error if .env doesn't exist (e.g. in prod)
+    // now env::var() will see values from .env
+
     let dbinfo = database::DBInfo {
-        dbname: "database".to_string(),
-        host: "localhost".to_string(),
-        username: "prushton".to_string(),
-        password: "password".to_string(),
-        port: "5432".to_string()
+        username: std::env::var("POSTGRES_DB_USER").expect("Missing env var POSTGRES_DB_USER"),
+        password: std::env::var("POSTGRES_DB_PASSWORD").expect("Missing env var POSTGRES_DB_PASSWORD"),
+        dbname:   std::env::var("POSTGRES_DB_DATABASE").expect("Missing env var POSTGRES_DB_DATABASE"),
+        host:     std::env::var("POSTGRES_DB_HOST").expect("Missing env var POSTGRES_DB_HOST"),
+        port:     std::env::var("POSTGRES_DB_PORT").expect("Missing env var POSTGRES_DB_PORT")
     };
 
     {
