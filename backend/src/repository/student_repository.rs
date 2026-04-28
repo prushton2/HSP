@@ -2,7 +2,7 @@ use axum::async_trait;
 use serde::{Deserialize, Serialize};
 
 // this holds the traits that directly interface with the database. These can be easily faked for tests.
-use crate::database::Error;
+use crate::types::Error;
 
 #[async_trait]
 pub trait StudentRepository: Send + Sync {

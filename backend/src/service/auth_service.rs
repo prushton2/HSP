@@ -8,13 +8,12 @@ use axum_extra::extract::CookieJar;
 use crate::SIGNUP_HASH_EXPIRY;
 use crate::encryption::Encryption;
 
-use crate::database::Error;
+use crate::types::Error;
 
 use crate::repository::Repository;
 use crate::repository::auth_repository::{FullUser, UpdateUser};
 use crate::types::Role;
 
-// #[derive(Clone)]
 pub struct AuthService {
     repo: Box<dyn Repository>,
     encryption: Box<dyn Encryption>,
@@ -30,29 +29,32 @@ impl AuthService {
         }
     }
 
-    pub async fn is_authenticated(&self, jar: &CookieJar, permission: &Role, action: &str) -> bool {
+    pub async fn is_authenticated(&self, jar: &CookieJar, permission: &Role, action: &str) -> Option<FullUser> {
         let token = match jar.get("token") {
             Some(t) => t.value(),
-            None => return false
+            None => return None
         };
 
         let hashed_token = self.encryption.hash(token, "");
 
         let token_entry = match self.repo.get_token(&hashed_token).await {
             Ok(t) => t,
-            Err(_) => return false
+            Err(_) => return None
         };
 
         let (user_entry, _) = match self.repo.get_user(&token_entry.uuid).await {
             Ok(t) => t,
-            Err(_) => return false
+            Err(_) => return None
         };
 
         let success = user_entry.role >= *permission;
 
         println!("{} {} ({}) was {} access to {}", user_entry.fname, user_entry.lname, user_entry.uuid, if success { "granted" } else { "denied" }, action);
 
-        success
+        match success {
+            true  => Some(user_entry),
+            false => None
+        }
     }
 
     pub async fn create_user(&self, user: &FullUser) -> Result<String, Error> {

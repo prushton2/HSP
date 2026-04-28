@@ -3,7 +3,7 @@ use axum::async_trait;
 use chrono::{DateTime, Utc};
 use tokio_postgres::types::ToSql;
 
-use crate::database::Error;
+use crate::types::Error;
 use crate::repository::AuthRepository;
 use crate::repository::auth_repository::{FullUser, TokenInfo, UpdateUser};
 

@@ -14,3 +14,5 @@ chrono = { version = "0.4.44", features = ["serde"] }
 uuid = { version = "1.23.1", features = ["v4"] }
 rand = "0.10.1"
 dotenvy = "0.15.7"
+log = "0.4.29"
+env_logger = "0.11.10"

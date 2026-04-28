@@ -3,6 +3,9 @@ use tokio::sync::RwLock;
 use axum::{Router, routing::{get, post}};
 use uuid::Uuid;
 
+use log::{LevelFilter};
+use env_logger::Builder;
+
 use crate::{repository::auth_repository::FullUser, types::Role};
 
 mod database;
@@ -28,11 +31,20 @@ async fn main() {
         port:     std::env::var("POSTGRES_DB_PORT").expect("Missing env var POSTGRES_DB_PORT")
     };
 
+    Builder::new()
+        // Set project's max level
+        .filter(Some("hsp-backend"), LevelFilter::Error)
+        // turn off everything else
+        .filter(None, LevelFilter::Off)
+        .init();
+
+    log::info!("Test");
+
     {
         let db = database::PSQLDB::new(&dbinfo).await;
         match db.init_if_uninitialized().await {
             Ok(_)         => println!("Database initialized"),
-            Err(t) => println!("{}", String::from(t))
+            Err(t) => println!("{}", t.to_obfuscated())
         };
     }
 

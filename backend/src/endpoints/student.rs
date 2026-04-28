@@ -5,7 +5,7 @@ use axum_extra::extract::CookieJar;
 use serde::Deserialize;
 
 use crate::service::student_service::{self, FullStudent, SearchStudent};
-use crate::types::Role;
+use crate::types::{Role, Error};
 
 
 #[derive(Deserialize)]
@@ -20,7 +20,10 @@ pub struct CreateUser {
 }
 pub async fn new_sudent(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<CreateUser>) -> (StatusCode, String) {
     let auth = state.auth.read().await;
-    if !auth.is_authenticated(&jar, &Role::Admin, "new_student").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    let user = match auth.is_authenticated(&jar, &Role::Admin, "new_student").await {
+        Some(t) => t,
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+    };
     drop(auth);
 
     let service = state.student.read().await;
@@ -37,7 +40,7 @@ pub async fn new_sudent(State(state): State<Arc<super::Services>>, jar: CookieJa
 
     let response = match service.create_student(&student).await {
         Ok(_) => (StatusCode::CREATED, "".to_string()),
-        Err(t) => (StatusCode::BAD_REQUEST, String::from(t))
+        Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     };
 
     return response;
@@ -53,7 +56,10 @@ pub struct EditUser {
 }
 pub async fn edit_student(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<EditUser>) -> (StatusCode, String) {
     let auth = state.auth.read().await;
-    if !auth.is_authenticated(&jar, &Role::Admin, "edit_student").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    let user = match auth.is_authenticated(&jar, &Role::Admin, "edit_student").await {
+        Some(t) => t,
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+    };
     drop(auth);
 
     let service = state.student.read().await;
@@ -81,7 +87,7 @@ pub async fn edit_student(State(state): State<Arc<super::Services>>, jar: Cookie
 
     match service.update_student(&body.uuid, &update).await {
         Ok(_) => (StatusCode::OK, "".to_owned()),
-        Err(t) => (StatusCode::INTERNAL_SERVER_ERROR, String::from(t))
+        Err(t) => (StatusCode::INTERNAL_SERVER_ERROR, t.log_to_obfuscated(&user.uuid))
     }
 }
 
@@ -93,14 +99,17 @@ pub struct GetStudent {
 }
 pub async fn get_student(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<GetStudent>) -> (StatusCode, String) {
     let auth = state.auth.read().await;
-    if !auth.is_authenticated(&jar, &Role::Staff, "get_student").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    let user = match auth.is_authenticated(&jar, &Role::Staff, "get_student").await {
+        Some(t) => t,
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+    };
     drop(auth);
 
     let service = state.student.read().await;
     
     return match service.get_student(&body.uuid, body.decrypt).await {
         Ok(t) => (StatusCode::OK, serde_json::to_string(&t).unwrap()),
-        Err(t) => (StatusCode::BAD_REQUEST, String::from(t))
+        Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     }
 }
 
@@ -111,14 +120,17 @@ pub struct DeleteStudent {
 }
 pub async fn delete_student(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<DeleteStudent>) -> (StatusCode, String) {
     let auth = state.auth.read().await;
-    if !auth.is_authenticated(&jar, &Role::Admin, "delete_student").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    let user = match auth.is_authenticated(&jar, &Role::Admin, "delete_student").await {
+        Some(t) => t,
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+    };
     drop(auth);
 
     let service = state.student.read().await;
     
     let response = match service.delete_student(&body.uuid).await {
         Ok(_) => (StatusCode::OK, String::from("")),
-        Err(t) => (StatusCode::BAD_REQUEST, String::from(t))
+        Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     };
 
     return response;
@@ -126,13 +138,16 @@ pub async fn delete_student(State(state): State<Arc<super::Services>>, jar: Cook
 
 pub async fn search_students(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<SearchStudent>) -> (StatusCode, String) {
     let auth = state.auth.read().await;
-    if !auth.is_authenticated(&jar, &Role::Staff, "search_students").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    let user = match auth.is_authenticated(&jar, &Role::Staff, "search_student").await {
+        Some(t) => t,
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+    };
     drop(auth);
 
     let service = state.student.read().await;
     
     return match service.search_students(&body).await {
         Ok(t) => (StatusCode::OK, serde_json::to_string(&t).unwrap()),
-        Err(t) => (StatusCode::BAD_REQUEST, String::from(t))
+        Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     };
 }

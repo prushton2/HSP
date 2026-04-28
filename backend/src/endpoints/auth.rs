@@ -8,9 +8,8 @@ use axum_extra::extract::CookieJar;
 use serde::Deserialize;
 
 use crate::TOKEN_EXPIRY;
-use crate::database::Error;
 use crate::repository::auth_repository::{FullUser, UpdateUser};
-use crate::types::Role;
+use crate::types::{Role, Error};
 
 #[derive(Deserialize)]
 pub struct CreateUser {
@@ -21,7 +20,10 @@ pub struct CreateUser {
 
 pub async fn create_user(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<CreateUser>) -> (StatusCode, String) {
     let service = state.auth.read().await;
-    if !service.is_authenticated(&jar, &Role::Owner, "create_user").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    let user = match service.is_authenticated(&jar, &Role::Owner, "create_user").await {
+        Some(t) => t,
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+    };
 
     let new_user = FullUser {
         uuid: String::from(""),
@@ -32,7 +34,7 @@ pub async fn create_user(State(state): State<Arc<super::Services>>, jar: CookieJ
 
     let token = match service.create_user(&new_user).await {
         Ok(t) => t,
-        Err(t) => return (StatusCode::INTERNAL_SERVER_ERROR, String::from(Error::ErrorDuring("Creating User".to_owned(), Box::new(t))))
+        Err(t) => return (StatusCode::INTERNAL_SERVER_ERROR, t.log_to_obfuscated(&user.uuid))
     };
 
     (StatusCode::OK, format!("{{\"token\": \"{}\"}}", token))
@@ -47,7 +49,7 @@ pub async fn signup(State(state): State<Arc<super::Services>>, Json(body): Json<
 
     let token = match service.signup(&body.signup_hash).await {
         Ok(t) => t,
-        Err(t) => return (StatusCode::BAD_REQUEST, String::from(t)).into_response()
+        Err(t) => return (StatusCode::BAD_REQUEST, t.log_to_obfuscated("[NO UUID]")).into_response()
     };
 
     let cookie = format!("token={}; HttpOnly; SameSite=Strict; Path=/; Max-Age={}", token, TOKEN_EXPIRY);
@@ -67,7 +69,10 @@ pub struct HttpUpdateUser {
 }
 pub async fn update_user(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpUpdateUser>) -> (StatusCode, String) {
     let service = state.auth.read().await;
-    if !service.is_authenticated(&jar, &Role::Owner, "update_user").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    let user = match service.is_authenticated(&jar, &Role::Owner, "update_user").await {
+        Some(t) => t,
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+    };
 
     let mut update = UpdateUser {
         fname: None,
@@ -79,13 +84,13 @@ pub async fn update_user(State(state): State<Arc<super::Services>>, jar: CookieJ
         "first name" => update.fname = Some(body.str_field),
         "last name"  => update.lname = Some(body.str_field),
         "role"       => update.role  = Some(Role::from(body.str_field)),
-        _            => return (StatusCode::BAD_REQUEST, "Invalid Field".to_string())
+        t            => return (StatusCode::BAD_REQUEST, Error::InvalidParameter("field".to_string(), t.to_string()).log_to_obfuscated(&user.uuid))
     }
 
 
     match service.update_user(&body.uuid, &update).await {
         Ok(_) => (StatusCode::OK, String::from("")),
-        Err(t) => (StatusCode::INTERNAL_SERVER_ERROR, String::from(t))
+        Err(t) => (StatusCode::INTERNAL_SERVER_ERROR, t.log_to_obfuscated(&user.uuid))
     }
 }
 
@@ -95,11 +100,14 @@ pub struct HttpDeleteUser {
 }
 pub async fn delete_user(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpDeleteUser>) -> (StatusCode, String) {
     let service = state.auth.read().await;
-    if !service.is_authenticated(&jar, &Role::Owner, "delete_user").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    let user = match service.is_authenticated(&jar, &Role::Owner, "delete_user").await {
+        Some(t) => t,
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+    };
 
     match service.delete_user(body.uuid.as_str()).await {
         Ok(_) => (StatusCode::OK, String::from("")),
-        Err(t) => (StatusCode::BAD_REQUEST, String::from(t))
+        Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     }
 }
 
@@ -109,11 +117,14 @@ pub struct HttpRevokeTokens {
 }
 pub async fn revoke_tokens(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpRevokeTokens>) -> (StatusCode, String) {
     let service = state.auth.read().await;
-    if !service.is_authenticated(&jar, &Role::Owner, "revoke_tokens").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    let user = match service.is_authenticated(&jar, &Role::Owner, "revoke_tokens").await {
+        Some(t) => t,
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+    };
 
     match service.revoke_tokens(body.uuid.as_str()).await {
         Ok(_) => (StatusCode::OK, String::from("")),
-        Err(t) => (StatusCode::BAD_REQUEST, String::from(t))
+        Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     }
 }
 
@@ -123,11 +134,14 @@ pub struct HttpGrantToken {
 }
 pub async fn grant_token(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpGrantToken>) -> (StatusCode, String) {
     let service = state.auth.read().await;
-    if !service.is_authenticated(&jar, &Role::Owner, "grant_token").await { return (StatusCode::UNAUTHORIZED, String::from("")) }
+    let user = match service.is_authenticated(&jar, &Role::Owner, "grant_token").await {
+        Some(t) => t,
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+    };
 
     match service.grant_token(body.uuid.as_str()).await {
         Ok(t) => (StatusCode::OK, format!("{{\"token\": \"{}\"}}", t)),
-        Err(t) => (StatusCode::BAD_REQUEST, String::from(t))
+        Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     }
 }
 

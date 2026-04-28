@@ -10,9 +10,8 @@ use crate::repository::student_repository::{EncryptedInfo, ResidenceInfo, Search
 
 use crate::encryption::{Encryption, EncryptedContents};
 
-use crate::database::Error;
+use crate::types::Error;
 
-// #[derive(Clone)]
 pub struct StudentService {
     repo: Box<dyn StudentRepository>,
     encryption: Box<dyn Encryption>

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::encryption::Encryption;
 
-use crate::database::Error;
+use crate::types::Error;
 
 use crate::repository::Repository;
 use crate::repository::auth_repository::{FullUser, TokenInfo};

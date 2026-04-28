@@ -1,6 +1,7 @@
 use tokio_postgres::{Client, NoTls};
 
-use crate::{database::{DBInfo, Error}, repository::Repository};
+use crate::types::Error;
+use crate::{database::DBInfo, repository::Repository};
 
 pub mod student;
 pub mod auth;

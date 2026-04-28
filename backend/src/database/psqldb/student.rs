@@ -1,7 +1,7 @@
 use crate::repository::StudentRepository;
 use crate::repository::student_repository::{EncryptedInfo, UpdateStudentInfo, ResidenceInfo, UpdateResidenceInfo, StudentInfo, SearchStudentInfo, UpdateEncryptedInfo, SearchResidenceInfo};
 
-use crate::database::Error;
+use crate::types::Error;
 
 use axum::async_trait;
 use tokio_postgres::types::ToSql;
