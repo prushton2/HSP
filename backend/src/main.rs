@@ -33,18 +33,16 @@ async fn main() {
 
     Builder::new()
         // Set project's max level
-        .filter(Some("hsp-backend"), LevelFilter::Error)
+        .filter(Some("hsp_backend"), LevelFilter::Info)
         // turn off everything else
         .filter(None, LevelFilter::Off)
         .init();
 
-    log::info!("Test");
-
     {
         let db = database::PSQLDB::new(&dbinfo).await;
         match db.init_if_uninitialized().await {
-            Ok(_)         => println!("Database initialized"),
-            Err(t) => println!("{}", t.to_obfuscated())
+            Ok(_)         => log::info!("Database initialized"),
+            Err(t) => log::error!("{}", t.to_obfuscated())
         };
     }
 

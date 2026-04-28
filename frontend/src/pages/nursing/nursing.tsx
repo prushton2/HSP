@@ -1,12 +1,12 @@
 import './nursing.css'
-import { useEffect, useState, type JSX } from 'react'
+import { type JSX } from 'react'
 
 export default function Nursing(): JSX.Element {
     return (
         <>
             <div className="title">
-                <h1>Nursing</h1>
+                <h1 onClick={() => window.location.href = "/"}>Nursing</h1>
             </div>
         </>
-        )
+    )
 }

@@ -22,7 +22,7 @@ pub async fn create_user(State(state): State<Arc<super::Services>>, jar: CookieJ
     let service = state.auth.read().await;
     let user = match service.is_authenticated(&jar, &Role::Owner, "create_user").await {
         Some(t) => t,
-        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
 
     let new_user = FullUser {
@@ -49,7 +49,7 @@ pub async fn signup(State(state): State<Arc<super::Services>>, Json(body): Json<
 
     let token = match service.signup(&body.signup_hash).await {
         Ok(t) => t,
-        Err(t) => return (StatusCode::BAD_REQUEST, t.log_to_obfuscated("[NO UUID]")).into_response()
+        Err(t) => return (StatusCode::BAD_REQUEST, t.log_to_obfuscated("NO UUID")).into_response()
     };
 
     let cookie = format!("token={}; HttpOnly; SameSite=Strict; Path=/; Max-Age={}", token, TOKEN_EXPIRY);
@@ -71,7 +71,7 @@ pub async fn update_user(State(state): State<Arc<super::Services>>, jar: CookieJ
     let service = state.auth.read().await;
     let user = match service.is_authenticated(&jar, &Role::Owner, "update_user").await {
         Some(t) => t,
-        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
 
     let mut update = UpdateUser {
@@ -102,7 +102,7 @@ pub async fn delete_user(State(state): State<Arc<super::Services>>, jar: CookieJ
     let service = state.auth.read().await;
     let user = match service.is_authenticated(&jar, &Role::Owner, "delete_user").await {
         Some(t) => t,
-        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
 
     match service.delete_user(body.uuid.as_str()).await {
@@ -119,7 +119,7 @@ pub async fn revoke_tokens(State(state): State<Arc<super::Services>>, jar: Cooki
     let service = state.auth.read().await;
     let user = match service.is_authenticated(&jar, &Role::Owner, "revoke_tokens").await {
         Some(t) => t,
-        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
 
     match service.revoke_tokens(body.uuid.as_str()).await {
@@ -136,7 +136,7 @@ pub async fn grant_token(State(state): State<Arc<super::Services>>, jar: CookieJ
     let service = state.auth.read().await;
     let user = match service.is_authenticated(&jar, &Role::Owner, "grant_token").await {
         Some(t) => t,
-        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
 
     match service.grant_token(body.uuid.as_str()).await {

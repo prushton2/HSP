@@ -23,7 +23,7 @@ function Admin() {
     <>
         <Modal />
         <div className="title">
-        <h1>HSP Admin</h1>
+        <h1 onClick={() => window.location.href = "/"}>HSP Admin</h1>
         </div>
         <div className='ribbon'>
             <HoverDropdown title="Student" buttons={[

@@ -19,7 +19,7 @@ export default function Search(): JSX.Element {
         <>
             <Modal />
             <div className="title">
-                <h1>Search</h1>
+                <h1 onClick={() => window.location.href = "/"}>Search</h1>
             </div>
 
             {RenderSearchResults(results)}
@@ -44,7 +44,7 @@ export default function Search(): JSX.Element {
             </tbody>
             </table>
         </>
-        )
+    )
 }
 
 function RenderSearchResults(students: ApiResponseObjects.FullStudent[]): JSX.Element[] {

@@ -47,9 +47,14 @@ impl AuthService {
             Err(_) => return None
         };
 
+        if token_entry.expiry < Utc::now().timestamp() {
+            log::error!("[{}]: Token expired for {} {}", user_entry.uuid, user_entry.fname, user_entry.lname);
+            return None
+        }
+
         let success = user_entry.role >= *permission;
 
-        println!("{} {} ({}) was {} access to {}", user_entry.fname, user_entry.lname, user_entry.uuid, if success { "granted" } else { "denied" }, action);
+        log::info!("[{}]: {} access to {}", user_entry.uuid, if success { "granted" } else { "denied" }, action);
 
         match success {
             true  => Some(user_entry),
@@ -75,7 +80,7 @@ impl AuthService {
         // this placeholder token ensures that the entry can be uniquely identified. It is NOT used in any authentication
         let placeholder_token = self.encryption.random_string(32);
 
-        match self.repo.insert_token(&new_user.uuid, &placeholder_token, &signup_hash, 86400).await {
+        match self.repo.insert_token(&new_user.uuid, &placeholder_token, &signup_hash, Utc::now().timestamp() + 86400).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Inserting token".to_owned(), Box::new(t)))
         };
@@ -103,7 +108,7 @@ impl AuthService {
         let unhashed_token = self.encryption.random_string(32);
         let hashed_token = self.encryption.hash(&unhashed_token, "");
 
-        match self.repo.update_token(&token.uuid, &token.token, Some(hashed_token.as_str()), Some(""), Some(3024000)).await {
+        match self.repo.update_token(&token.uuid, &token.token, Some(hashed_token.as_str()), Some(""), Some(Utc::now().timestamp() + 3024000)).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Updating token".to_owned(), Box::new(t)))
         };

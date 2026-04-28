@@ -22,7 +22,7 @@ pub async fn new_sudent(State(state): State<Arc<super::Services>>, jar: CookieJa
     let auth = state.auth.read().await;
     let user = match auth.is_authenticated(&jar, &Role::Admin, "new_student").await {
         Some(t) => t,
-        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
     drop(auth);
 
@@ -58,7 +58,7 @@ pub async fn edit_student(State(state): State<Arc<super::Services>>, jar: Cookie
     let auth = state.auth.read().await;
     let user = match auth.is_authenticated(&jar, &Role::Admin, "edit_student").await {
         Some(t) => t,
-        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
     drop(auth);
 
@@ -101,7 +101,7 @@ pub async fn get_student(State(state): State<Arc<super::Services>>, jar: CookieJ
     let auth = state.auth.read().await;
     let user = match auth.is_authenticated(&jar, &Role::Staff, "get_student").await {
         Some(t) => t,
-        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
     drop(auth);
 
@@ -122,7 +122,7 @@ pub async fn delete_student(State(state): State<Arc<super::Services>>, jar: Cook
     let auth = state.auth.read().await;
     let user = match auth.is_authenticated(&jar, &Role::Admin, "delete_student").await {
         Some(t) => t,
-        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
     drop(auth);
 
@@ -140,7 +140,7 @@ pub async fn search_students(State(state): State<Arc<super::Services>>, jar: Coo
     let auth = state.auth.read().await;
     let user = match auth.is_authenticated(&jar, &Role::Staff, "search_student").await {
         Some(t) => t,
-        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
     drop(auth);
 

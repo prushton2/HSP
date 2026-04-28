@@ -10,10 +10,9 @@ pub async fn get_all_tables(State(state): State<Arc<super::Services>>, jar: Cook
     let auth = state.auth.read().await;
     let user = match auth.is_authenticated(&jar, &Role::Admin, "get_all_tables").await {
         Some(t) => t,
-        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("[NO UUID]"))
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
     drop(auth);
-
 
     let service = state.admin.read().await;
 

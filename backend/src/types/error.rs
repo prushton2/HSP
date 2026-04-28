@@ -23,7 +23,7 @@ impl Error {
 
     pub fn to_deobfuscated(&self) -> String {
         match self {
-            Error::ErrorDuring(m, e) => format!("{}: {}", m, (*e).to_obfuscated()),
+            Error::ErrorDuring(m, e) => format!("{}: {}", m, (*e).to_deobfuscated()),
             Error::InvalidParameter(p, v) => format!("Invalid parameter {} supplied to {}", v, p),
             Error::PostgresError(e) => format!("Postgres Error: {}", fmt_pg_error(&e)),
             Error::TokioError => String::from("Tokio Error"),
@@ -33,7 +33,7 @@ impl Error {
     }
 
     pub fn log(&self, uuid: &str) {
-        log::error!("User {} Caused {}", uuid, self.to_deobfuscated());
+        log::error!("[{}]: {}", uuid, self.to_deobfuscated());
     }
 
     pub fn log_to_obfuscated(&self, uuid: &str) -> String {
