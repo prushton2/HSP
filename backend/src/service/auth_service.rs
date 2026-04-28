@@ -48,7 +48,7 @@ impl AuthService {
         };
 
         if token_entry.expiry < Utc::now().timestamp() {
-            log::error!("[{}]: Token expired for {} {}", user_entry.uuid, user_entry.fname, user_entry.lname);
+            log::error!("[{}]: token expired for {} {}", user_entry.uuid, user_entry.fname, user_entry.lname);
             return None
         }
 
@@ -108,10 +108,17 @@ impl AuthService {
         let unhashed_token = self.encryption.random_string(32);
         let hashed_token = self.encryption.hash(&unhashed_token, "");
 
+        let (user, _) = match self.repo.get_user(&token.uuid).await {
+            Ok(t) => t,
+            Err(t) => return Err(Error::ErrorDuring("Fetching User".to_owned(), Box::new(t)))
+        };
+
         match self.repo.update_token(&token.uuid, &token.token, Some(hashed_token.as_str()), Some(""), Some(Utc::now().timestamp() + 3024000)).await {
             Ok(_) => {},
             Err(t) => return Err(Error::ErrorDuring("Updating token".to_owned(), Box::new(t)))
         };
+
+        log::info!("[{}] user signed up: {} {}", token.uuid, user.fname, user.lname);
 
         Ok(unhashed_token)
     }
