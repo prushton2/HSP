@@ -145,3 +145,10 @@ pub async fn grant_token(State(state): State<Arc<super::Services>>, jar: CookieJ
     }
 }
 
+pub async fn get_self(State(state): State<Arc<super::Services>>, jar: CookieJar) -> (StatusCode, String) {
+    let service = state.auth.read().await;
+    match service.is_authenticated(&jar, &Role::Staff, "get_self").await {
+        Some(t) => (StatusCode::OK, serde_json::to_string(&t).unwrap()),
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
+    }
+}

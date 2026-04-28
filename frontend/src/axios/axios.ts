@@ -9,6 +9,18 @@ export namespace Http {
             return response.data as ApiResponseObjects.AllTables
         }
     }
+
+    export async function Self(): Promise<Result<Tables.Users, string>> {
+            try {
+                let response = await axios.get("/api/auth/self");
+                return NewResult.from_ok(response.data);
+            } catch (err) {
+                if(!axios.isAxiosError(err)) { return NewResult.from_err("Non Axios Error"); }
+                return NewResult.from_err(err.response?.data);
+            }
+        }
+    
+
     export namespace Student {
         export async function Create(student: ApiRequestObjects.CreateStudent): Promise<Result<null, string>> {
             try {

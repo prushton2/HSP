@@ -93,6 +93,8 @@ async fn main() {
         .route("/auth/signup", post(endpoints::auth::signup))
         .route("/auth/update", post(endpoints::auth::update_user))
         .route("/auth/delete", post(endpoints::auth::delete_user))
+        
+        .route("/auth/self",    get(endpoints::auth::get_self))
 
         .route("/auth/grant",  post(endpoints::auth::grant_token))
         .route("/auth/revoke", post(endpoints::auth::revoke_tokens))

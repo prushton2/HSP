@@ -16,10 +16,15 @@ pub async fn get_all_tables(State(state): State<Arc<super::Services>>, jar: Cook
 
     let service = state.admin.read().await;
 
-    let tables = match service.get_all_tables().await {
+    let mut tables = match service.get_all_tables().await {
         Ok(t) => t,
         Err(t) => return (StatusCode::INTERNAL_SERVER_ERROR, t.log_to_obfuscated(&user.uuid))
     };
+
+    if user.role == Role::Admin {
+        tables.tokens = vec![];
+        tables.users = vec![];
+    }
 
     (StatusCode::OK, serde_json::to_string(&tables).unwrap())
 }

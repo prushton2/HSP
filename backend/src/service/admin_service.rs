@@ -37,9 +37,9 @@ impl AdminService {
 
 #[derive(Serialize, Deserialize)]
 pub struct AllTables {
-    residence: Vec<ResidenceInfo>,
-    studentinfo: Vec<StudentInfo>,
-    encryptedinfo: Vec<EncryptedInfo>,
-    users: Vec<FullUser>,
-    tokens: Vec<TokenInfo>
+    pub residence: Vec<ResidenceInfo>,
+    pub studentinfo: Vec<StudentInfo>,
+    pub encryptedinfo: Vec<EncryptedInfo>,
+    pub users: Vec<FullUser>,
+    pub tokens: Vec<TokenInfo>
 }

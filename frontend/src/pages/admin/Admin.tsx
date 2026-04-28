@@ -6,15 +6,22 @@ import { Modal, prompt } from '../../components/Modal';
 import HoverDropdown from '../../components/HoverDropdown';
 import RenderTable from './RenderTable';
 import { Toast } from '../../components/toast';
+import { RoleGE } from '../../components/Role';
 
 function Admin() {
     const [studentInfo, setStudentInfo] = useState<ApiResponseObjects.AllTables>({} as ApiResponseObjects.AllTables);
     const [selectedUUID, setSelectedUUID] = useState<string>("");
-
+    const [user, setUser] = useState<Tables.Users>({fname: "", lname: "", uuid: "", role: ""} as Tables.Users);
+    
+    
     useEffect(() => {
         async function init() {
             let info = await Http.Admin.GetAllTables()
             setStudentInfo(info);
+            let user = await Toast.WrapErr(() => Http.Self());
+            if(user.is_ok()) {
+                setUser(user.into_ok())
+            }
         }
         init();
     }, [])
@@ -39,23 +46,32 @@ function Admin() {
                 ["Assign", async () => {}],
                 ["Edit",   async () => {}]
             ]}/>
+            {
+            RoleGE(user.role, "Owner") ? <>
+                <HoverDropdown title="Users" buttons={[
+                    ["Create",   async () => {await prompt.show("Create User", <GrantAccess />)}],
+                    ["Update",   async () => {await prompt.show("Update User", <EditUser    init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                    ["Delete",   async () => {await prompt.show("Delete User", <DeleteUser  init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ]}/>
 
-            <HoverDropdown title="Users" buttons={[
-                ["Create",   async () => {await prompt.show("Create User", <GrantAccess />)}],
-                ["Update",   async () => {await prompt.show("Update User", <EditUser    init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-                ["Delete",   async () => {await prompt.show("Delete User", <DeleteUser  init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-            ]}/>
-
-            <HoverDropdown title="Tokens" buttons={[
-                ["Grant",  async () => {await prompt.show("Grant Token",   <GrantToken   init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-                ["Revoke", async () => {await prompt.show("Revoke Tokens", <RevokeTokens init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-            ]}/>
+                <HoverDropdown title="Tokens" buttons={[
+                    ["Grant",  async () => {await prompt.show("Grant Token",   <GrantToken   init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                    ["Revoke", async () => {await prompt.show("Revoke Tokens", <RevokeTokens init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ]}/>
+            
+                </>: <></>
+            }
         </div>
         <div className="tables">
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.studentinfo} tag="student_info" />
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.residence} tag="residencies" />
-            <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.users} tag="users" />
-            <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.tokens} tag="tokens" />
+            {
+                RoleGE(user.role, "Owner") ? <>
+                <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.users} tag="users" />
+                <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.tokens} tag="tokens" />
+                </>: <></>
+            }
+            
         </div>
     </>
     )
