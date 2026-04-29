@@ -34,7 +34,7 @@ export default function Search(): JSX.Element {
                     <td className='lefttd'>Hall</td> <td><select  onChange={(e) => setSearchState({...searchState, hall: e.target.value == "Unspecified" ? null : e.target.value})}> {search_options} </select></td>
                 </tr>
                 <tr>
-                    <td /><td><button onClick={async () => setResults(await Http.Student.Search(searchState))}> Search </button></td>
+                    <td colSpan={2}><button onClick={async () => setResults(await Http.Student.Search(searchState))}> Search </button></td>
                 </tr>
             </tbody>
             </table>

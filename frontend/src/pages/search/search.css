@@ -8,6 +8,11 @@
   border: none;
   margin-top: auto;
   padding-bottom: 30px;
+  border-collapse: collapse;
+}
+
+.searchtable td {
+  padding: 2px 0;
 }
 
 .searchtable .lefttd {
@@ -16,17 +21,17 @@
 
 .searchtable input {
   width: 100%;
-  box-sizing: border-box;
+  border-collapse: collapse;
 }
 
 .searchtable button {
   width: 100%;
-  box-sizing: border-box;
+  border-collapse: collapse;
 }
 
 .searchtable select {
   width: 100%;
-  box-sizing: border-box;
+  border-collapse: collapse;
 }
 
 .searchresult {

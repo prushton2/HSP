@@ -1,19 +1,4 @@
 :root {
-  --bg-dark: hsl(281 63% 92%);
-  --bg: hsl(281 100% 97%);
-  --bg-light: hsl(281 100% 100%);
-  --text: hsl(282 100% 6%);
-  --text-muted: hsl(282 28% 31%);
-  --highlight: hsl(281 100% 100%);
-  --border: hsl(281 20% 54%);
-  --border-muted: hsl(281 28% 66%);
-  --primary: hsl(282 34% 32%);
-  --secondary: hsl(95 61% 20%);
-  --danger: hsl(8 32% 41%);
-  --warning: hsl(51 46% 30%);
-  --success: hsl(150 37% 33%);
-  --info: hsl(217 34% 43%);
-
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
@@ -22,7 +7,7 @@
   letter-spacing: 0.18px;
   color-scheme: light dark;
   color: var(--text);
-  background: var(--bg);
+  background: var(--bg-dark);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -35,20 +20,24 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-dark: hsl(231 91% 3%);
-    --bg: hsl(223 70% 6%);
-    --bg-light: hsl(221 47% 10%);
-    --text: hsl(220 100% 100%);
-    --text-muted: hsl(220 51% 74%);
-    --highlight: hsl(220 28% 43%);
-    --border: hsl(221 35% 32%);
-    --border-muted: hsl(221 49% 21%);
-    --primary: hsl(220 78% 76%);
-    --secondary: hsl(40 53% 60%);
-    --danger: hsl(9 37% 65%);
-    --warning: hsl(52 26% 54%);
-    --success: hsl(147 24% 57%);
-    --info: hsl(217 40% 66%);
+    --bg-dark: #1f1f1f;
+    --bg:      #323232;
+    --bg-light:#464646;
+
+    --text:       #FFF;
+    --text-muted: #888;
+    
+    --accent-dark: #271635;
+    --accent:      #472960;
+    --accent-light:#663d89;
+    
+    --primary: hsl(105 33% 63%);
+    --secondary: hsl(286 46% 74%);
+    
+    --danger: hsl(9 42% 65%);
+    --warning: hsl(51 29% 53%);
+    --success: hsl(148 27% 56%);
+    --info: hsl(217 46% 66%);
   }
 
   #social .button-icon {
@@ -57,11 +46,7 @@
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
   text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -87,6 +72,7 @@ h1 {
     margin: 20px 0;
   }
 }
+
 h2 {
   font-size: 24px;
   line-height: 118%;
@@ -96,6 +82,7 @@ h2 {
     font-size: 20px;
   }
 }
+
 p {
   margin: 0;
 }

@@ -8,7 +8,7 @@ import RenderTable from './RenderTable';
 import { Toast } from '../../components/toast';
 import { RoleGE } from '../../components/Role';
 
-function Admin({user}: {user: Tables.Users}) {
+function Admin({user, ribbon}: {user: Tables.Users, ribbon: (e: JSX.Element) => void}) {
     const [studentInfo, setStudentInfo] = useState<ApiResponseObjects.AllTables>({} as ApiResponseObjects.AllTables);
     const [selectedUUID, setSelectedUUID] = useState<string>("");
     
@@ -21,37 +21,14 @@ function Admin({user}: {user: Tables.Users}) {
         init();
     }, [])
 
+    useEffect(() => {
+        ribbon(Ribbon(user, selectedUUID))
+    }, [selectedUUID, user])
+
     return (
     <>
         <div className='ribbon'>
-            <HoverDropdown title="Student" buttons={[
-                ["Create",  async () => {await prompt.show("Create Student", <CreateStudent />)}],
-                ["Edit",    async () => {await prompt.show("Edit Student",   <EditStudent   init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-                ["Get",     async () => {await prompt.show("Get Student",    <GetStudent    init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-                ["Delete",  async () => {await prompt.show("Delete Student", <DeleteStudent init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-            ]}/>
-
-            <HoverDropdown title="Activities" buttons={[
-                ["Create", async () => {}],
-                ["Clone",  async () => {}],
-                ["Assign", async () => {}],
-                ["Edit",   async () => {}]
-            ]}/>
-            {
-            RoleGE(user.role, "Owner") ? <>
-                <HoverDropdown title="Users" buttons={[
-                    ["Create",   async () => {await prompt.show("Create User", <GrantAccess />)}],
-                    ["Update",   async () => {await prompt.show("Update User", <EditUser    init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-                    ["Delete",   async () => {await prompt.show("Delete User", <DeleteUser  init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-                ]}/>
-
-                <HoverDropdown title="Tokens" buttons={[
-                    ["Grant",  async () => {await prompt.show("Grant Token",   <GrantToken   init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-                    ["Revoke", async () => {await prompt.show("Revoke Tokens", <RevokeTokens init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-                ]}/>
             
-                </>: <></>
-            }
         </div>
         <div className="tables">
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.studentinfo} tag="student_info" />
@@ -69,6 +46,39 @@ function Admin({user}: {user: Tables.Users}) {
 }
 
 export default Admin
+
+function Ribbon(user: Tables.Users, selectedUUID: string): JSX.Element {
+    return <>
+        <HoverDropdown title="Student" buttons={[
+            ["Create",  async () => {await prompt.show("Create Student", <CreateStudent />)}],
+            ["Edit",    async () => {await prompt.show("Edit Student",   <EditStudent   init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+            ["Get",     async () => {await prompt.show("Get Student",    <GetStudent    init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+            ["Delete",  async () => {await prompt.show("Delete Student", <DeleteStudent init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+        ]}/>
+
+        <HoverDropdown title="Activities" buttons={[
+            ["Create", async () => {}],
+            ["Clone",  async () => {}],
+            ["Assign", async () => {}],
+            ["Edit",   async () => {}]
+        ]}/>
+        {
+        RoleGE(user.role, "Owner") ? <>
+            <HoverDropdown title="Users" buttons={[
+                ["Create",   async () => {await prompt.show("Create User", <GrantAccess />)}],
+                ["Update",   async () => {await prompt.show("Update User", <EditUser    init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Delete",   async () => {await prompt.show("Delete User", <DeleteUser  init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+            ]}/>
+
+            <HoverDropdown title="Tokens" buttons={[
+                ["Grant",  async () => {await prompt.show("Grant Token",   <GrantToken   init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+                ["Revoke", async () => {await prompt.show("Revoke Tokens", <RevokeTokens init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+            ]}/>
+        
+            </>: <></>
+        }
+    </>
+}
 
 function EditStudent({init_uuid}: {init_uuid: string}): JSX.Element {
     const [editData, setEditData] = useState({} as ApiRequestObjects.EditStudent)

@@ -4,24 +4,35 @@
   flex-grow: 10%;
   align-items: center;
   user-select: none;
+
+  background-color: var(--bg);
+  box-shadow: 0px 8px 8px #000;
 }
 
 .title h1 {
   color: var(--text);
 }
 
-.body {
+.ribbon {
   padding: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.body {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  margin-bottom: 20px;
+
+  width: 1126px;
+  max-width: 100%;
+  margin: 0 auto;
+  border-inline: 1px solid var(--bg);
 }
 
 input {
-  border: 1px solid var(--border);
-  border-top: 1px solid var(--text-muted);
-  border-radius: 10px;
-
+  border: none;
   background-color: var(--bg-light);
 
   padding: 5px;
@@ -29,17 +40,16 @@ input {
 }
 
 button {
-  border: 1px solid var(--border);
-  border-top: 1px solid var(--text-muted);
-  border-radius: 10px;
-
+  border: none;
   background-color: var(--bg-light);
-  padding: 10px;
+  box-sizing: border-box;
   
+  margin: 0px;
+  padding: 10px;
 }
 
 button:hover {
-  background-color: var(--border);
+  background-color: var(--accent);
 }
 
 .loggedInUser {
@@ -49,10 +59,7 @@ button:hover {
 }
 
 select {
-  border: 1px solid var(--border);
-  border-top: 1px solid var(--text-muted);
-  border-radius: 10px;
-
+  border: none;
   background-color: var(--bg-light);
 
   padding: 5px;
