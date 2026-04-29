@@ -5,6 +5,7 @@
 }
 
 .nntable {
+  border: none;
   margin-top: auto;
   padding-bottom: 30px;
 }
@@ -37,7 +38,7 @@
 }
 
 .incompleteStudent .numberLabel:hover {
-  background-color: var(--social-bg);
+  background-color: var(--border-muted);
 }
 
 .incompleteStudent .removeButton {
@@ -53,29 +54,22 @@
 }
 
 .completeStudent .studentButton {
-  background-color: var(--accent-bg);
+  /* background-color: var(--accent-bg); */
   width: 70%;
   box-sizing: border-box;
 }
-
-.completeStudent .studentButton:hover {
-  background-color: var(--accent-border);
-}
-
 .completeStudent .numberLabel {
-  background-color: var(--accent-bg);
   width: 8%;
   margin: 1%;
   box-sizing: border-box;
 }
 
-
-.completeStudent .removeButton {
-  background-color: var(--accent-bg);
-  width: 20%;
-  box-sizing: border-box;
+.completeStudent .numberLabel:hover {
+  background-color: var(--border-muted);
 }
 
-.completeStudent .removeButton:hover {
-  background-color: var(--accent-border);
+.completeStudent .removeButton {
+  /* background-color: var(--accent-bg); */
+  width: 20%;
+  box-sizing: border-box;
 }

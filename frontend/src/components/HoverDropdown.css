@@ -1,12 +1,14 @@
 .dropdown-button {
   padding: 10px;
-  background-color: var(--accent-bg);
-  border: none;
+  /* background-color: var(--border-muted); */
+  /* border: none; */
   min-width: 150px;
 }
 
 .dropdown-button:hover {
-  background-color: var(--accent-border);
+  border-bottom: none;
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
 }
 
 .dropdown-element-button {
@@ -20,10 +22,6 @@
   min-height: 50px;
 }
 
-.dropdown-element-button:hover{
-  background-color: #3c434f;
-}
-
 .dropdown-ul {
   position: absolute;
   top: 100%;
@@ -33,7 +31,6 @@
   padding: 4px 0;
   min-width: 150px;
   z-index: 1000;
-  background-color: var(--border);
 }
 
 .dropdown-ul li {

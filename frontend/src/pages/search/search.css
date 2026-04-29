@@ -5,6 +5,7 @@
 }
 
 .searchtable {
+  border: none;
   margin-top: auto;
   padding-bottom: 30px;
 }

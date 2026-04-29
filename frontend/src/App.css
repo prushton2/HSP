@@ -6,6 +6,10 @@
   user-select: none;
 }
 
+.title h1 {
+  color: var(--text);
+}
+
 .body {
   padding: 10px;
   display: flex;
@@ -19,9 +23,13 @@ input {
 }
 
 button {
-  background-color: var(--social-bg);
+  border: 1px solid var(--border);
+  border-top: 1px solid var(--text-muted);
+
+  border-radius: 10px;
+  background-color: var(--bg-light);
   padding: 10px;
-  border: none;
+  
 }
 
 button:hover {
@@ -32,4 +40,9 @@ button:hover {
   position: absolute;
   right: 0px;
   padding: 20px;
+}
+
+select {
+  border: none;
+  padding: 5px;
 }
