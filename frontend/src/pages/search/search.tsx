@@ -2,7 +2,7 @@ import './search.css'
 import { Http } from '../../axios/axios'
 import type { ApiRequestObjects, ApiResponseObjects } from '../../axios/structs'
 import { formatProperly } from '../../components/Format'
-import { Modal, prompt } from '../../components/Modal'
+import { prompt } from '../../components/Modal'
 import { useState, type JSX } from 'react'
 
 export default function Search(): JSX.Element {
@@ -34,7 +34,7 @@ export default function Search(): JSX.Element {
                     <td className='lefttd'>Hall</td> <td><select  onChange={(e) => setSearchState({...searchState, hall: e.target.value == "Unspecified" ? null : e.target.value})}> {search_options} </select></td>
                 </tr>
                 <tr>
-                    <td colSpan={2}><button onClick={async () => setResults(await Http.Student.Search(searchState))}> Search </button></td>
+                    <td /><td><button onClick={async () => setResults(await Http.Student.Search(searchState))}> Search </button></td>
                 </tr>
             </tbody>
             </table>

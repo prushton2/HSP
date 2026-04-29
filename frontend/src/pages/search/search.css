@@ -1,35 +1,30 @@
-.title {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .searchtable {
   border: none;
   margin-top: auto;
   padding-bottom: 30px;
   border-collapse: collapse;
+  width: 100%;
+  /* max-width: 400px; */
+  table-layout: fixed;
 }
 
 .searchtable td {
-  padding: 2px 0;
+  padding: 2px 4px;
 }
 
 .searchtable .lefttd {
-  width: min-content;
+  width: 100px;
+  white-space: nowrap;
 }
 
-.searchtable input {
+.searchtable input,
+.searchtable select,
+.searchtable button {
   width: 100%;
-  border-collapse: collapse;
+  box-sizing: border-box;
 }
 
 .searchtable button {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.searchtable select {
   width: 100%;
   border-collapse: collapse;
 }
