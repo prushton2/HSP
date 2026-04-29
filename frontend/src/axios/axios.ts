@@ -66,6 +66,17 @@ export namespace Http {
             const response = await axios.post("/api/student/search", params);
             return response.data as ApiResponseObjects.FullStudent[];
         }
+
+        export async function Numbers(params: number[]): Promise<Result<ApiResponseObjects.FullStudent[], string>> {
+            try {
+                const response = await axios.post("/api/student/numbers", {numbers: params});
+                return NewResult.from_ok(response.data);
+            } catch (err) {
+                if(!axios.isAxiosError(err)) { return NewResult.from_err("Non Axios Error"); }
+                return NewResult.from_err(err.response?.data);
+            }
+
+        }
     }
 
     export namespace User {

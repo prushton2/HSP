@@ -24,6 +24,7 @@ pub trait StudentRepository: Send + Sync {
     async fn get_residence   (&self, uuid: &str) -> Result<ResidenceInfo, Error>;
     async fn search_residence(&self, params: &SearchResidenceInfo) -> Result<Vec<ResidenceInfo>, Error>;
 }
+
 #[derive(Serialize, Deserialize)]
 pub struct StudentInfo {
     pub uuid:     String,

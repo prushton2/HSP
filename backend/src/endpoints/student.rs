@@ -151,3 +151,25 @@ pub async fn search_students(State(state): State<Arc<super::Services>>, jar: Coo
         Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     };
 }
+
+#[derive(Deserialize)]
+pub struct GetFromNumbers {
+    numbers: Vec<i32>
+}
+pub async fn get_from_numbers(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<GetFromNumbers>) -> (StatusCode, String) {
+    let auth = state.auth.read().await;
+    let user = match auth.is_authenticated(&jar, &Role::Staff, "get_from_numbers").await {
+        Some(t) => t,
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
+    };
+    drop(auth);
+
+    let service = state.student.read().await;
+
+    let students = match service.get_from_numbers(body.numbers).await {
+        Ok(t) => t,
+        Err(t) => return (StatusCode::INTERNAL_SERVER_ERROR, t.log_to_obfuscated(&user.uuid))
+    };
+
+    (StatusCode::OK, serde_json::to_string(&students).unwrap())
+}

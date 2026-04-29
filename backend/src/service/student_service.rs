@@ -1,6 +1,6 @@
 // The service handles the actual logic to doing stuff to the database.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -245,6 +245,64 @@ impl StudentService {
         }
 
         Ok(student_info)
+    }
+
+    pub async fn get_from_numbers(&self, numbers: Vec<i32>) -> Result<Vec<FullStudent>, Error> {
+        let hashset_numbers: HashSet<i32> = HashSet::from_iter(numbers);
+        let mut map: HashMap<&String, FullStudent> = [].into();
+
+        let numbers = match self.repo.search_studentinfo(&UpdateStudentInfo { uuid: "".to_owned(), fname: None, lname: None, number: None }).await {
+            Ok(t) => t,
+            Err(t) => return Err(Error::ErrorDuring("Getting student info".to_owned(), Box::new(t)))
+        };
+
+        numbers.iter().for_each(|e| {
+            if hashset_numbers.contains(&e.number) {
+                map.insert(
+                    &e.uuid,
+                    FullStudent { 
+                        fname: String::from(""),
+                        lname: String::from(""),
+                        pronouns: String::from(""),
+                        number: e.number,
+                        hall: String::from(""),
+                        room: -1,
+                        wing: String::from("")
+                    }
+                );
+            }
+        });
+
+        let residences = match self.repo.search_residence(&SearchResidenceInfo {uuid: String::from(""), hall: None, wing: None, room: None}).await {
+            Ok(t) => t,
+            Err(t) => return Err(Error::ErrorDuring("Getting residence info".to_owned(), Box::new(t)))
+        };
+
+        residences.iter().for_each(|e| {
+            if let Some(reference) = map.get_mut(&e.uuid) {
+                reference.hall = e.hall.clone();
+                reference.room = e.room;
+                reference.wing = e.wing.clone();
+            }
+        });
+
+        let encrypted = match self.repo.getall_encrypted().await {
+            Ok(t) => t,
+            Err(t) => return Err(Error::ErrorDuring("Getting residence info".to_owned(), Box::new(t)))
+        };
+
+        encrypted.iter().for_each(|e| {
+            if let Some(reference) = map.get_mut(&e.uuid) {
+                let decrypted = self.encryption.decrypt(&e.data);
+                reference.fname = decrypted.first_name;
+                reference.lname = decrypted.last_name;
+                reference.pronouns = decrypted.pronouns;
+            }
+        });
+
+
+
+        return Ok(map.into_iter().map(|(_, v)| {v}).collect::<Vec<FullStudent>>());
     }
 }
 
