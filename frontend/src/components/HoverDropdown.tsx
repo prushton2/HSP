@@ -20,7 +20,7 @@ export default function HoverDropdown({title, buttons}: {title: string, buttons:
       onMouseLeave={() => setIsOpen(false)}
     >
       {/* Trigger */}
-      <button className="dropdown-button">{title}</button>
+      <button className={`dropdown-button${isOpen ? "-open" : ""}`}>{title}</button>
 
       {/* Dropdown */}
       {isOpen && (

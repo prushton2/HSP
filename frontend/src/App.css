@@ -18,15 +18,21 @@
 }
 
 input {
-  border: none;
+  border: 1px solid var(--border);
+  border-top: 1px solid var(--text-muted);
+  border-radius: 10px;
+
+  background-color: var(--bg-light);
+
   padding: 5px;
+  margin: 3px;
 }
 
 button {
   border: 1px solid var(--border);
   border-top: 1px solid var(--text-muted);
-
   border-radius: 10px;
+
   background-color: var(--bg-light);
   padding: 10px;
   
@@ -43,6 +49,12 @@ button:hover {
 }
 
 select {
-  border: none;
+  border: 1px solid var(--border);
+  border-top: 1px solid var(--text-muted);
+  border-radius: 10px;
+
+  background-color: var(--bg-light);
+
   padding: 5px;
+  margin: 3px;
 }
