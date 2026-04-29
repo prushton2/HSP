@@ -1,37 +1,28 @@
-import { useEffect, useState, type JSX } from 'react'
 import './Admin.css'
+import { useEffect, useState, type JSX } from 'react'
 import { Http } from '../../axios/axios'
 import { type ApiRequestObjects, type ApiResponseObjects, type Tables, DefaultAllStudentInfo } from '../../axios/structs';
-import { Modal, prompt } from '../../components/Modal';
+import { prompt } from '../../components/Modal';
 import HoverDropdown from '../../components/HoverDropdown';
 import RenderTable from './RenderTable';
 import { Toast } from '../../components/toast';
 import { RoleGE } from '../../components/Role';
 
-function Admin() {
+function Admin({user}: {user: Tables.Users}) {
     const [studentInfo, setStudentInfo] = useState<ApiResponseObjects.AllTables>({} as ApiResponseObjects.AllTables);
     const [selectedUUID, setSelectedUUID] = useState<string>("");
-    const [user, setUser] = useState<Tables.Users>({fname: "", lname: "", uuid: "", role: ""} as Tables.Users);
     
     
     useEffect(() => {
         async function init() {
             let info = await Http.Admin.GetAllTables()
             setStudentInfo(info);
-            let user = await Toast.WrapErr(() => Http.Self());
-            if(user.is_ok()) {
-                setUser(user.into_ok())
-            }
         }
         init();
     }, [])
 
     return (
     <>
-        <Modal />
-        <div className="title">
-        <h1 onClick={() => window.location.href = "/"}>HSP Admin</h1>
-        </div>
         <div className='ribbon'>
             <HoverDropdown title="Student" buttons={[
                 ["Create",  async () => {await prompt.show("Create Student", <CreateStudent />)}],

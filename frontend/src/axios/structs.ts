@@ -79,8 +79,7 @@ export namespace Tables {
     
     export interface Tokens {
         uuid: string,
-        token: string,
-        signup_hash: string,
+        signed_up: boolean,
         expiry: number
     }
     

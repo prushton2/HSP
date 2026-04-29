@@ -7,7 +7,7 @@ use crate::encryption::Encryption;
 use crate::types::Error;
 
 use crate::repository::Repository;
-use crate::repository::auth_repository::{FullUser, TokenInfo};
+use crate::repository::auth_repository::{FullUser};
 use crate::repository::student_repository::{EncryptedInfo, ResidenceInfo, SearchResidenceInfo, SearchStudentInfo, StudentInfo};
 
 pub struct AdminService {
@@ -30,7 +30,7 @@ impl AdminService {
             studentinfo: self.repo.search_studentinfo(&SearchStudentInfo{uuid: String::from(""), fname: None, lname: None, number: None}).await?,
             encryptedinfo: self.repo.getall_encrypted().await?,
             users: self.repo.getall_user().await?,
-            tokens: self.repo.getall_token().await?
+            tokens: self.repo.getall_token().await?.iter().map(|f| {ObfuscatedTokenInfo {uuid: f.uuid.clone(), signed_up: f.signup_hash == "".to_owned(), expiry: f.expiry}}).collect()
         })
     }
 }
@@ -41,5 +41,12 @@ pub struct AllTables {
     pub studentinfo: Vec<StudentInfo>,
     pub encryptedinfo: Vec<EncryptedInfo>,
     pub users: Vec<FullUser>,
-    pub tokens: Vec<TokenInfo>
+    pub tokens: Vec<ObfuscatedTokenInfo>
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ObfuscatedTokenInfo {
+    pub uuid: String,
+    pub signed_up: bool,
+    pub expiry: i64
 }

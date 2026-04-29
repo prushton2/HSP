@@ -18,19 +18,30 @@
   box-sizing: border-box;
 }
 
+
+
 .incompleteStudent {
   margin: 10px;
   width: auto;
 }
 
-.incompleteStudent .studentbutton {
-  width: 80%;
+.incompleteStudent .studentButton {
+  width: 70%;
   box-sizing: border-box;
 }
 
-.incompleteStudent .removeButton {
-  width: 18%;
+.incompleteStudent .numberLabel {
+  width: 8%;
   margin: 1%;
+  box-sizing: border-box;
+}
+
+.incompleteStudent .numberLabel:hover {
+  background-color: var(--social-bg);
+}
+
+.incompleteStudent .removeButton {
+  width: 20%;
   box-sizing: border-box;
 }
 
@@ -41,15 +52,30 @@
   width: auto;
 }
 
-.completeStudent .studentbutton {
+.completeStudent .studentButton {
   background-color: var(--accent-bg);
-  width: 80%;
+  width: 70%;
   box-sizing: border-box;
 }
 
-.completeStudent .removeButton {
+.completeStudent .studentButton:hover {
+  background-color: var(--accent-border);
+}
+
+.completeStudent .numberLabel {
   background-color: var(--accent-bg);
-  width: 18%;
+  width: 8%;
   margin: 1%;
   box-sizing: border-box;
+}
+
+
+.completeStudent .removeButton {
+  background-color: var(--accent-bg);
+  width: 20%;
+  box-sizing: border-box;
+}
+
+.completeStudent .removeButton:hover {
+  background-color: var(--accent-border);
 }

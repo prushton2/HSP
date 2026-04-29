@@ -1,11 +1,17 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-import type { Tables } from './axios/structs'
-import { Http } from './axios/axios';
-import { Toast } from './components/toast';
-import { RoleGE } from './components/Role';
+import "./App.css"
+import { useEffect, useState, type JSX } from "react";
+import { Toast } from "./components/toast";
+import { Http } from "./axios/axios";
+import type { Tables } from "./axios/structs";
 
-function App() {
+import { BrowserRouter, Route, Routes } from "react-router";
+import Home from './pages/home/Home.tsx'
+import Admin from './pages/admin/Admin.tsx';
+import Signup from './pages/signup/signup.tsx';
+import Nursing from './pages/nursing/nursing.tsx';
+import Search from './pages/search/search.tsx';
+
+export default function App(): JSX.Element {
     const [user, setUser] = useState<Tables.Users>({fname: "", lname: "", uuid: "", role: ""} as Tables.Users);
 
     useEffect(() => {
@@ -16,26 +22,43 @@ function App() {
             }
         }
         init();
-    })
+    }, [])
 
-    return (
-        <>
-        <div className="title">
-            <h1>HSP {user.fname} </h1>
+    return <>
+        <div className="title" onClick={() => {if(window.location.pathname != "/") {window.location.href = "/"}}}>
+            <h1>{GetWindowTitle()}</h1>
         </div>
-
+        <div className='loggedInUser'>{user.fname} <br /> {user.lname}</div>
         <div className="body">
-            { RoleGE(user.role, "Admin") ?
-                <div className="titleButton" onClick={() => window.location.href="/admin"}>Admin</div>
-                : <></>
-            }
-            <div className="titleButton" onClick={() => window.location.href="/nursing"}>Nursing Numbers</div>
-            <div className="titleButton" onClick={() => window.location.href="/activities"}>Activities</div>
-            <div className="titleButton" onClick={() => window.location.href="/search"}>Search</div>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/" element={<Home user={user}/>} />
+                    <Route path="/admin" element={<Admin user={user}/>} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/nursing" element={<Nursing />} />
+                    <Route path="/search" element={<Search />} />
+                </Routes>
+            </BrowserRouter>
         </div>
-
-        </>
-    )
+    </>
 }
 
-export default App
+function GetWindowTitle(): string {
+    console.log(window.location.pathname);
+    switch (window.location.pathname) {
+        case "/":
+            return "High School Program";
+        case "/admin":
+            return "HSP Admin";
+        case "/signup":
+            return "Signup";
+        case "/nursing":
+            return "Nursing Numbers";
+        case "/search":
+            return "Search";
+        case "/activities":
+            return "Activities";
+
+    }
+    return "No Title"
+}

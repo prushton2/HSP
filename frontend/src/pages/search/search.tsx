@@ -1,8 +1,8 @@
+import './search.css'
 import { Http } from '../../axios/axios'
 import type { ApiRequestObjects, ApiResponseObjects } from '../../axios/structs'
 import { formatProperly } from '../../components/Format'
 import { Modal, prompt } from '../../components/Modal'
-import './search.css'
 import { useState, type JSX } from 'react'
 
 export default function Search(): JSX.Element {
@@ -17,11 +17,6 @@ export default function Search(): JSX.Element {
     ]
     return (
         <>
-            <Modal />
-            <div className="title">
-                <h1 onClick={() => window.location.href = "/"}>Search</h1>
-            </div>
-
             {RenderSearchResults(results)}
 
             <table className='searchtable'>

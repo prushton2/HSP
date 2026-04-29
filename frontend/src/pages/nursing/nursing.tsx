@@ -1,9 +1,9 @@
+import './nursing.css'
 import { Http } from '../../axios/axios';
 import type { ApiResponseObjects } from '../../axios/structs';
 import { formatProperly } from '../../components/Format';
-import { Modal, prompt } from '../../components/Modal';
+import { prompt } from '../../components/Modal';
 import { Toast } from '../../components/toast';
-import './nursing.css'
 import { useEffect, useRef, useState, type JSX } from 'react'
 
 export default function Nursing(): JSX.Element {
@@ -15,17 +15,25 @@ export default function Nursing(): JSX.Element {
     let ref = useRef(0);
 
     useEffect(() => {
+        if(numbers.length == 0) {
+            setIncompleteStudents([]);
+            setCompleteStudents([]);
+            return
+        }
+
         clearTimeout(ref.current);
         setLoading(true);
+
         ref.current = setTimeout(async () => {
             let response = await Toast.WrapErr(() => Http.Student.Numbers(numbers));
             if(response.is_ok()) {
                 console.log(response.into_ok())
-                setIncompleteStudents(response.into_ok())
+                setIncompleteStudents(response.into_ok().sort((a, b) => a.number - b.number))
                 setCompleteStudents([])
                 setLoading(false);
             }
         }, 1000)
+
     }, [numbers])
 
     function RenderStudents(students: ApiResponseObjects.FullStudent[], complete: boolean): JSX.Element[] {
@@ -35,29 +43,31 @@ export default function Nursing(): JSX.Element {
         
         return students.map<JSX.Element>((e, i) => {
             return <div className={complete ? "completeStudent" : "incompleteStudent"}>
-                <button className="studentbutton" onClick={async() => {
+
+                <button className="studentButton" onClick={async() => {
                     await prompt.show("", <StudentModal student={e} />)}}
                 >{e.fname} {e.lname}</button>
+
+                <button className='numberLabel'>
+                    #{e.number}
+                </button>
+
                 <button className='removeButton' onClick={() => {
                     if(!complete) {
-                        setCompleteStudents([e, ...completeStudents])
+                        setCompleteStudents([e, ...completeStudents].sort((a, b) => a.number - b.number))
                         setIncompleteStudents(incompleteStudents.filter((_, j) => {return i != j}))
                     } else {
-                        setIncompleteStudents([e, ...incompleteStudents])
+                        setIncompleteStudents([e, ...incompleteStudents].sort((a, b) => a.number - b.number))
                         setCompleteStudents(completeStudents.filter((_, j) => {return i != j}))
                     }
                 }}> {complete ? "Unsend" : "Send"} </button>
+
             </div>
         })
     }
 
     return (
         <>
-            <Modal />
-            <div className="title">
-                <h1 onClick={() => window.location.href = "/"}>Nursing</h1>
-            </div>
-
             <div className="students">
                 {loading ? <h2>Loading...</h2> : <>
                     {incompleteStudents.length > 0 ? <h2>Students</h2> : <></>}

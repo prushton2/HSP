@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import "../../App.css"
 import { Http } from "../../axios/axios";
 import { useSearchParams } from "react-router";
 

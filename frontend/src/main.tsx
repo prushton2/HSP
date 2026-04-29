@@ -1,25 +1,14 @@
+import './index.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Route, Routes } from "react-router";
-import './index.css'
-import App from './App.tsx'
-import Admin from './pages/admin/Admin.tsx';
-import Signup from './pages/signup/signup.tsx';
-import Nursing from './pages/nursing/nursing.tsx';
-import Search from './pages/search/search.tsx';
 import { ToastContainer } from './components/toast.tsx';
+import App from './App.tsx';
+import { Modal } from './components/Modal.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/nursing" element={<Nursing />} />
-        <Route path="/search" element={<Search />} />
-      </Routes>
-    </BrowserRouter>
+    <App />
+    <Modal />
     <ToastContainer />
   </StrictMode>,
 )

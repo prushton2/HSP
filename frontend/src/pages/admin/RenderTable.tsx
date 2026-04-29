@@ -22,42 +22,41 @@ export default function RenderTable({info, tag, select, selected}: {select: (uui
         case "residencies":
             head = <tr>
                 <th>UUID</th>
-                <th>hall</th>
-                <th>room</th>
-                <th>wing</th>
+                <th>Hall</th>
+                <th>Room</th>
+                <th>Wing</th>
             </tr>
             break;
 
         case "student_activities":
             head = <tr>
                 <th>UUID</th>
-                <th>date</th>
-                <th>activity</th>
+                <th>Date</th>
+                <th>Activity</th>
             </tr>
             break;
         case "activities":
             head = <tr>
-                <th>activity</th>
-                <th>date</th>
-                <th>staff</th>
+                <th>Activity</th>
+                <th>Date</th>
+                <th>Staff</th>
             </tr>
             break;
         
 
         case "users":
             head = <tr>
-                <th>uuid</th>
-                <th>first name</th>
-                <th>last name</th>
-                <th>role</th>
+                <th>UUID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Role</th>
             </tr>
             break;
         case "tokens":
             head = <tr>
-                <th>uuid</th>
-                <th>token</th>
-                <th>signup hash</th>
-                <th>expiry</th>
+                <th>UUID</th>
+                <th>Signed Up</th>
+                <th>Expiry</th>
             </tr>
             break;
 
@@ -107,8 +106,7 @@ export default function RenderTable({info, tag, select, selected}: {select: (uui
             case "tokens":
                 table_row = <>
                     <td>{(row as Tables.Tokens).uuid}</td>
-                    <td>{(row as Tables.Tokens).token}</td>
-                    <td>{(row as Tables.Tokens).signup_hash}</td>
+                    <td>{(row as Tables.Tokens).signed_up ? "true" : "false"}</td>
                     <td>{(new Date((row as Tables.Tokens).expiry*1000)).toLocaleString()}</td>
                 </>
                 break;
