@@ -6,7 +6,7 @@
   user-select: none;
 
   background-color: var(--bg);
-  box-shadow: 0px 8px 8px #000;
+  box-shadow: 0px 8px 8px #111;
 }
 
 .title h1 {
@@ -23,7 +23,7 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  margin-bottom: 20px;
+  padding-bottom: 20px;
 
   width: 1126px;
   max-width: 100%;
@@ -32,17 +32,60 @@
 }
 
 input {
+  all: unset;
+  
   border: none;
-  background-color: var(--bg-light);
-
-  padding: 5px;
-  margin: 3px;
-}
-
-button {
-  border: none;
+  color: var(--text);
   background-color: var(--bg-light);
   box-sizing: border-box;
+  
+  padding: 5px;
+}
+
+input[type="checkbox"] {
+  all: unset;
+  box-sizing: border-box;
+  width:  20px;
+  height: 20px;
+  /* border: 1.5px solid #d4d4d4; */
+  border-radius: 4px;
+  background: var(--bg-light);
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+input[type="checkbox"]::before {
+  content: "";
+  width:  12px;
+  height: 12px;
+  transform: scale(0);
+  transition: transform 0.12s ease-in-out;
+  background: #fff;
+  clip-path: polygon(14% 44%, 0 65%, 36% 100%, 100% 16%, 80% 0%, 36% 60%);
+}
+
+/* input[type="checkbox"]:hover {} */
+
+input[type="checkbox"]:checked {
+  background: var(--accent);
+}
+
+input[type="checkbox"]:checked::before { transform: scale(1); }
+
+/* input[type="checkbox"]:focus-visible {
+  box-shadow: 0 0 0 3px #e6f1fb;
+} */
+
+button {
+  all: unset;
+
+  border: none;
+  color: var(--text);
+  background-color: var(--bg-light);
+  box-sizing: border-box;
+  user-select: none;
   
   margin: 0px;
   padding: 10px;
@@ -52,16 +95,19 @@ button:hover {
   background-color: var(--accent);
 }
 
+select {
+  all: unset;
+
+  border: none;
+  color: var(--text);
+  background-color: var(--bg-light);
+  box-sizing: border-box;
+
+  padding: 5px;
+}
+
 .loggedInUser {
   position: absolute;
   right: 0px;
   padding: 20px;
-}
-
-select {
-  border: none;
-  background-color: var(--bg-light);
-
-  padding: 5px;
-  margin: 3px;
 }

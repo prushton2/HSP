@@ -4,12 +4,11 @@
   padding-bottom: 30px;
   border-collapse: collapse;
   width: 100%;
-  /* max-width: 400px; */
   table-layout: fixed;
 }
 
 .searchtable td {
-  padding: 2px 4px;
+  padding: 4px;
 }
 
 .searchtable .lefttd {
@@ -22,6 +21,7 @@
 .searchtable button {
   width: 100%;
   box-sizing: border-box;
+  border: none;
 }
 
 .searchtable button {
