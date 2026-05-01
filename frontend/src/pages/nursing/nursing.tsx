@@ -67,7 +67,7 @@ export default function Nursing(): JSX.Element {
     }
 
     return (
-        <>
+        <div className="nn-container">
             <div className="students">
                 {loading ? <h2>Loading...</h2> : <>
                     {incompleteStudents.length > 0 ? <h2>Students</h2> : <></>}
@@ -89,7 +89,7 @@ export default function Nursing(): JSX.Element {
                 </tr>
             </tbody>
             </table>
-        </>
+        </div>
     )
 }
 

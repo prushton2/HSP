@@ -114,9 +114,9 @@ function EditStudent({init_uuid}: {init_uuid: string}): JSX.Element {
         <table className='context_menu'>
         <tbody>
             <tr><td>uuid  </td><td><input  value={uuid} onChange={(e) => setUuid(e.target.value)}/> </td></tr>
-            <tr><td>field </td><td><select onChange={(e) => setField(e.target.value)}>{Options()}</select></td></tr>
+            <tr><td>field </td><td><select className="select" onChange={(e) => setField(e.target.value)}>{Options()}</select></td></tr>
             <tr><td>value </td><td><input  onChange={(e) => setValue(e.target.value)}/>  </td></tr>
-            <tr><td></td><td><button onClick={async () => {
+            <tr><td></td><td><button className="highlight-button" onClick={async () => {
                     await Toast.WrapFunction(() => Http.Student.Edit(editData), "Student Edited")
                 }}>Submit Edit</button></td></tr>
         </tbody>
@@ -137,7 +137,7 @@ function CreateStudent(): JSX.Element {
             <tr><td>hall  </td><td><input onChange={(e) => setState({...state, hall:   e.target.value})} /> </td></tr>
             <tr><td>room  </td><td><input onChange={(e) => setState({...state, room:   parseInt(e.target.value)})} type="number" /> </td></tr>
             <tr><td>wing  </td><td><input onChange={(e) => setState({...state, wing:   e.target.value})} /> </td></tr>
-            <tr><td></td><td><button onClick={async () => 
+            <tr><td></td><td><button className="highlight-button" onClick={async () => 
                     await Toast.WrapFunction(() => Http.Student.Create(state), "Student Created")
                 }>Create Student</button></td></tr>
         </tbody>
@@ -171,7 +171,7 @@ function GetStudent({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>hall       </td><td>{info.hall}</td></tr>
             <tr><td>room       </td><td>{info.room}</td></tr>
             <tr><td>wing       </td><td>{info.wing}</td></tr>
-            <tr><td></td><td><button onClick={async () => {
+            <tr><td></td><td><button className="highlight-button" onClick={async () => {
                     let result = await Toast.WrapErr(() => Http.Student.Get(uuid, true))
                     if(result.is_ok()) {setInfo(result.into_ok())}
                 }}>Get</button></td></tr>
@@ -190,7 +190,7 @@ function DeleteStudent({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>UUID         </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
             <tr><td>Are you sure?</td><td><input type="checkbox" onChange={(e) => setChecked(e.target.checked)} /></td></tr>
             {!checked ? <></> : 
-            <tr><td></td><td><button onClick={async () => 
+            <tr><td></td><td><button className="highlight-button" onClick={async () => 
                     await Toast.WrapFunction(() => Http.Student.Delete(uuid))
                 }>Confirm</button></td></tr>
             }
@@ -208,7 +208,7 @@ function GrantAccess(): JSX.Element {
             <tr><td>first name </td><td><input onChange={(e) => setState({...state, fname:  e.target.value})} /> </td></tr>
             <tr><td>last name </td><td><input onChange={(e) => setState({...state, lname:  e.target.value})} /> </td></tr>
             <tr><td>role  </td><td><input onChange={(e) => setState({...state, role:   e.target.value})} /> </td></tr>
-            <tr><td></td><td><button onClick={async () => {
+            <tr><td></td><td><button className="highlight-button" onClick={async () => {
                     let result = await Toast.WrapErr(() => Http.User.Create(state))
                     if(result.is_ok()) {
                         alert(`${window.origin}/signup?token=${result.into_ok().token}`)
@@ -247,7 +247,7 @@ function EditUser({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>uuid  </td><td><input  value={uuid} onChange={(e) => setUuid(e.target.value)}/> </td></tr>
             <tr><td>field </td><td><select onChange={(e) => setField(e.target.value)}>{Options()}</select></td></tr>
             <tr><td>value </td><td><input  onChange={(e) => setValue(e.target.value)}/>  </td></tr>
-            <tr><td></td><td><button onClick={async () => {
+            <tr><td></td><td><button className="highlight-button" onClick={async () => {
                     await Toast.WrapFunction(() => Http.User.Update(editData), "User Edited")
                 }}>Submit Edit</button></td></tr>
         </tbody>
@@ -265,7 +265,7 @@ function DeleteUser({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>UUID         </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
             <tr><td>Are you sure?</td><td><input type="checkbox" onChange={(e) => setChecked(e.target.checked)} /></td></tr>
             {!checked ? <></> : 
-            <tr><td></td><td><button onClick={async () => 
+            <tr><td></td><td><button className="highlight-button" onClick={async () => 
                     await Toast.WrapFunction(() => Http.User.Delete(uuid), "User Deleted")
                 }>Confirm</button></td></tr>
             }
@@ -284,7 +284,7 @@ function GrantToken({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>UUID         </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
             <tr><td>Are you sure?</td><td><input type="checkbox" onChange={(e) => setChecked(e.target.checked)} /></td></tr>
             {!checked ? <></> : 
-            <tr><td></td><td><button onClick={async () => {
+            <tr><td></td><td><button className="highlight-button" onClick={async () => {
                     let result = await Toast.WrapErr(() => Http.User.Token.Grant(uuid));
                     if(result.is_ok()) {
                         alert(`${window.origin}/signup?token=${result.into_ok().token}`)
@@ -306,7 +306,7 @@ function RevokeTokens({init_uuid}: {init_uuid: string}): JSX.Element {
             <tr><td>UUID         </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
             <tr><td>Are you sure?</td><td><input type="checkbox" onChange={(e) => setChecked(e.target.checked)} /></td></tr>
             {!checked ? <></> : 
-            <tr><td></td><td><button onClick={async () => {
+            <tr><td></td><td><button className="highlight-button" onClick={async () => {
                     await Toast.WrapFunction(() => Http.User.Token.Revoke(uuid), "All Tokens Revoked")
                 }}>Confirm</button></td></tr>
             }

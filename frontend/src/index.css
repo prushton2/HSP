@@ -20,9 +20,10 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-dark: #1f1f1f;
-    --bg:      #323232;
-    --bg-light:#464646;
+    --bg-dark:  #1f1f1f;
+    --bg:       #323232;
+    --bg-light: #464646;
+    --highlight:#686868;
 
     --text:       #FFF;
     --text-muted: #888;
@@ -47,7 +48,7 @@
 
 #root {
   text-align: center;
-  min-height: 100svh;
+  height: 100svh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;

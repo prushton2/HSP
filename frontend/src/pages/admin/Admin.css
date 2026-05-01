@@ -22,3 +22,7 @@
 .tables thead {
   background-color: var(--accent);
 }
+
+.select {
+  width: 100%;
+}

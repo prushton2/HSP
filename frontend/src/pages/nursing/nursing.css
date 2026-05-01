@@ -1,12 +1,15 @@
-.title {
+.nn-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  flex: 1;
+  min-height: 0%;
+
+  /* border: 1px solid red; */
 }
 
 .nntable {
+  flex-shrink: 0;
   border: none;
-  margin-top: auto;
   padding-bottom: 30px;
 }
 
@@ -20,6 +23,13 @@
 }
 
 
+.students {
+  flex: 1;
+  min-height: 0;
+  overflow-y: scroll;
+  padding-top: 10px;
+}
+
 
 .incompleteStudent {
   margin: 10px;
@@ -32,13 +42,12 @@
 }
 
 .incompleteStudent .numberLabel {
-  width: 8%;
-  margin: 1%;
+  width: 10%;
   box-sizing: border-box;
 }
 
 .incompleteStudent .numberLabel:hover {
-  background-color: var(--border-muted);
+  background-color: var(--bg-light);
 }
 
 .incompleteStudent .removeButton {
@@ -54,22 +63,19 @@
 }
 
 .completeStudent .studentButton {
-  /* background-color: var(--accent-bg); */
   width: 70%;
   box-sizing: border-box;
 }
 .completeStudent .numberLabel {
-  width: 8%;
-  margin: 1%;
+  width: 10%;
   box-sizing: border-box;
 }
 
 .completeStudent .numberLabel:hover {
-  background-color: var(--border-muted);
+  background-color: var(--bg-light);
 }
 
 .completeStudent .removeButton {
-  /* background-color: var(--accent-bg); */
   width: 20%;
   box-sizing: border-box;
 }
