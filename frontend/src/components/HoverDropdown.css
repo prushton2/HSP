@@ -1,12 +1,15 @@
 .dropdown-button {
   padding: 10px;
-  background-color: var(--accent-bg);
-  border: none;
   min-width: 150px;
+
+  border: none;
 }
 
-.dropdown-button:hover {
-  background-color: var(--accent-border);
+.dropdown-button-open {
+  padding: 10px;
+  min-width: 150px;
+
+  border: none;
 }
 
 .dropdown-element-button {
@@ -20,20 +23,19 @@
   min-height: 50px;
 }
 
-.dropdown-element-button:hover{
-  background-color: #3c434f;
-}
-
 .dropdown-ul {
   position: absolute;
-  top: 100%;
+  /* top: 100%; */
   left: 0;
   list-style: none;
   margin-top: 0px;
-  padding: 4px 0;
+  padding: 0px;
   min-width: 150px;
   z-index: 1000;
-  background-color: var(--border);
+
+  background-color: var(--bg-light);
+  border: 1px solid var(--border);
+  border: none;
 }
 
 .dropdown-ul li {

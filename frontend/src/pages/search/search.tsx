@@ -2,7 +2,7 @@ import './search.css'
 import { Http } from '../../axios/axios'
 import type { ApiRequestObjects, ApiResponseObjects } from '../../axios/structs'
 import { formatProperly } from '../../components/Format'
-import { Modal, prompt } from '../../components/Modal'
+import { prompt } from '../../components/Modal'
 import { useState, type JSX } from 'react'
 
 export default function Search(): JSX.Element {
@@ -16,8 +16,10 @@ export default function Search(): JSX.Element {
         <option value="davis">Davis</option>,
     ]
     return (
-        <>
-            {RenderSearchResults(results)}
+        <div className="searchpage">
+            <div className="searchresults">
+                {RenderSearchResults(results)}
+            </div>
 
             <table className='searchtable'>
             <tbody>
@@ -38,7 +40,7 @@ export default function Search(): JSX.Element {
                 </tr>
             </tbody>
             </table>
-        </>
+        </div>
     )
 }
 

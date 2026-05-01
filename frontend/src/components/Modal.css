@@ -10,7 +10,6 @@
     align-items: center;
     justify-content: center;
     background-color: rgba(107, 114, 128, 0.7);
-    /* Tailwind's bg-gray-500 with 70% opacity */
 }
 
 .modal-inner-container {
@@ -53,5 +52,6 @@
     width: 50px;
     height: 50px;
     font-size: xx-large;
+    text-align: center;
     border: none
 }

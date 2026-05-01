@@ -4,28 +4,128 @@
   flex-grow: 10%;
   align-items: center;
   user-select: none;
+
+  background-color: var(--bg);
+  box-shadow: 0px 8px 8px #111;
+}
+
+.title h1 {
+  color: var(--text);
+}
+
+.ribbon {
+  padding: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 .body {
-  padding: 10px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  min-height: 0;
+  padding-bottom: 20px;
+  
+  width: 1126px;
+  max-width: 100%;
+  margin: 0 auto;
+  border-inline: 1px solid var(--bg);
 }
 
 input {
+  all: unset;
+  
   border: none;
+  color: var(--text);
+  background-color: var(--bg-light);
+  box-sizing: border-box;
+  text-align: left;
+  
   padding: 5px;
 }
 
+input[type="checkbox"] {
+  all: unset;
+  box-sizing: border-box;
+  width:  20px;
+  height: 20px;
+  /* border: 1.5px solid #d4d4d4; */
+  border-radius: 4px;
+  background: var(--bg-light);
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+input[type="checkbox"]::before {
+  content: "";
+  width:  12px;
+  height: 12px;
+  transform: scale(0);
+  transition: transform 0.12s ease-in-out;
+  background: #fff;
+  clip-path: polygon(14% 44%, 0 65%, 36% 100%, 100% 16%, 80% 0%, 36% 60%);
+}
+
+/* input[type="checkbox"]:hover {} */
+
+input[type="checkbox"]:checked {
+  background: var(--accent);
+}
+
+input[type="checkbox"]:checked::before { transform: scale(1); }
+
+/* input[type="checkbox"]:focus-visible {
+  box-shadow: 0 0 0 3px #e6f1fb;
+} */
+
 button {
-  background-color: var(--social-bg);
-  padding: 10px;
+  all: unset;
+
   border: none;
+  color: var(--text);
+  background-color: var(--bg-light);
+  box-sizing: border-box;
+  user-select: none;
+  
+  margin: 0px;
+  padding: 10px;
 }
 
 button:hover {
-  background-color: var(--border);
+  background-color: var(--highlight);
+}
+
+.highlight-button {
+  background-color: var(--accent);
+}
+
+.highlight-button:hover {
+  background-color: var(--accent-light);
+}
+
+select {
+  all: unset;
+
+  color: var(--text);
+  background-color: var(--bg-light);
+  box-sizing: border-box;
+
+  padding: 5px 24px 5px 8px;
+  cursor: pointer;
+
+  /* dropdown arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+select:hover {
+  background-color: var(--highlight);
 }
 
 .loggedInUser {

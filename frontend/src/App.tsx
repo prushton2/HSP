@@ -13,6 +13,7 @@ import Search from './pages/search/search.tsx';
 
 export default function App(): JSX.Element {
     const [user, setUser] = useState<Tables.Users>({fname: "", lname: "", uuid: "", role: ""} as Tables.Users);
+    const [ribbon, setRibbon] = useState<JSX.Element>(<></>)
 
     useEffect(() => {
         async function init() {
@@ -25,15 +26,19 @@ export default function App(): JSX.Element {
     }, [])
 
     return <>
-        <div className="title" onClick={() => {if(window.location.pathname != "/") {window.location.href = "/"}}}>
-            <h1>{GetWindowTitle()}</h1>
+        <div className="title">
+            <h1 onClick={() => {if(window.location.pathname != "/") {window.location.href = "/"}}}>{GetWindowTitle()}</h1>
+            <div className="ribbon">
+                {ribbon}
+            </div>
         </div>
         <div className='loggedInUser'>{user.fname} <br /> {user.lname}</div>
+
         <div className="body">
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<Home user={user}/>} />
-                    <Route path="/admin" element={<Admin user={user}/>} />
+                    <Route path="/admin" element={<Admin user={user} ribbon={(e) => setRibbon(e)}/>} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/nursing" element={<Nursing />} />
                     <Route path="/search" element={<Search />} />
@@ -44,7 +49,6 @@ export default function App(): JSX.Element {
 }
 
 function GetWindowTitle(): string {
-    console.log(window.location.pathname);
     switch (window.location.pathname) {
         case "/":
             return "High School Program";
