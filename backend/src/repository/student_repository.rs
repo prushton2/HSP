@@ -1,7 +1,7 @@
+// this holds the traits that directly interface with the database. These can be easily faked for tests.
 use axum::async_trait;
 use serde::{Deserialize, Serialize};
 
-// this holds the traits that directly interface with the database. These can be easily faked for tests.
 use crate::types::Error;
 
 #[async_trait]

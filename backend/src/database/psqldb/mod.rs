@@ -56,11 +56,10 @@ impl PSQLDB {
             );
 
             CREATE TABLE IF NOT EXISTS StudentActivities (
-                UUID varchar(36),
-                date date,
-                activity text,
+                Student varchar(36),
+                Activity varchar(36),
 
-                PRIMARY KEY (UUID, date)
+                PRIMARY KEY (Student, Activity)
             );
 
             CREATE TABLE IF NOT EXISTS Activities (

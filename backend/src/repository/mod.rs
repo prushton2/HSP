@@ -1,5 +1,6 @@
 pub mod student_repository;
 pub mod auth_repository;
+pub mod activities_repository;
 
 pub use student_repository::StudentRepository;
 pub use auth_repository::AuthRepository;
