@@ -18,31 +18,32 @@ pub trait ActivitiesRepository: Send + Sync {
     async fn delete_all_binds(&self, uuid: &str, field: ActivityBindField) -> Result<(), Error>;
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Activity {
     pub uuid:  String,
     pub name:  String,
     pub staff: [String; 8],
     pub dates: [i64; 32]
 }
-
+#[derive(Serialize, Deserialize)]
 pub struct UpdateActivity {
     pub uuid:  String,
     pub name:  Option<String>,
     pub staff: Option<Vec<String>>,
     pub dates: Option<Vec<i64>>
 }
-
+#[derive(Serialize, Deserialize)]
 pub struct SearchActivity {
     pub name:  Option<String>,
     pub staff: Option<String>,
     pub dates: Option<i64>
 }
-
+#[derive(Serialize, Deserialize)]
 pub struct ActivityBind {
     pub student: String,
     pub activity: String
 }
-
+#[derive(Serialize, Deserialize)]
 pub struct SearchActivityBind {
     pub student: Option<String>,
     pub activity: Option<String>

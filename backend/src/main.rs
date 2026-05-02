@@ -42,7 +42,7 @@ async fn main() {
         let db = database::PSQLDB::new(&dbinfo).await;
         match db.init_if_uninitialized().await {
             Ok(_)         => log::info!("Database initialized"),
-            Err(t) => log::error!("{}", t.to_obfuscated())
+            Err(t) => log::error!("{}", t.to_deobfuscated())
         };
     }
 

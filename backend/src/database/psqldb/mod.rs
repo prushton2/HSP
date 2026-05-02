@@ -3,6 +3,7 @@ use tokio_postgres::{Client, NoTls};
 use crate::types::Error;
 use crate::{database::DBInfo, repository::Repository};
 
+pub mod activities;
 pub mod student;
 pub mod auth;
 
@@ -63,11 +64,10 @@ impl PSQLDB {
             );
 
             CREATE TABLE IF NOT EXISTS Activities (
-                activity text,
-                dates bigint[32]
+                uuid varchar(32) PRIMARY KEY,
+                name text,
                 staff text[8],
-
-                PRIMARY KEY (activity, date)
+                dates bigint[32],
             );
 
             CREATE TABLE IF NOT EXISTS Users (
