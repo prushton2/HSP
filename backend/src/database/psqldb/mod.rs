@@ -64,7 +64,7 @@ impl PSQLDB {
 
             CREATE TABLE IF NOT EXISTS Activities (
                 activity text,
-                date date,
+                dates bigint[32]
                 staff text[8],
 
                 PRIMARY KEY (activity, date)
