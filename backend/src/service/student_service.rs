@@ -1,6 +1,7 @@
 // The service handles the actual logic to doing stuff to the database.
 
 use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -14,11 +15,11 @@ use crate::types::Error;
 
 pub struct StudentService {
     repo: Box<dyn StudentRepository>,
-    encryption: Box<dyn Encryption>
+    encryption: Arc<dyn Encryption>
 }
 
 impl StudentService {
-    pub fn new(repo: Box<dyn StudentRepository>, encryption: Box<dyn Encryption>) -> Self {
+    pub fn new(repo: Box<dyn StudentRepository>, encryption: Arc<dyn Encryption>) -> Self {
         Self {
             repo: repo,
             encryption: encryption

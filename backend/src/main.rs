@@ -46,20 +46,26 @@ async fn main() {
         };
     }
 
+    let encryption = Arc::new(encryption::PlaintextEncryption::new());
+
     let state = Arc::new(
         endpoints::Services { 
             student: RwLock::new(service::StudentService::new(
                 Box::new(database::PSQLDB::new(&dbinfo).await),
-                Box::new(encryption::PlaintextEncryption::new())
+                encryption.clone()
             )),
             admin: RwLock::new(service::AdminService::new(
                 Box::new(database::PSQLDB::new(&dbinfo).await),
-                Box::new(encryption::PlaintextEncryption::new())
+                encryption.clone()
             )),
             auth: RwLock::new(service::AuthService::new(
                 Box::new(database::PSQLDB::new(&dbinfo).await),
-                Box::new(encryption::PlaintextEncryption::new())
+                encryption.clone()
             )),
+            activities: RwLock::new(service::ActivitiesService::new(
+                Box::new(database::PSQLDB::new(&dbinfo).await),
+                encryption.clone()
+            ))
         }
     );
 
@@ -101,6 +107,7 @@ async fn main() {
         .route("/auth/grant",  post(endpoints::auth::grant_token))
         .route("/auth/revoke", post(endpoints::auth::revoke_tokens))
 
+        .route("/activity/create", post(endpoints::activities::create_activity))
 
 
         .with_state(state); // move db in directly, no clone needed

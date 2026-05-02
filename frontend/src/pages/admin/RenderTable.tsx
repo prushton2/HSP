@@ -37,7 +37,8 @@ export default function RenderTable({info, tag, select, selected}: {select: (uui
             break;
         case "activities":
             head = <tr>
-                <th>Activity</th>
+                <th>UUID</th>
+                <th>Name</th>
                 <th>Date</th>
                 <th>Staff</th>
             </tr>
@@ -89,9 +90,13 @@ export default function RenderTable({info, tag, select, selected}: {select: (uui
                 break;
             case "activities":
                 table_row = <>
-                    <td>{(row as Tables.Activities).activity}</td>
-                    <td>{(row as Tables.Activities).date}</td>
-                    <td>{(row as Tables.Activities).staff}</td>
+                    <td>{(row as Tables.Activity).uuid}</td>
+                    <td>{(row as Tables.Activity).name}</td>
+                    <td>{(row as Tables.Activity).dates.filter((e) => e != 0).map((e) => {
+                        let date = new Date(e);
+                        return `${date.getMonth()}/${date.getDay()}`
+                    }).join("; ")}</td>
+                    <td>{(row as Tables.Activity).staff.filter((e) => e != "").join("; ")}</td>
                 </>
                 break;
 
@@ -112,14 +117,14 @@ export default function RenderTable({info, tag, select, selected}: {select: (uui
                 break;
         }
 
-        if(tag == "activities") {
-            table_rows.push(
-                <tr>
-                    {table_row}
-                </tr>
-            );
-            return;
-        } 
+        // if(tag == "activities") {
+        //     table_rows.push(
+        //         <tr>
+        //             {table_row}
+        //         </tr>
+        //     );
+        //     return;
+        // } 
         
         if(selected == (row as any).uuid) {
             table_rows = [

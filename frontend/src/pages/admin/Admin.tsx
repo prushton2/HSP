@@ -1,4 +1,5 @@
 import './Admin.css'
+import "react-datepicker/dist/react-datepicker.css";
 import { useEffect, useState, type JSX } from 'react'
 import { Http } from '../../axios/axios'
 import { type ApiRequestObjects, type ApiResponseObjects, type Tables, DefaultAllStudentInfo } from '../../axios/structs';
@@ -7,6 +8,7 @@ import HoverDropdown from '../../components/HoverDropdown';
 import RenderTable from './RenderTable';
 import { Toast } from '../../components/toast';
 import { RoleGE } from '../../components/Role';
+import DatePicker from 'react-datepicker';
 
 function Admin({user, ribbon}: {user: Tables.Users, ribbon: (e: JSX.Element) => void}) {
     const [studentInfo, setStudentInfo] = useState<ApiResponseObjects.AllTables>({} as ApiResponseObjects.AllTables);
@@ -33,6 +35,7 @@ function Admin({user, ribbon}: {user: Tables.Users, ribbon: (e: JSX.Element) => 
         <div className="tables">
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.studentinfo} tag="student_info" />
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.residence} tag="residencies" />
+            <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.activities} tag="activities" />
             {
                 RoleGE(user.role, "Owner") ? <>
                 <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.users} tag="users" />
@@ -57,8 +60,8 @@ function Ribbon(user: Tables.Users, selectedUUID: string): JSX.Element {
         ]}/>
 
         <HoverDropdown title="Activities" buttons={[
-            ["Create", async () => {}],
-            ["Clone",  async () => {}],
+            ["Create", async () => {await prompt.show("Create Activity", <CreateActivity />)}],
+            ["Delete", async () => {}],
             ["Assign", async () => {}],
             ["Edit",   async () => {}]
         ]}/>
@@ -310,6 +313,31 @@ function RevokeTokens({init_uuid}: {init_uuid: string}): JSX.Element {
                     await Toast.WrapFunction(() => Http.User.Token.Revoke(uuid), "All Tokens Revoked")
                 }}>Confirm</button></td></tr>
             }
+        </tbody>
+        </table>
+    </>
+}
+
+function CreateActivity(): JSX.Element {
+    const [state, setState] = useState<ApiRequestObjects.CreateActivity>({} as ApiRequestObjects.CreateActivity);
+    const [dates, setDates] = useState<Date[]>([])
+
+    useEffect(() => {
+        console.log(dates.map((e) => {return e.getTime()}).join("\n"))
+    }, [dates])
+
+    return <>
+        <table className='context_menu'>
+        <tbody>
+            <tr><td>name  </td><td><input onChange={(e) => setState({...state, name:   e.target.value})} /> </td></tr>
+            <tr><td>staff </td><td><input onChange={(e) => setState({...state, staff:   e.target.value.split(";")})} /> </td></tr>
+            <tr><td>dates </td><td><DatePicker selectsMultiple shouldCloseOnSelect={false} selectedDates={dates} onChange={(dates: any) => setDates(dates as Date[])} /></td></tr>
+
+            <tr><td></td><td><button className="highlight-button" onClick={async () => {
+                let object = state;
+                object.dates = dates.map<number>((e) => e.getTime())
+                await Toast.WrapFunction(() => Http.Activity.Create(object), "Activity Created")
+            }}>Create Student</button></td></tr>
         </tbody>
         </table>
     </>

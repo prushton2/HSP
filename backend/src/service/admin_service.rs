@@ -1,9 +1,12 @@
 // The service handles the actual logic to doing stuff to the database.
 
+use std::sync::Arc;
+
 use serde::{Deserialize, Serialize};
 
 use crate::encryption::Encryption;
 
+use crate::repository::activities_repository::{Activity, SearchActivity};
 use crate::types::Error;
 
 use crate::repository::Repository;
@@ -12,11 +15,11 @@ use crate::repository::student_repository::{EncryptedInfo, ResidenceInfo, Search
 
 pub struct AdminService {
     repo: Box<dyn Repository>,
-    _encryption: Box<dyn Encryption>
+    _encryption: Arc<dyn Encryption>
 }
 
 impl AdminService {
-    pub fn new(repo: Box<dyn Repository>, encryption: Box<dyn Encryption>) -> Self {
+    pub fn new(repo: Box<dyn Repository>, encryption: Arc<dyn Encryption>) -> Self {
         Self {
             repo: repo,
             _encryption: encryption
@@ -30,7 +33,8 @@ impl AdminService {
             studentinfo: self.repo.search_studentinfo(&SearchStudentInfo{uuid: String::from(""), fname: None, lname: None, number: None}).await?,
             encryptedinfo: self.repo.getall_encrypted().await?,
             users: self.repo.getall_user().await?,
-            tokens: self.repo.getall_token().await?.iter().map(|f| {ObfuscatedTokenInfo {uuid: f.uuid.clone(), signed_up: f.signup_hash == "".to_owned(), expiry: f.expiry}}).collect()
+            tokens: self.repo.getall_token().await?.iter().map(|f| {ObfuscatedTokenInfo {uuid: f.uuid.clone(), signed_up: f.signup_hash == "".to_owned(), expiry: f.expiry}}).collect(),
+            activities: self.repo.search_activity(&SearchActivity{name: None, staff: None, dates: None}).await?
         })
     }
 }
@@ -41,7 +45,8 @@ pub struct AllTables {
     pub studentinfo: Vec<StudentInfo>,
     pub encryptedinfo: Vec<EncryptedInfo>,
     pub users: Vec<FullUser>,
-    pub tokens: Vec<ObfuscatedTokenInfo>
+    pub tokens: Vec<ObfuscatedTokenInfo>,
+    pub activities: Vec<Activity>
 }
 
 #[derive(Serialize, Deserialize)]

@@ -3,9 +3,9 @@ export namespace ApiResponseObjects {
         studentinfo: Tables.StudentInfo[],
         residence: Tables.Residencies[],
         student_activities: Tables.StudentActivities[],
-        activities: Tables.Activities[]
         users: Tables.Users[],
         tokens: Tables.Tokens[]
+        activities: Tables.Activity[]
     }
     
     export interface FullStudent {
@@ -50,6 +50,12 @@ export namespace ApiRequestObjects {
         hall:   string | null,
         room:   number | null,
     }
+
+    export interface CreateActivity {
+        name:  string,
+        staff: string[],
+        dates: number[]
+    }
 }
 
 export namespace Tables {
@@ -71,12 +77,6 @@ export namespace Tables {
         activity: string,
     }
     
-    export interface Activities {
-        activity: string,
-        date: number,
-        staff: string[]
-    }
-    
     export interface Tokens {
         uuid: string,
         signed_up: boolean,
@@ -90,8 +90,15 @@ export namespace Tables {
         role: string
     }
 
-    export type AnyTable = StudentInfo | Residencies | StudentActivities | Activities | Users | Tokens;
-    export type AnyTableArray = StudentInfo[] | Residencies[] | StudentActivities[] | Activities[] | Users[] | Tokens[];
+    export interface Activity {
+        uuid:  string,
+        name:  string,
+        staff: string[],
+        dates: number[]
+    }
+
+    export type AnyTable = StudentInfo | Residencies | StudentActivities | Activity | Users | Tokens;
+    export type AnyTableArray = StudentInfo[] | Residencies[] | StudentActivities[] | Activity[] | Users[] | Tokens[];
 }
 
 export function DefaultAllStudentInfo(): ApiRequestObjects.CreateStudent {

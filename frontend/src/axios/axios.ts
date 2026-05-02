@@ -135,6 +135,18 @@ export namespace Http {
             }
         }
     }
+
+    export namespace Activity {
+        export async function Create(activity: ApiRequestObjects.CreateActivity): Promise<Result<null, string>> {
+            try {
+                await axios.post("/api/activity/create", activity);
+                return NewResult.from_ok<null, string>(null)
+            } catch (err) {
+                if(!axios.isAxiosError(err)) { return NewResult.from_err<null, string>("Non Axios Error"); }
+                return NewResult.from_err<null, string>(err.response?.data)
+            }
+        }
+    }
 }
 
 

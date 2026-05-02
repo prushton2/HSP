@@ -64,10 +64,10 @@ impl PSQLDB {
             );
 
             CREATE TABLE IF NOT EXISTS Activities (
-                uuid varchar(32) PRIMARY KEY,
+                uuid varchar(36) PRIMARY KEY,
                 name text,
                 staff text[8],
-                dates bigint[32],
+                dates bigint[32]
             );
 
             CREATE TABLE IF NOT EXISTS Users (

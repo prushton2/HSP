@@ -1,5 +1,7 @@
 // The service handles the actual logic to doing stuff to the database.
 
+use std::sync::Arc;
+
 use chrono::Utc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
@@ -16,12 +18,12 @@ use crate::types::Role;
 
 pub struct AuthService {
     repo: Box<dyn Repository>,
-    encryption: Box<dyn Encryption>,
+    encryption: Arc<dyn Encryption>,
     signup_mutex: Mutex<bool> // load bearing drywall that determines if someone is signing up (one signup at a time)
 }
 
 impl AuthService {
-    pub fn new(repo: Box<dyn Repository>, encryption: Box<dyn Encryption>) -> Self {
+    pub fn new(repo: Box<dyn Repository>, encryption: Arc<dyn Encryption>) -> Self {
         Self {
             repo: repo,
             encryption: encryption,
