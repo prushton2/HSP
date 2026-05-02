@@ -1,6 +1,7 @@
 import { useState, type JSX } from "react";
 import type { Tables } from '../../axios/structs';
 import { formatProperly } from "../../components/Format";
+import DatePicker from "react-datepicker";
 
 export default function RenderTable({info, tag, select, selected}: {select: (uuid: string) => void, selected: string, info: Tables.AnyTableArray, tag: string}): JSX.Element {
     const [visible, setVisible] = useState<boolean>(false)
@@ -39,7 +40,7 @@ export default function RenderTable({info, tag, select, selected}: {select: (uui
             head = <tr>
                 <th>UUID</th>
                 <th>Name</th>
-                <th>Date</th>
+                <th>Dates</th>
                 <th>Staff</th>
             </tr>
             break;
@@ -89,17 +90,14 @@ export default function RenderTable({info, tag, select, selected}: {select: (uui
                 </>
                 break;
             case "activities":
+                let date_arr = (row as Tables.Activity).dates.filter((e) => e != 0).map((e) => new Date(e))
                 table_row = <>
                     <td>{(row as Tables.Activity).uuid}</td>
                     <td>{(row as Tables.Activity).name}</td>
-                    <td>{(row as Tables.Activity).dates.filter((e) => e != 0).map((e) => {
-                        let date = new Date(e);
-                        return `${date.getMonth()}/${date.getDay()}`
-                    }).join("; ")}</td>
+                    <td><DatePicker selectsMultiple shouldCloseOnSelect={false} selectedDates={date_arr}/></td>
                     <td>{(row as Tables.Activity).staff.filter((e) => e != "").join("; ")}</td>
                 </>
                 break;
-
             case "users":
                 table_row = <>
                     <td>{(row as Tables.Users).uuid}</td>
@@ -116,15 +114,6 @@ export default function RenderTable({info, tag, select, selected}: {select: (uui
                 </>
                 break;
         }
-
-        // if(tag == "activities") {
-        //     table_rows.push(
-        //         <tr>
-        //             {table_row}
-        //         </tr>
-        //     );
-        //     return;
-        // } 
         
         if(selected == (row as any).uuid) {
             table_rows = [
@@ -137,8 +126,6 @@ export default function RenderTable({info, tag, select, selected}: {select: (uui
             ...table_rows]
             return
         }
-
-
 
         table_rows.push(
             <tr 
