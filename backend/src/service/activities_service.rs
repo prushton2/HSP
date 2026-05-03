@@ -77,6 +77,20 @@ impl ActivitiesService {
         }
     }
 
+    pub async fn delete_activity(&self, uuid: &str) -> Result<(), Error> {
+        match self.repo.delete_activity(uuid).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::ErrorDuring("Deleting activities".to_owned(), Box::new(t)))
+        }
+
+        match self.repo.delete_all_binds(uuid, ActivityBindField::Activity).await {
+            Ok(_) => {},
+            Err(t) => return Err(Error::ErrorDuring("Deleting binds".to_owned(), Box::new(t)))
+        }
+
+        Ok(())
+    }
+
     pub async fn get_activity(&self, uuid: &str, get_attendees: bool, decrypt: bool) -> Result<(Activity, Vec<FullStudent>), Error> {
         let activity = match self.repo.get_activity(uuid).await {
             Ok(t) => t,

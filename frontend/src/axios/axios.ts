@@ -147,6 +147,16 @@ export namespace Http {
             }
         }
 
+        export async function Delete(uuid: string): Promise<Result<null, string>> {
+            try {
+                await axios.post("/api/activity/delete", {uuid: uuid});
+                return NewResult.from_ok<null, string>(null)
+            } catch (err) {
+                if(!axios.isAxiosError(err)) { return NewResult.from_err<null, string>("Non Axios Error"); }
+                return NewResult.from_err<null, string>(err.response?.data)
+            }
+        }
+
         export async function Edit(activity: ApiRequestObjects.EditActivity): Promise<Result<null, string>> {
             try {
                 await axios.post("/api/activity/edit", activity);

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::types::Error;
 
 #[async_trait]
+#[allow(dead_code)]
 pub trait ActivitiesRepository: Send + Sync {
     async fn insert_activity(&self, activity: &Activity) -> Result<(), Error>;
     async fn update_activity(&self, update: &UpdateActivity) -> Result<(), Error>;
@@ -49,8 +50,10 @@ pub struct SearchActivityBind {
     pub activity: Option<String>
 }
 
+#[allow(dead_code)]
 pub type DeleteActivityBinds = SearchActivityBind;
 
+#[allow(dead_code)]
 #[derive(Copy, Clone)]
 pub enum ActivityBindField {
     Student,

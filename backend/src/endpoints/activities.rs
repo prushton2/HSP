@@ -133,3 +133,30 @@ pub async fn search_activity(State(state): State<Arc<super::Services>>, jar: Coo
         Err(t) => (StatusCode::INTERNAL_SERVER_ERROR, t.log_to_obfuscated(&user.uuid))
     }
 }
+
+#[derive(Deserialize)]
+#[allow(dead_code)]
+pub struct DeleteUuid {
+    pub uuid: String,
+}
+pub async fn delete_student(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<DeleteUuid>) -> (StatusCode, String) {
+    let auth = state.auth.read().await;
+    let user = match auth.is_authenticated(&jar, &Role::Admin, "delete_student").await {
+        Some(t) => t,
+        None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
+    };
+    drop(auth);
+
+    if body.uuid == "" {
+        return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
+    }
+
+    let service = state.activities.read().await;
+    
+    let response = match service.delete_activity(&body.uuid).await {
+        Ok(_) => (StatusCode::OK, String::from("")),
+        Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
+    };
+
+    return response;
+}

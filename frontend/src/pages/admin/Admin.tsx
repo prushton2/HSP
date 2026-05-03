@@ -63,7 +63,7 @@ function Ribbon(user: Tables.Users, selectedUUID: string): JSX.Element {
         <HoverDropdown title="Activities" buttons={[
             ["Create", async () => {await prompt.show("Create Activity", <CreateActivity />)}],
             ["Edit",   async () => {await prompt.show("Edit Activity",   <EditActivity init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-            ["Delete", async () => {}],
+            ["Delete", async () => {await prompt.show("Delete Activity", <DeleteActivity init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
             ["Assign", async () => {await prompt.show("Assign Students", <BindActivity init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
             ["View",   async () => {await prompt.show("View Activity",   <GetActivity init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
         ]}/>
@@ -461,6 +461,25 @@ function GetActivity({init_uuid}: {init_uuid: string}): JSX.Element {
                     <td>{formatProperly(e.hall)} {e.room} ({e.wing})</td>
                 </tr>
                 )
+            }
+        </tbody>
+        </table>
+    </>
+}
+
+function DeleteActivity({init_uuid}: {init_uuid: string}): JSX.Element {
+    const [uuid, setUuid] = useState(init_uuid)
+    const [checked, setChecked] = useState(false)
+
+    return <>
+        <table className='context_menu'>
+        <tbody>
+            <tr><td>UUID         </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
+            <tr><td>Are you sure?</td><td><input type="checkbox" onChange={(e) => setChecked(e.target.checked)} /></td></tr>
+            {!checked ? <></> : 
+            <tr><td></td><td><button className="highlight-button" onClick={async () => 
+                    await Toast.WrapFunction(() => Http.Activity.Delete(uuid), "User Deleted")
+                }>Confirm</button></td></tr>
             }
         </tbody>
         </table>

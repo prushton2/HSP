@@ -112,6 +112,7 @@ async fn main() {
         .route("/activity/get", post(endpoints::activities::get_activity))
         .route("/activity/assign", post(endpoints::activities::bind_activity))
         .route("/activity/search", post(endpoints::activities::search_activity))
+        .route("/activity/delete", post(endpoints::activities::delete_student))
 
 
         .with_state(state); // move db in directly, no clone needed
