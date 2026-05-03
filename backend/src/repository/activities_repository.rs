@@ -7,7 +7,7 @@ use crate::types::Error;
 #[async_trait]
 pub trait ActivitiesRepository: Send + Sync {
     async fn insert_activity(&self, activity: &Activity) -> Result<(), Error>;
-    async fn update_activity(&self, uuid: &str, update: &UpdateActivity) -> Result<(), Error>;
+    async fn update_activity(&self, update: &UpdateActivity) -> Result<(), Error>;
     async fn delete_activity(&self, uuid: &str) -> Result<(), Error>;
     async fn search_activity(&self, params: &SearchActivity) -> Result<Vec<Activity>, Error>;
     async fn get_activity   (&self, uuid: &str) -> Result<Activity, Error>;

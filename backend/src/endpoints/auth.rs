@@ -52,6 +52,10 @@ pub async fn signup(State(state): State<Arc<super::Services>>, Json(body): Json<
         Err(t) => return (StatusCode::BAD_REQUEST, t.log_to_obfuscated("NO UUID")).into_response()
     };
 
+    if body.signup_hash == "" {
+        return (StatusCode::BAD_REQUEST, String::from("Provide a valid signup token")).into_response()
+    }
+
     let cookie = format!("token={}; HttpOnly; SameSite=Strict; Path=/; Max-Age={}", token, TOKEN_EXPIRY);
 
     (
@@ -73,6 +77,10 @@ pub async fn update_user(State(state): State<Arc<super::Services>>, jar: CookieJ
         Some(t) => t,
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
+
+    if body.uuid == "" {
+        return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
+    }
 
     let mut update = UpdateUser {
         fname: None,
@@ -105,6 +113,10 @@ pub async fn delete_user(State(state): State<Arc<super::Services>>, jar: CookieJ
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
 
+    if body.uuid == "" {
+        return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
+    }
+
     match service.delete_user(body.uuid.as_str()).await {
         Ok(_) => (StatusCode::OK, String::from("")),
         Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
@@ -122,6 +134,10 @@ pub async fn revoke_tokens(State(state): State<Arc<super::Services>>, jar: Cooki
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
 
+    if body.uuid == "" {
+        return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
+    }
+
     match service.revoke_tokens(body.uuid.as_str()).await {
         Ok(_) => (StatusCode::OK, String::from("")),
         Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
@@ -138,6 +154,10 @@ pub async fn grant_token(State(state): State<Arc<super::Services>>, jar: CookieJ
         Some(t) => t,
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
+
+    if body.uuid == "" {
+        return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
+    }
 
     match service.grant_token(body.uuid.as_str()).await {
         Ok(t) => (StatusCode::OK, format!("{{\"token\": \"{}\"}}", t)),

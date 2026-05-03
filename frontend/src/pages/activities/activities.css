@@ -1,0 +1,39 @@
+.activitiespage {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0%;
+}
+
+.activity-select {
+  flex-shrink: 0;
+
+  border: none;
+  margin-top: auto;
+  border-collapse: collapse;
+  width: 100%;
+  text-align: center;
+}
+
+.activity-select option {
+  padding: 4px;
+  text-align: center;
+}
+
+
+.attendees {
+  margin-top: 30px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+}
+
+.student-table {
+  flex-grow: 1;
+  border: 1px solid var(--accent);
+}
+
+.student-table thead {
+  background-color: var(--accent);
+}

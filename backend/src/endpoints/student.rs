@@ -62,6 +62,10 @@ pub async fn edit_student(State(state): State<Arc<super::Services>>, jar: Cookie
     };
     drop(auth);
 
+    if body.uuid == "" {
+        return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
+    }
+
     let service = state.student.read().await;
     
     let mut update = student_service::StudentUpdate {
@@ -105,6 +109,10 @@ pub async fn get_student(State(state): State<Arc<super::Services>>, jar: CookieJ
     };
     drop(auth);
 
+    if body.uuid == "" {
+        return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
+    }
+
     let service = state.student.read().await;
     
     return match service.get_student(&body.uuid, body.decrypt).await {
@@ -125,6 +133,10 @@ pub async fn delete_student(State(state): State<Arc<super::Services>>, jar: Cook
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
     drop(auth);
+
+    if body.uuid == "" {
+        return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
+    }
 
     let service = state.student.read().await;
     

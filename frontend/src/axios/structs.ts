@@ -56,6 +56,13 @@ export namespace ApiRequestObjects {
         staff: string[],
         dates: number[]
     }
+
+    export interface EditActivity {
+        uuid: string,
+        name:  string | null,
+        staff: string[] | null,
+        dates: number[] | null
+    }
 }
 
 export namespace Tables {

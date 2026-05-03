@@ -146,6 +146,46 @@ export namespace Http {
                 return NewResult.from_err<null, string>(err.response?.data)
             }
         }
+
+        export async function Edit(activity: ApiRequestObjects.EditActivity): Promise<Result<null, string>> {
+            try {
+                await axios.post("/api/activity/edit", activity);
+                return NewResult.from_ok<null, string>(null)
+            } catch (err) {
+                if(!axios.isAxiosError(err)) { return NewResult.from_err<null, string>("Non Axios Error"); }
+                return NewResult.from_err<null, string>(err.response?.data)
+            }
+        }
+
+        export async function Assign(uuid: string, numbers: number[]): Promise<Result<null, string>> {
+            try {
+                await axios.post("/api/activity/assign", {uuid: uuid, student_numbers: numbers});
+                return NewResult.from_ok<null, string>(null)
+            } catch (err) {
+                if(!axios.isAxiosError(err)) { return NewResult.from_err<null, string>("Non Axios Error"); }
+                return NewResult.from_err<null, string>(err.response?.data)
+            }
+        }
+
+        export async function Get(uuid: string): Promise<Result<[Tables.Activity, ApiResponseObjects.FullStudent[]], string>> {
+            try {
+                const response = await axios.post("/api/activity/get", {uuid: uuid, get_attendees: true, decrypt: true});
+                return NewResult.from_ok(response.data as [Tables.Activity, ApiResponseObjects.FullStudent[]])
+            } catch (err) {
+                if(!axios.isAxiosError(err)) { return NewResult.from_err("Non Axios Error"); }
+                return NewResult.from_err(err.response?.data)
+            }
+        }
+
+        export async function Search(date: number): Promise<Result<Tables.Activity[], string>> {
+            try {
+                const response = await axios.post("/api/activity/search", {date: date});
+                return NewResult.from_ok(response.data as Tables.Activity[])
+            } catch (err) {
+                if(!axios.isAxiosError(err)) { return NewResult.from_err("Non Axios Error"); }
+                return NewResult.from_err(err.response?.data)
+            }
+        }
     }
 }
 

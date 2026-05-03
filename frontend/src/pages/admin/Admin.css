@@ -1,4 +1,5 @@
 .tables {
+  font-family: monospace;
   padding: 10px;
   display: flex;
   flex-direction: column;
@@ -25,4 +26,15 @@
 
 .select {
   width: 100%;
+}
+
+h5 {
+  margin: 0px;
+  color: var(--text-muted)
+}
+
+
+.context_menu thead {
+  background-color: var(--bg-dark);
+  padding: 10px;
 }

@@ -10,6 +10,7 @@ import Admin from './pages/admin/Admin.tsx';
 import Signup from './pages/signup/signup.tsx';
 import Nursing from './pages/nursing/nursing.tsx';
 import Search from './pages/search/search.tsx';
+import Activities from "./pages/activities/activities.tsx";
 
 export default function App(): JSX.Element {
     const [user, setUser] = useState<Tables.Users>({fname: "", lname: "", uuid: "", role: ""} as Tables.Users);
@@ -42,6 +43,7 @@ export default function App(): JSX.Element {
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/nursing" element={<Nursing />} />
                     <Route path="/search" element={<Search />} />
+                    <Route path="/activities" element={<Activities />} />
                 </Routes>
             </BrowserRouter>
         </div>

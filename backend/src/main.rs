@@ -108,6 +108,10 @@ async fn main() {
         .route("/auth/revoke", post(endpoints::auth::revoke_tokens))
 
         .route("/activity/create", post(endpoints::activities::create_activity))
+        .route("/activity/edit", post(endpoints::activities::edit_activity))
+        .route("/activity/get", post(endpoints::activities::get_activity))
+        .route("/activity/assign", post(endpoints::activities::bind_activity))
+        .route("/activity/search", post(endpoints::activities::search_activity))
 
 
         .with_state(state); // move db in directly, no clone needed

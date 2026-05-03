@@ -20,7 +20,7 @@ impl ActivitiesRepository for super::PSQLDB {
         };
     }
 
-    async fn update_activity(&self, uuid: &str, update: &UpdateActivity) -> Result<(), Error> {
+    async fn update_activity(&self, update: &UpdateActivity) -> Result<(), Error> {
         let mut set_clauses: Vec<String> = Vec::new();
         let mut params: Vec<Box<dyn ToSql + Sync + Send>> = Vec::new();
         let mut idx = 1;
@@ -45,7 +45,7 @@ impl ActivitiesRepository for super::PSQLDB {
             return Ok(());
         }
 
-        params.push(Box::new(uuid.to_owned()));
+        params.push(Box::new(update.uuid.to_owned()));
         let query = format!("UPDATE Activities SET {} WHERE uuid = ${}", set_clauses.join(", "), idx);
 
         let param_refs: Vec<&(dyn ToSql + Sync)> = params.iter().map(|p| p.as_ref() as &(dyn ToSql + Sync)).collect();
