@@ -199,6 +199,26 @@ function DeleteStudent({init_uuid}: {init_uuid: string}): JSX.Element {
     </>
 }
 
+function UrlPopup({url}: {url: string}): JSX.Element {
+    const [copied, setCopied] = useState(false);
+
+    useEffect(() => {
+        if(copied) {
+            setTimeout(() => setCopied(false), 2500)
+        }
+    }, [copied])
+
+    return <>
+        <h4 style={{margin: "0px"}}>Send this URL to the user</h4>
+        <label style={{marginBottom: "20px", marginTop: "20px"}}>{url.substring(0, 32)}...</label>
+        <button className='highlight-button' onClick={() => {
+            navigator.clipboard.writeText(url);
+            setCopied(true);
+        }}>{copied ? "Copied!" : "Copy"}</button>
+    </>
+    
+}
+
 function GrantAccess(): JSX.Element {
     const [state, setState] = useState<Tables.Users>({} as Tables.Users);
 
@@ -211,7 +231,7 @@ function GrantAccess(): JSX.Element {
             <tr><td></td><td><button className="highlight-button" onClick={async () => {
                     let result = await Toast.WrapErr(() => Http.User.Create(state))
                     if(result.is_ok()) {
-                        alert(`${window.origin}/signup?token=${result.into_ok().token}`)
+                        prompt.show("Login URL", <UrlPopup url={`${window.origin}/signup?token=${result.into_ok().token}`} />)
                     }
                 }}>Create User</button></td></tr>
         </tbody>
@@ -286,7 +306,7 @@ function GrantToken({init_uuid}: {init_uuid: string}): JSX.Element {
                 if(!checked) {return}
                 let result = await Toast.WrapErr(() => Http.User.Token.Grant(uuid));
                 if(result.is_ok()) {
-                    alert(`Send this url to the user: ${window.origin}/signup?token=${result.into_ok().token}`)
+                    prompt.show("Login URL", <UrlPopup url={`${window.origin}/signup?token=${result.into_ok().token}`} />)
                 }
             }}>Confirm</button></td></tr>
         </tbody>
