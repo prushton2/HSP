@@ -185,7 +185,8 @@ impl StudentService {
 
     // TODO: FIX
     pub async fn search_students(&self, params: &SearchStudent) -> Result<Vec<FullStudent>, Error> {
-        let mut uuids: HashSet<String> = [].into();
+        let mut info_uuids: HashSet<String> = [].into();
+        let mut res_uuids:  HashSet<String> = [].into();
 
         let student_info_params = SearchStudentInfo {
             uuid: String::from(""),
@@ -201,22 +202,22 @@ impl StudentService {
             wing: None
         };
 
-        if student_info_params.fname.is_some() || student_info_params.lname.is_some() || student_info_params.number.is_some() {
-            match self.repo.search_studentinfo(&student_info_params).await {
-                Ok(t) => t,
-                Err(t) => return Err(Error::ErrorDuring("Searching student info".to_owned(), Box::new(t)))
-            }.iter().for_each(|f| {uuids.insert(f.uuid.clone());});
-        }
+        // fetch UUIDs of students that match the parameters
+        match self.repo.search_studentinfo(&student_info_params).await {
+            Ok(t) => t,
+            Err(t) => return Err(Error::ErrorDuring("Searching student info".to_owned(), Box::new(t)))
+        }.iter().for_each(|f| {info_uuids.insert(f.uuid.clone());});
 
-        if residence_info_params.hall.is_some() || residence_info_params.room.is_some() {
-            match self.repo.search_residence(&residence_info_params).await {
-                Ok(t) => t,
-                Err(t) => return Err(Error::ErrorDuring("Searching residence info".to_owned(), Box::new(t)))
-            }.iter().for_each(|f| {uuids.insert(f.uuid.clone());});
-        }
+        match self.repo.search_residence(&residence_info_params).await {
+            Ok(t) => t,
+            Err(t) => return Err(Error::ErrorDuring("Searching residence info".to_owned(), Box::new(t)))
+        }.iter().for_each(|f| {res_uuids.insert(f.uuid.clone());});
+
+        let uuids = info_uuids.into_iter().filter(|f| res_uuids.contains(f)).collect::<Vec<String>>();
 
         let mut student_info: Vec<FullStudent> = vec![];
 
+        // fetch the student info
         for uuid in uuids {
             let mut student = FullStudent::default();
 
