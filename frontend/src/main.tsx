@@ -1,4 +1,6 @@
+import "react-datepicker/dist/react-datepicker.css";
 import './index.css'
+import './datepicker-override.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ToastContainer } from './components/toast.tsx';

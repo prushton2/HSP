@@ -1,5 +1,4 @@
 import './Admin.css'
-import "react-datepicker/dist/react-datepicker.css";
 import { useEffect, useState, type JSX } from 'react'
 import { Http } from '../../axios/axios'
 import { type ApiRequestObjects, type ApiResponseObjects, type Tables, DefaultAllStudentInfo } from '../../axios/structs';
@@ -408,14 +407,17 @@ function GetActivity({init_uuid}: {init_uuid: string}): JSX.Element {
     return <>
         <table className='context_menu'>
         <tbody>
-            <tr><td>UUID       </td><td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td></tr>
-            <tr><td /><td><button onClick={async() => {
-                let result = await Toast.WrapErr<[Tables.Activity, ApiResponseObjects.FullStudent[]], string>(() => Http.Activity.Get(uuid))
-                if(result.is_ok()) {
-                    setInfo(result.into_ok()[0])
-                    setStudents(result.into_ok()[1])
-                }
-            }}>Get Activity</button></td></tr>
+            <tr>
+                <td>UUID</td>
+                <td><input value={uuid} onChange={(e) => setUuid(e.target.value)}/></td>
+                <td /><td><button onClick={async() => {
+                    let result = await Toast.WrapErr<[Tables.Activity, ApiResponseObjects.FullStudent[]], string>(() => Http.Activity.Get(uuid))
+                    if(result.is_ok()) {
+                        setInfo(result.into_ok()[0])
+                        setStudents(result.into_ok()[1])
+                    }
+                }}>Get Activity</button></td>
+            </tr>
         </tbody>
         </table>
         <h2>Activity</h2>

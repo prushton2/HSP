@@ -18,6 +18,7 @@ pub struct AdminService {
     _encryption: Arc<dyn Encryption>
 }
 
+#[allow(dead_code)]
 impl AdminService {
     pub fn new(repo: Box<dyn Repository>, encryption: Arc<dyn Encryption>) -> Self {
         Self {

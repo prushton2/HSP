@@ -114,16 +114,22 @@ export default function RenderTable({info, tag, select, selected}: {select: (uui
                 </>
                 break;
         }
-        
+
         if(selected == (row as any).uuid) {
-            table_rows = [
-                <tr
+
+            let row = <tr
                     onClick={() => {if (selected == (row as any).uuid) {select("0")} else {select((row as any).uuid)}}}
                     className="highlighted_row"
                 >
                     {table_row}
-                </tr>,
-            ...table_rows]
+                </tr>
+            
+            if(tag != "activities") {
+                table_rows = [row, ...table_rows]
+            } else {
+                table_rows.push(row)
+            }
+
             return
         }
 
