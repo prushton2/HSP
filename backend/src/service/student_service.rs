@@ -30,7 +30,7 @@ impl StudentService {
         self.repo.as_ref()
     }
 
-    pub async fn create_student(&self, student: &FullStudent) -> Result<(), Error> {
+    pub async fn create_student(&self, student: FullStudent) -> Result<(), Error> {
         let uuid = Uuid::new_v4().to_string();
 
         let student_info = StudentInfo {
@@ -47,9 +47,9 @@ impl StudentService {
 
         let residence = ResidenceInfo {
             uuid: uuid.clone(),
-            hall: student.hall.clone(),
+            hall: student.hall,
             room: student.room,
-            wing: student.wing.clone()
+            wing: student.wing
         };
 
         match self.repo.insert_residence(&residence).await {
@@ -58,9 +58,9 @@ impl StudentService {
         };
 
         let encrypted = self.encryption.encrypt(&EncryptedContents {
-            first_name: student.fname.clone(),
-            last_name: student.lname.clone(),
-            pronouns: student.pronouns.clone()
+            first_name: student.fname,
+            last_name: student.lname,
+            pronouns: student.pronouns
         });
 
         let encrypted_info = EncryptedInfo {

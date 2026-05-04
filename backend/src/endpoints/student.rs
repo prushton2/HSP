@@ -38,7 +38,7 @@ pub async fn new_sudent(State(state): State<Arc<super::Services>>, jar: CookieJa
         wing:     body.wing.to_ascii_lowercase(),
     };
 
-    let response = match service.create_student(&student).await {
+    let response = match service.create_student(student).await {
         Ok(_) => (StatusCode::CREATED, "".to_string()),
         Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     };

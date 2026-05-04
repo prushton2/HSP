@@ -32,7 +32,7 @@ pub async fn create_user(State(state): State<Arc<super::Services>>, jar: CookieJ
         role: Role::from(body.role)
     };
 
-    let token = match service.create_user(&new_user).await {
+    let token = match service.create_user(new_user).await {
         Ok(t) => t,
         Err(t) => return (StatusCode::INTERNAL_SERVER_ERROR, t.log_to_obfuscated(&user.uuid))
     };

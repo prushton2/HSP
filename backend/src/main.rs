@@ -74,7 +74,7 @@ async fn main() {
             let fname = std::env::args().nth(2).expect("usage: bootstrap-owner <fname> <lname>");
             let lname = std::env::args().nth(3).expect("usage: bootstrap-owner <fname> <lname>");
             let service = state.auth.write().await;
-            let signup_hash = service.create_user(&FullUser {
+            let signup_hash = service.create_user(FullUser {
                 uuid: Uuid::new_v4().to_string(),
                 fname: fname, 
                 lname: lname,

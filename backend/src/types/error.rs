@@ -15,7 +15,7 @@ impl Error {
     pub fn to_obfuscated(&self) -> String {
         match self {
             Error::ErrorDuring(_, e) => (*e).to_obfuscated(),
-            Error::InvalidParameter(p, v) => format!("Invalid parameter {} supplied to {}", v, p),
+            Error::InvalidParameter(p, v) => format!("Invalid parameter supplied to {}: {}", p, v),
             Error::PostgresError(t) => Self::obfuscate_psql_err(t),
             Error::TokioError => String::from("Tokio error"),
             Error::ExpiredError => String::from("The resource you are trying to access expired"),
@@ -33,7 +33,7 @@ impl Error {
     pub fn to_deobfuscated(&self) -> String {
         match self {
             Error::ErrorDuring(m, e) => format!("{}: {}", m, (*e).to_deobfuscated()),
-            Error::InvalidParameter(p, v) => format!("Invalid parameter {} supplied to {}", v, p),
+            Error::InvalidParameter(p, v) => format!("Invalid parameter supplied to {}: {}", p, v),
             Error::PostgresError(e) => format!("Postgres Error: {}", fmt_pg_error(&e)),
             Error::TokioError => String::from("Tokio Error"),
             Error::ExpiredError => String::from("The resource you are trying to access expired"),

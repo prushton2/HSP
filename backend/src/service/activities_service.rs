@@ -35,10 +35,14 @@ impl ActivitiesService {
 
         if activity.staff.len() < 8 {
             activity.staff.extend(vec![String::from(""); 8-activity.staff.len()]);
+        } else if activity.staff.len() > 8 {
+            return Err(Error::InvalidParameter("staff".to_owned(), "Count cannot exceed 8".to_owned()))
         }
 
         if activity.dates.len() < 32 {
             activity.dates.extend(vec![0; 32-activity.dates.len()]);
+        } else if activity.dates.len() > 32 {
+            return Err(Error::InvalidParameter("dates".to_owned(), "Count cannot exceed 32".to_owned()))
         }
 
         let new_activity = Activity {
@@ -56,16 +60,22 @@ impl ActivitiesService {
 
     pub async fn edit_activity(&self, mut update: UpdateActivity) -> Result<(), Error>{
 
-        if update.staff.is_some() && update.staff.as_ref().expect("").len() < 8 {
-            let len = update.staff.as_ref().expect("").len();
-
-            update.staff.as_mut().expect("").extend(vec![String::from(""); 8-len]);
+        if let Some(staff) = &mut update.staff {
+            if staff.len() < 8 {
+                let len = staff.len();
+                staff.extend(vec![String::from(""); 8-len]);
+            } else if staff.len() > 8 {
+                return Err(Error::InvalidParameter("staff".to_owned(), "Count cannot exceed 8".to_owned()))
+            }
         }
 
-        if update.dates.is_some() && update.dates.as_ref().expect("").len() < 32 {
-            let len = update.dates.as_ref().expect("").len();
-
-            update.dates.as_mut().expect("").extend(vec![0; 32-len]);
+        if let Some(dates) = &mut update.dates {
+            if dates.len() < 32 {
+                let len = dates.len();
+                dates.extend(vec![0; 8-len]);
+            } else if dates.len() > 32 {
+                return Err(Error::InvalidParameter("dates".to_owned(), "Count cannot exceed 32".to_owned()))
+            }
         }
 
         match self.repo.update_activity(&update).await {

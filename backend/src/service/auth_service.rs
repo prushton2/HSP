@@ -68,12 +68,12 @@ impl AuthService {
         }
     }
 
-    pub async fn create_user(&self, user: &FullUser) -> Result<String, Error> {
+    pub async fn create_user(&self, user: FullUser) -> Result<String, Error> {
         let new_user = FullUser {
-            fname: user.fname.clone(),
-            lname: user.lname.clone(),
+            fname: user.fname,
+            lname: user.lname,
             uuid: Uuid::new_v4().to_string(),
-            role: user.role.clone()
+            role: user.role
         };
 
         let signup_hash = self.encryption.random_string(32);
