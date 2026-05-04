@@ -62,11 +62,12 @@ pub async fn edit_student(State(state): State<Arc<super::Services>>, jar: Cookie
     };
     drop(auth);
 
-    if body.uuid == "" {
+    let service = state.student.read().await;
+
+    if service.get_repo().get_studentinfo(&body.uuid).await.is_err() {
+        Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }
-
-    let service = state.student.read().await;
     
     let mut update = student_service::StudentUpdate {
         fname:    None,
@@ -109,11 +110,12 @@ pub async fn get_student(State(state): State<Arc<super::Services>>, jar: CookieJ
     };
     drop(auth);
 
-    if body.uuid == "" {
-        return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
-    }
-
     let service = state.student.read().await;
+    
+    if service.get_repo().get_studentinfo(&body.uuid).await.is_err() {
+        Error::log_custom(&user.uuid, "Invalid UUID provided");
+        return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
+    }    
     
     return match service.get_student(&body.uuid, body.decrypt).await {
         Ok(t) => (StatusCode::OK, serde_json::to_string(&t).unwrap()),
@@ -134,12 +136,13 @@ pub async fn delete_student(State(state): State<Arc<super::Services>>, jar: Cook
     };
     drop(auth);
 
-    if body.uuid == "" {
+    let service = state.student.read().await;
+    
+    if service.get_repo().get_studentinfo(&body.uuid).await.is_err() {
+        Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }
 
-    let service = state.student.read().await;
-    
     let response = match service.delete_student(&body.uuid).await {
         Ok(_) => (StatusCode::OK, String::from("")),
         Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))

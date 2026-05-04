@@ -6,7 +6,7 @@ use std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::repository::StudentRepository;
+use crate::repository::Repository;
 use crate::repository::student_repository::{EncryptedInfo, ResidenceInfo, SearchResidenceInfo, SearchStudentInfo, StudentInfo, UpdateEncryptedInfo, UpdateResidenceInfo, UpdateStudentInfo};
 
 use crate::encryption::{Encryption, EncryptedContents};
@@ -14,16 +14,20 @@ use crate::encryption::{Encryption, EncryptedContents};
 use crate::types::Error;
 
 pub struct StudentService {
-    repo: Box<dyn StudentRepository>,
+    repo: Box<dyn Repository>,
     encryption: Arc<dyn Encryption>
 }
 
 impl StudentService {
-    pub fn new(repo: Box<dyn StudentRepository>, encryption: Arc<dyn Encryption>) -> Self {
+    pub fn new(repo: Box<dyn Repository>, encryption: Arc<dyn Encryption>) -> Self {
         Self {
             repo: repo,
             encryption: encryption
         }
+    }
+
+    pub fn get_repo<'a>(&'a self) -> &'a dyn Repository {
+        self.repo.as_ref()
     }
 
     pub async fn create_student(&self, student: &FullStudent) -> Result<(), Error> {
@@ -179,6 +183,7 @@ impl StudentService {
         Ok(student)
     }
 
+    // TODO: FIX
     pub async fn search_students(&self, params: &SearchStudent) -> Result<Vec<FullStudent>, Error> {
         let mut uuids: HashSet<String> = [].into();
 

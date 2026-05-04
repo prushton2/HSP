@@ -1,3 +1,5 @@
+use tokio_postgres::error::SqlState;
+
 #[derive(Debug)]
 #[allow(dead_code)]
 pub enum Error {
@@ -14,10 +16,17 @@ impl Error {
         match self {
             Error::ErrorDuring(_, e) => (*e).to_obfuscated(),
             Error::InvalidParameter(p, v) => format!("Invalid parameter {} supplied to {}", v, p),
-            Error::PostgresError(_) => String::from("Database error"),
+            Error::PostgresError(t) => Self::obfuscate_psql_err(t),
             Error::TokioError => String::from("Tokio error"),
             Error::ExpiredError => String::from("The resource you are trying to access expired"),
             Error::UnauthenticatedError => String::from("Unauthenticated"),
+        }
+    }
+
+    fn obfuscate_psql_err(err: &tokio_postgres::Error) -> String {
+        match err.code() {
+            Some(&SqlState::UNIQUE_VIOLATION) => format!("{}", err.as_db_error().unwrap().detail().unwrap()),
+            _ => String::from("Database Error")
         }
     }
 
@@ -30,6 +39,10 @@ impl Error {
             Error::ExpiredError => String::from("The resource you are trying to access expired"),
             Error::UnauthenticatedError => String::from("Unauthenticated"),
         }
+    }
+
+    pub fn log_custom(uuid: &str, reason: &str) {
+        log::error!("[{}]: {}", uuid, reason);
     }
 
     pub fn log(&self, uuid: &str) {

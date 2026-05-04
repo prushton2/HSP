@@ -52,8 +52,9 @@ pub async fn signup(State(state): State<Arc<super::Services>>, Json(body): Json<
         Err(t) => return (StatusCode::BAD_REQUEST, t.log_to_obfuscated("NO UUID")).into_response()
     };
 
-    if body.signup_hash == "" {
-        return (StatusCode::BAD_REQUEST, String::from("Provide a valid signup token")).into_response()
+    if service.get_repo().get_token_hash(&body.signup_hash).await.is_err() {
+        Error::log_custom("NO UUID", "Failed signup attempt");
+        return (StatusCode::BAD_REQUEST, String::from("Provide a valid signup hash")).into_response()
     }
 
     let cookie = format!("token={}; HttpOnly; SameSite=Strict; Path=/; Max-Age={}", token, TOKEN_EXPIRY);
@@ -113,7 +114,8 @@ pub async fn delete_user(State(state): State<Arc<super::Services>>, jar: CookieJ
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
 
-    if body.uuid == "" {
+    if service.get_repo().get_user(&body.uuid).await.is_err() {
+        Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }
 
@@ -134,7 +136,8 @@ pub async fn revoke_tokens(State(state): State<Arc<super::Services>>, jar: Cooki
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
 
-    if body.uuid == "" {
+    if service.get_repo().get_user(&body.uuid).await.is_err() {
+        Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }
 
@@ -155,7 +158,8 @@ pub async fn grant_token(State(state): State<Arc<super::Services>>, jar: CookieJ
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
 
-    if body.uuid == "" {
+    if service.get_repo().get_user(&body.uuid).await.is_err() {
+        Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }
 

@@ -31,6 +31,10 @@ impl AuthService {
         }
     }
 
+    pub fn get_repo<'a>(&'a self) -> &'a dyn Repository {
+        self.repo.as_ref()
+    }
+
     pub async fn is_authenticated(&self, jar: &CookieJar, permission: &Role, action: &str) -> Option<FullUser> {
         let token = match jar.get("token") {
             Some(t) => t.value(),

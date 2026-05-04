@@ -40,7 +40,8 @@ pub async fn edit_activity(State(state): State<Arc<super::Services>>, jar: Cooki
 
     let service = state.activities.read().await;
 
-    if body.uuid == "" {
+    if service.get_repo().get_activity(&body.uuid).await.is_err() {
+        Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }
     
@@ -68,7 +69,8 @@ pub async fn get_activity(State(state): State<Arc<super::Services>>, jar: Cookie
 
     let service = state.activities.read().await;
 
-    if body.uuid == "" {
+    if service.get_repo().get_activity(&body.uuid).await.is_err() {
+        Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }
 
@@ -91,15 +93,16 @@ pub async fn bind_activity(State(state): State<Arc<super::Services>>, jar: Cooki
     };
     drop(auth);
 
-    if body.uuid == "" {
+    let service = state.activities.read().await;
+
+    if service.get_repo().get_activity(&body.uuid).await.is_err() {
+        Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }
 
     if body.student_numbers.len() == 0 {
         return (StatusCode::BAD_REQUEST, String::from("Provide student IDs"))
     }
-
-    let service = state.activities.read().await;
 
     match service.bind_students(&body.uuid, body.student_numbers).await {
         Ok(_) => {},
@@ -126,8 +129,6 @@ pub async fn search_activity(State(state): State<Arc<super::Services>>, jar: Coo
 
     let service = state.activities.read().await;
 
-    
-
     return match service.search_activity(&SearchActivity{name: None, staff: None, dates: body.date}).await {
         Ok(t) => (StatusCode::OK, serde_json::to_string(&t).unwrap()),
         Err(t) => (StatusCode::INTERNAL_SERVER_ERROR, t.log_to_obfuscated(&user.uuid))
@@ -146,12 +147,13 @@ pub async fn delete_student(State(state): State<Arc<super::Services>>, jar: Cook
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
     drop(auth);
+    
+    let service = state.activities.read().await;
 
-    if body.uuid == "" {
+    if service.get_repo().get_activity(&body.uuid).await.is_err() {
+        Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }
-
-    let service = state.activities.read().await;
     
     let response = match service.delete_activity(&body.uuid).await {
         Ok(_) => (StatusCode::OK, String::from("")),

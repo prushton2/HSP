@@ -120,7 +120,7 @@ export namespace Http {
                     return NewResult.from_ok<{token: string}, string>(response.data)
                 } catch (err) {
                     if(!axios.isAxiosError(err)) { return NewResult.from_err<{token: string}, string>("Non Axios Error"); }
-                    return NewResult.from_ok<{token: string}, string>(err.response?.data);
+                    return NewResult.from_err<{token: string}, string>(err.response?.data);
                 }
             }
             
@@ -198,6 +198,3 @@ export namespace Http {
         }
     }
 }
-
-
-

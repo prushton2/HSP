@@ -26,6 +26,10 @@ impl AdminService {
         }
     }
 
+    pub fn get_repo<'a>(&'a self) -> &'a dyn Repository {
+        self.repo.as_ref()
+    }
+
     pub async fn get_all_tables(&self) -> Result<AllTables, Error> {
 
         Ok(AllTables {

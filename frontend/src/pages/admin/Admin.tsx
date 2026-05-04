@@ -30,9 +30,6 @@ function Admin({user, ribbon}: {user: Tables.Users, ribbon: (e: JSX.Element) => 
 
     return (
     <>
-        <div className='ribbon'>
-            
-        </div>
         <div className="tables">
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.studentinfo} tag="student_info" />
             <RenderTable select={(u) => {setSelectedUUID(u)}} selected={selectedUUID} info={studentInfo.residence} tag="residencies" />
