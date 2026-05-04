@@ -105,6 +105,16 @@ button:hover {
   background-color: var(--accent-light);
 }
 
+.disabled-button {
+  background-color: var(--bg-light);
+  color: var(--text-muted)
+}
+
+.disabled-button:hover {
+  background-color: var(--bg-light);
+  color: var(--text-muted)
+}
+
 select {
   all: unset;
 

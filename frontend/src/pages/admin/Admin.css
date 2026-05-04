@@ -33,8 +33,15 @@ h5 {
   color: var(--text-muted)
 }
 
-
 .context_menu thead {
   background-color: var(--bg-dark);
   padding: 10px;
+}
+
+.context_menu td {
+  text-align: left;
+}
+
+.context_menu tr:last-child td{
+  text-align: center;
 }
