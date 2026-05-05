@@ -7,7 +7,5 @@ pub use student_repository::StudentRepository;
 pub use auth_repository::AuthRepository;
 pub use activities_repository::ActivitiesRepository;
 
-use crate::types::Error;
-
 #[async_trait]
 pub trait Repository: StudentRepository + AuthRepository + ActivitiesRepository {}
