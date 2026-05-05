@@ -11,10 +11,16 @@ export class Result<T, E> {
     }
 
     into_ok (): T {
+        if(this.tag == ResultTag.Err) {
+            throw "Cannot cast err into ok"
+        }
         return this.data as T
     }
 
     into_err (): E {
+        if(this.tag == ResultTag.Ok) {
+            throw "Cannot cast ok into err"
+        }
         return this.data as E
     }
 }

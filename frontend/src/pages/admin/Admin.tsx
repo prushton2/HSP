@@ -17,8 +17,10 @@ function Admin({user, ribbon}: {user: Tables.Users, ribbon: (e: JSX.Element) => 
     
     useEffect(() => {
         async function init() {
-            let info = await Http.Admin.GetAllTables()
-            setStudentInfo(info);
+            let info = await Toast.WrapErr(() => Http.Admin.GetAllTables());
+            if(info.is_ok()) {
+                setStudentInfo(info.into_ok());
+            }
         }
         init();
     }, [])

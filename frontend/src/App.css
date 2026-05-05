@@ -6,7 +6,7 @@
   user-select: none;
 
   background-color: var(--bg);
-  box-shadow: 0px 8px 8px #111;
+  box-shadow: 0px 8px 8px var(--shadow);
 }
 
 .title h1 {

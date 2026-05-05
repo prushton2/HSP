@@ -4,9 +4,14 @@ import { NewResult, Result } from "../components/Result";
 
 export namespace Http {
     export namespace Admin {
-        export async function GetAllTables(): Promise<ApiResponseObjects.AllTables> {
-            const response = await axios.get('api/admin/all');
-            return response.data as ApiResponseObjects.AllTables
+        export async function GetAllTables(): Promise<Result<ApiResponseObjects.AllTables, string>> {
+            try {
+                const response = await axios.get('api/admin/all');
+                return NewResult.from_ok(response.data as ApiResponseObjects.AllTables);
+            } catch (err) {
+                if(!axios.isAxiosError(err)) { return NewResult.from_err("Non Axios Error"); }
+                return NewResult.from_err(err.response?.data);
+            }
         }
     }
 
@@ -62,9 +67,14 @@ export namespace Http {
             }
         }
 
-        export async function Search(params: ApiRequestObjects.SearchStudent): Promise<ApiResponseObjects.FullStudent[]> {
-            const response = await axios.post("/api/student/search", params);
-            return response.data as ApiResponseObjects.FullStudent[];
+        export async function Search(params: ApiRequestObjects.SearchStudent): Promise<Result<ApiResponseObjects.FullStudent[], string>> {
+            try {
+                const response = await axios.post("/api/student/search", params);
+                return NewResult.from_ok(response.data as ApiResponseObjects.FullStudent[]);
+            } catch (err) {
+                if(!axios.isAxiosError(err)) { return NewResult.from_err("Non Axios Error"); }
+                return NewResult.from_err(err.response?.data);
+            }
         }
 
         export async function Numbers(params: number[]): Promise<Result<ApiResponseObjects.FullStudent[], string>> {

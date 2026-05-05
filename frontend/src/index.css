@@ -1,4 +1,26 @@
 :root {
+  --bg-dark:  #C4C4C4;
+  --bg:       #DDDDDD;
+  --bg-light: #FFFFFF;
+  --highlight:#BBBBBB;
+
+  --text:       #111;
+  --text-muted: #555;
+  --shadow:     #555;
+  
+  --accent-dark: #6b4d84;
+  --accent:      #9468b7;
+  --accent-light:#c689f7;
+  
+  --primary: hsl(105 33% 63%);
+  --secondary: hsl(286 46% 74%);
+  
+  --danger: hsl(9 42% 65%);
+  --warning: hsl(51 29% 53%);
+  --success: hsl(148 27% 56%);
+  --info: hsl(217 46% 66%);
+
+
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
@@ -25,8 +47,9 @@
     --bg-light: #464646;
     --highlight:#686868;
 
-    --text:       #FFF;
+    --text:       #EEE;
     --text-muted: #888;
+    --shadow:     #111;
     
     --accent-dark: #271635;
     --accent:      #472960;
