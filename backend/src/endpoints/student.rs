@@ -19,14 +19,10 @@ pub struct CreateUser {
     pub wing: String,
 }
 pub async fn new_sudent(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<CreateUser>) -> (StatusCode, String) {
-    let auth = state.auth.read().await;
-    let user = match auth.is_authenticated(&jar, &Role::Admin, "new_student").await {
+    let user = match state.auth.is_authenticated(&jar, &Role::Admin, "new_student").await {
         Some(t) => t,
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
-    drop(auth);
-
-    let service = state.student.read().await;
     
     let student = FullStudent {
         fname:    body.fname,
@@ -38,7 +34,7 @@ pub async fn new_sudent(State(state): State<Arc<super::Services>>, jar: CookieJa
         wing:     body.wing.to_ascii_lowercase(),
     };
 
-    let response = match service.create_student(student).await {
+    let response = match state.student.create_student(student).await {
         Ok(_) => (StatusCode::CREATED, "".to_string()),
         Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     };
@@ -55,16 +51,12 @@ pub struct EditUser {
     pub int_field: i32,
 }
 pub async fn edit_student(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<EditUser>) -> (StatusCode, String) {
-    let auth = state.auth.read().await;
-    let user = match auth.is_authenticated(&jar, &Role::Admin, "edit_student").await {
+    let user = match state.auth.is_authenticated(&jar, &Role::Admin, "edit_student").await {
         Some(t) => t,
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
-    drop(auth);
 
-    let service = state.student.read().await;
-
-    if service.get_repo().get_studentinfo(&body.uuid).await.is_err() {
+    if state.admin.get_repo().get_studentinfo(&body.uuid).await.is_err() {
         Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }
@@ -90,7 +82,7 @@ pub async fn edit_student(State(state): State<Arc<super::Services>>, jar: Cookie
         _            => { return (StatusCode::BAD_REQUEST, "Invalid Field".to_string())}
     }
 
-    match service.update_student(&body.uuid, &update).await {
+    match state.student.update_student(&body.uuid, &update).await {
         Ok(_) => (StatusCode::OK, "".to_owned()),
         Err(t) => (StatusCode::INTERNAL_SERVER_ERROR, t.log_to_obfuscated(&user.uuid))
     }
@@ -103,21 +95,17 @@ pub struct GetStudent {
     pub decrypt: bool
 }
 pub async fn get_student(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<GetStudent>) -> (StatusCode, String) {
-    let auth = state.auth.read().await;
-    let user = match auth.is_authenticated(&jar, &Role::Staff, "get_student").await {
+    let user = match state.auth.is_authenticated(&jar, &Role::Staff, "get_student").await {
         Some(t) => t,
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
-    drop(auth);
-
-    let service = state.student.read().await;
     
-    if service.get_repo().get_studentinfo(&body.uuid).await.is_err() {
+    if state.admin.get_repo().get_studentinfo(&body.uuid).await.is_err() {
         Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }    
     
-    return match service.get_student(&body.uuid, body.decrypt).await {
+    return match state.student.get_student(&body.uuid, body.decrypt).await {
         Ok(t) => (StatusCode::OK, serde_json::to_string(&t).unwrap()),
         Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     }
@@ -129,21 +117,17 @@ pub struct DeleteStudent {
     pub uuid: String,
 }
 pub async fn delete_student(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<DeleteStudent>) -> (StatusCode, String) {
-    let auth = state.auth.read().await;
-    let user = match auth.is_authenticated(&jar, &Role::Admin, "delete_student").await {
+    let user = match state.auth.is_authenticated(&jar, &Role::Admin, "delete_student").await {
         Some(t) => t,
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
-    drop(auth);
-
-    let service = state.student.read().await;
     
-    if service.get_repo().get_studentinfo(&body.uuid).await.is_err() {
+    if state.admin.get_repo().get_studentinfo(&body.uuid).await.is_err() {
         Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }
 
-    let response = match service.delete_student(&body.uuid).await {
+    let response = match state.student.delete_student(&body.uuid).await {
         Ok(_) => (StatusCode::OK, String::from("")),
         Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     };
@@ -152,16 +136,12 @@ pub async fn delete_student(State(state): State<Arc<super::Services>>, jar: Cook
 }
 
 pub async fn search_students(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<SearchStudent>) -> (StatusCode, String) {
-    let auth = state.auth.read().await;
-    let user = match auth.is_authenticated(&jar, &Role::Staff, "search_student").await {
+    let user = match state.auth.is_authenticated(&jar, &Role::Staff, "search_student").await {
         Some(t) => t,
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
-    drop(auth);
-
-    let service = state.student.read().await;
     
-    return match service.search_students(&body).await {
+    return match state.student.search_students(&body).await {
         Ok(t) => (StatusCode::OK, serde_json::to_string(&t).unwrap()),
         Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     };
@@ -172,16 +152,12 @@ pub struct GetFromNumbers {
     numbers: Vec<i32>
 }
 pub async fn get_from_numbers(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<GetFromNumbers>) -> (StatusCode, String) {
-    let auth = state.auth.read().await;
-    let user = match auth.is_authenticated(&jar, &Role::Staff, "get_from_numbers").await {
+    let user = match state.auth.is_authenticated(&jar, &Role::Staff, "get_from_numbers").await {
         Some(t) => t,
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
-    drop(auth);
 
-    let service = state.student.read().await;
-
-    let students = match service.get_from_numbers(body.numbers).await {
+    let students = match state.student.get_from_numbers(body.numbers).await {
         Ok(t) => t,
         Err(t) => return (StatusCode::INTERNAL_SERVER_ERROR, t.log_to_obfuscated(&user.uuid))
     };

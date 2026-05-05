@@ -1,4 +1,6 @@
-use tokio_postgres::{Client, NoTls};
+use axum::async_trait;
+use tokio_postgres::types::ToSql;
+use tokio_postgres::{Client, GenericClient, NoTls, Row, Transaction};
 
 use crate::types::Error;
 use crate::{database::DBInfo, repository::Repository};
@@ -7,9 +9,19 @@ pub mod activities;
 pub mod student;
 pub mod auth;
 
+// #[async_trait]
+// pub trait DbExecutor: Send + Sync {
+//     async fn execute(&self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<u64, tokio_postgres::Error>;
+//     async fn batch_execute(&self, query: &str) -> Result<(), tokio_postgres::Error>;
+//     async fn query(&self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<Vec<Row>, tokio_postgres::Error>;
+//     async fn query_one(&self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<Row, tokio_postgres::Error>;
+//     async fn query_opt(&self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<Option<Row>, tokio_postgres::Error>;
+//     async fn transaction(&self) -> Result<Transaction<'_>, tokio_postgres::Error>;
+// }
 
 pub struct PSQLDB {
-    client: Client
+    client: Client,
+    // in_transaction: bool
 }
 
 impl Repository for PSQLDB {}
@@ -29,7 +41,7 @@ impl PSQLDB {
         });
 
         let db: Self = Self{
-            client: new_client.0,
+            client: new_client.0
         };
         
         return db;
@@ -93,3 +105,48 @@ impl PSQLDB {
         };
     }
 }
+
+// #[async_trait]
+// impl DbExecutor for tokio_postgres::Client {
+//     async fn execute(&self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<u64, tokio_postgres::Error> {
+//         self.execute(query, params).await
+//     }
+//     async fn batch_execute(&self, query: &str) -> Result<(), tokio_postgres::Error> {
+//         self.batch_execute(query).await
+//     }
+//     async fn query(&self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<Vec<Row>, tokio_postgres::Error> {
+//         self.query(query, params).await
+//     }
+//     async fn query_one(&self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<Row, tokio_postgres::Error> {
+//         self.query_one(query, params).await
+//     }
+//     async fn query_opt(&self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<Option<Row>, tokio_postgres::Error> {
+//         self.query_opt(query, params).await
+//     }
+//     async fn transaction(&self) -> Result<Transaction<'_>, tokio_postgres::Error> {
+//         self.transaction().await
+//     }
+// }
+
+// // Transaction borrows the Client, so we need the lifetime
+// #[async_trait]
+// impl<'a> DbExecutor for tokio_postgres::Transaction<'a> {
+//     async fn execute(&self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<u64, tokio_postgres::Error> {
+//         self.execute(query, params).await
+//     }
+//     async fn batch_execute(&self, query: &str) -> Result<(), tokio_postgres::Error> {
+//         self.batch_execute(query).await
+//     }
+//     async fn query(&self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<Vec<Row>, tokio_postgres::Error> {
+//         self.query(query, params).await
+//     }
+//     async fn query_one(&self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<Row, tokio_postgres::Error> {
+//         self.query_one(query, params).await
+//     }
+//     async fn query_opt(&self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<Option<Row>, tokio_postgres::Error> {
+//         self.query_opt(query, params).await
+//     }
+//     async fn transaction(&self) -> Result<Transaction<'_>, tokio_postgres::Error> {
+//         panic!("Cannot nest transactions")
+//     }
+// }

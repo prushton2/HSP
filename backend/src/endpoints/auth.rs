@@ -19,8 +19,7 @@ pub struct CreateUser {
 }
 
 pub async fn create_user(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<CreateUser>) -> (StatusCode, String) {
-    let service = state.auth.read().await;
-    let user = match service.is_authenticated(&jar, &Role::Owner, "create_user").await {
+    let user = match state.auth.is_authenticated(&jar, &Role::Owner, "create_user").await {
         Some(t) => t,
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
@@ -32,12 +31,12 @@ pub async fn create_user(State(state): State<Arc<super::Services>>, jar: CookieJ
         role: Role::from(body.role)
     };
 
-    let token = match service.create_user(new_user).await {
+    let token = match state.auth.create_user(new_user).await {
         Ok(t) => t,
         Err(t) => return (StatusCode::INTERNAL_SERVER_ERROR, t.log_to_obfuscated(&user.uuid))
     };
 
-    (StatusCode::OK, format!("{{\"token\": \"{}\"}}", token))
+    (StatusCode::OK, serde_json::json!({"token": token}).to_string())
 }
 
 #[derive(Deserialize)]
@@ -45,17 +44,15 @@ pub struct LoginRequest {
     pub signup_hash: String
 }
 pub async fn signup(State(state): State<Arc<super::Services>>, Json(body): Json<LoginRequest>) -> impl IntoResponse {
-    let service = state.auth.read().await;
-
-    let token = match service.signup(&body.signup_hash).await {
-        Ok(t) => t,
-        Err(t) => return (StatusCode::BAD_REQUEST, t.log_to_obfuscated("NO UUID")).into_response()
-    };
-
-    if service.get_repo().get_token_hash(&body.signup_hash).await.is_err() {
+    if state.admin.get_repo().get_token_hash(&body.signup_hash).await.is_err() {
         Error::log_custom("NO UUID", "Failed signup attempt");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid signup hash")).into_response()
     }
+
+    let token = match state.auth.signup(&body.signup_hash).await {
+        Ok(t) => t,
+        Err(t) => return (StatusCode::BAD_REQUEST, t.log_to_obfuscated("NO UUID")).into_response()
+    };
 
     let cookie = format!("token={}; HttpOnly; SameSite=Strict; Path=/; Max-Age={}", token, TOKEN_EXPIRY);
 
@@ -73,8 +70,7 @@ pub struct HttpUpdateUser {
     pub str_field: String,
 }
 pub async fn update_user(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpUpdateUser>) -> (StatusCode, String) {
-    let service = state.auth.read().await;
-    let user = match service.is_authenticated(&jar, &Role::Owner, "update_user").await {
+    let user = match state.auth.is_authenticated(&jar, &Role::Owner, "update_user").await {
         Some(t) => t,
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
@@ -96,8 +92,7 @@ pub async fn update_user(State(state): State<Arc<super::Services>>, jar: CookieJ
         t            => return (StatusCode::BAD_REQUEST, Error::InvalidParameter("field".to_string(), t.to_string()).log_to_obfuscated(&user.uuid))
     }
 
-
-    match service.update_user(&body.uuid, &update).await {
+    match state.auth.update_user(&body.uuid, &update).await {
         Ok(_) => (StatusCode::OK, String::from("")),
         Err(t) => (StatusCode::INTERNAL_SERVER_ERROR, t.log_to_obfuscated(&user.uuid))
     }
@@ -108,18 +103,17 @@ pub struct HttpDeleteUser {
     uuid: String
 }
 pub async fn delete_user(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpDeleteUser>) -> (StatusCode, String) {
-    let service = state.auth.read().await;
-    let user = match service.is_authenticated(&jar, &Role::Owner, "delete_user").await {
+    let user = match state.auth.is_authenticated(&jar, &Role::Owner, "delete_user").await {
         Some(t) => t,
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
 
-    if service.get_repo().get_user(&body.uuid).await.is_err() {
+    if state.admin.get_repo().get_user(&body.uuid).await.is_err() {
         Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }
 
-    match service.delete_user(body.uuid.as_str()).await {
+    match state.auth.delete_user(body.uuid.as_str()).await {
         Ok(_) => (StatusCode::OK, String::from("")),
         Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     }
@@ -130,18 +124,17 @@ pub struct HttpRevokeTokens {
     uuid: String
 }
 pub async fn revoke_tokens(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpRevokeTokens>) -> (StatusCode, String) {
-    let service = state.auth.read().await;
-    let user = match service.is_authenticated(&jar, &Role::Owner, "revoke_tokens").await {
+    let user = match state.auth.is_authenticated(&jar, &Role::Owner, "revoke_tokens").await {
         Some(t) => t,
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
 
-    if service.get_repo().get_user(&body.uuid).await.is_err() {
+    if state.admin.get_repo().get_user(&body.uuid).await.is_err() {
         Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }
 
-    match service.revoke_tokens(body.uuid.as_str()).await {
+    match state.auth.revoke_tokens(body.uuid.as_str()).await {
         Ok(_) => (StatusCode::OK, String::from("")),
         Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     }
@@ -152,26 +145,24 @@ pub struct HttpGrantToken {
     uuid: String
 }
 pub async fn grant_token(State(state): State<Arc<super::Services>>, jar: CookieJar, Json(body): Json<HttpGrantToken>) -> (StatusCode, String) {
-    let service = state.auth.read().await;
-    let user = match service.is_authenticated(&jar, &Role::Owner, "grant_token").await {
+    let user = match state.auth.is_authenticated(&jar, &Role::Owner, "grant_token").await {
         Some(t) => t,
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
 
-    if service.get_repo().get_user(&body.uuid).await.is_err() {
+    if state.admin.get_repo().get_user(&body.uuid).await.is_err() {
         Error::log_custom(&user.uuid, "Invalid UUID provided");
         return (StatusCode::BAD_REQUEST, String::from("Provide a valid UUID"))
     }
 
-    match service.grant_token(body.uuid.as_str()).await {
-        Ok(t) => (StatusCode::OK, format!("{{\"token\": \"{}\"}}", t)),
+    match state.auth.grant_token(body.uuid.as_str()).await {
+        Ok(t) => (StatusCode::OK, serde_json::json!({"token": t}).to_string()), // format!("{{\"token\": \"{}\"}}", t)
         Err(t) => (StatusCode::BAD_REQUEST, t.log_to_obfuscated(&user.uuid))
     }
 }
 
 pub async fn get_self(State(state): State<Arc<super::Services>>, jar: CookieJar) -> (StatusCode, String) {
-    let service = state.auth.read().await;
-    match service.is_authenticated(&jar, &Role::Staff, "get_self").await {
+    match state.auth.is_authenticated(&jar, &Role::Staff, "get_self").await {
         Some(t) => (StatusCode::OK, serde_json::to_string(&t).unwrap()),
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     }

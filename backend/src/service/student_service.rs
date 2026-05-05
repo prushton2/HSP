@@ -26,10 +26,6 @@ impl StudentService {
         }
     }
 
-    pub fn get_repo<'a>(&'a self) -> &'a dyn Repository {
-        self.repo.as_ref()
-    }
-
     pub async fn create_student(&self, student: FullStudent) -> Result<(), Error> {
         let uuid = Uuid::new_v4().to_string();
 

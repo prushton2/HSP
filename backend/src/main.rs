@@ -1,5 +1,4 @@
 use std::sync::Arc;
-use tokio::sync::RwLock;
 use axum::{Router, routing::{get, post}};
 use uuid::Uuid;
 
@@ -50,22 +49,22 @@ async fn main() {
 
     let state = Arc::new(
         endpoints::Services { 
-            student: RwLock::new(service::StudentService::new(
+            student: service::StudentService::new(
                 Box::new(database::PSQLDB::new(&dbinfo).await),
                 encryption.clone()
-            )),
-            admin: RwLock::new(service::AdminService::new(
+            ),
+            admin: service::AdminService::new(
                 Box::new(database::PSQLDB::new(&dbinfo).await),
                 encryption.clone()
-            )),
-            auth: RwLock::new(service::AuthService::new(
+            ),
+            auth: service::AuthService::new(
                 Box::new(database::PSQLDB::new(&dbinfo).await),
                 encryption.clone()
-            )),
-            activities: RwLock::new(service::ActivitiesService::new(
+            ),
+            activities: service::ActivitiesService::new(
                 Box::new(database::PSQLDB::new(&dbinfo).await),
                 encryption.clone()
-            ))
+            )
         }
     );
 
@@ -73,8 +72,7 @@ async fn main() {
         Some("bootstrap-owner") => {
             let fname = std::env::args().nth(2).expect("usage: bootstrap-owner <fname> <lname>");
             let lname = std::env::args().nth(3).expect("usage: bootstrap-owner <fname> <lname>");
-            let service = state.auth.write().await;
-            let signup_hash = service.create_user(FullUser {
+            let signup_hash = state.auth.create_user(FullUser {
                 uuid: Uuid::new_v4().to_string(),
                 fname: fname, 
                 lname: lname,
@@ -112,7 +110,7 @@ async fn main() {
         .route("/activity/get", post(endpoints::activities::get_activity))
         .route("/activity/assign", post(endpoints::activities::bind_activity))
         .route("/activity/search", post(endpoints::activities::search_activity))
-        .route("/activity/delete", post(endpoints::activities::delete_student))
+        .route("/activity/delete", post(endpoints::activities::delete_activity))
 
 
         .with_state(state); // move db in directly, no clone needed
