@@ -46,7 +46,11 @@ export namespace Toast {
         let result = await fn();
 
         if(result.is_err()) {
-            error(result.into_err() as string);
+            if(result.into_err() == "") {
+                error("Could not reach server");
+            } else {
+                error(result.into_err() as string);
+            }
         }
 
         return result;
