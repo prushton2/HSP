@@ -1,10 +1,8 @@
-use crate::repository::ActivitiesRepository;
-use crate::repository::activities_repository::{Activity, UpdateActivity, SearchActivity, ActivityBind, SearchActivityBind, ActivityBindField};
+use axum::async_trait;
 
 use crate::types::Error;
-
-use axum::async_trait;
-use tokio_postgres::types::ToSql;
+use crate::repository::ActivitiesRepository;
+use crate::repository::activities_repository::{Activity, UpdateActivity, SearchActivity, ActivityBind, SearchActivityBind, ActivityBindField};
 
 #[async_trait]
 impl ActivitiesRepository for super::MockDB {
