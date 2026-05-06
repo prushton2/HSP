@@ -1,8 +1,10 @@
 use serde::{Serialize, Deserialize};
 
 pub mod psqldb;
+pub mod mockdb;
 
 pub use psqldb::PSQLDB;
+pub use mockdb::MockDB;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct DBInfo {

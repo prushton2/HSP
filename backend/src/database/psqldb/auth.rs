@@ -5,11 +5,11 @@ use tokio_postgres::types::ToSql;
 
 use crate::types::Error;
 use crate::repository::AuthRepository;
-use crate::repository::auth_repository::{FullUser, TokenInfo, UpdateUser};
+use crate::repository::auth_repository::{User, Token, UpdateUser};
 
 #[async_trait]
 impl AuthRepository for super::PSQLDB {
-    async fn insert_user(&self, user: &FullUser) -> Result<(), Error> {
+    async fn insert_user(&self, user: &User) -> Result<(), Error> {
         let role = String::from(&user.role);
         match self.client.execute(
             "INSERT INTO Users (UUID, first_name, last_name, role) VALUES ($1, $2, $3, $4)",
@@ -65,12 +65,12 @@ impl AuthRepository for super::PSQLDB {
         }
     }
 
-    async fn get_user(&self, uuid: &str) -> Result<(FullUser, Vec<TokenInfo>), Error> {
+    async fn get_user(&self, uuid: &str) -> Result<(User, Vec<Token>), Error> {
         let user = match self.client.query_opt(
             "SELECT * FROM Users WHERE UUID = $1",
             &[&uuid]
         ).await {
-            Ok(Some(row)) => FullUser {
+            Ok(Some(row)) => User {
                 uuid:  row.get::<&str, &str>("UUID").to_string(),
                 fname: row.get::<&str, &str>("first_name").to_string(),
                 lname: row.get::<&str, &str>("last_name").to_string(),
@@ -83,13 +83,13 @@ impl AuthRepository for super::PSQLDB {
         let users_tokens = match self.client.query("SELECT * FROM Tokens WHERE uuid = $1", &[&uuid]).await {
             Ok(rows) => {
                 rows.into_iter().map(|row| {
-                    TokenInfo {
+                    Token {
                         uuid:        row.get("uuid"),
                         token:       row.get("token"),
                         signup_hash: row.get("signup_hash"),
                         expiry:      row.get("expiry")
                     }
-                }).collect::<Vec<TokenInfo>>()
+                }).collect::<Vec<Token>>()
             },
             Err(t)   => return Err(Error::ErrorDuring("Getting user's tokens".to_owned(), Box::new(Error::PostgresError(t))))
         };
@@ -97,9 +97,9 @@ impl AuthRepository for super::PSQLDB {
         Ok((user, users_tokens))
     }
 
-    async fn getall_user(&self) -> Result<Vec<FullUser>, Error> {
+    async fn getall_user(&self) -> Result<Vec<User>, Error> {
         match self.client.query("SELECT * FROM Users", &[]).await {
-            Ok(rows) => Ok(rows.iter().map(|row| FullUser {
+            Ok(rows) => Ok(rows.iter().map(|row| User {
                 uuid:  row.get::<&str, &str>("UUID").to_string(),
                 fname: row.get::<&str, &str>("first_name").to_string(),
                 lname: row.get::<&str, &str>("last_name").to_string(),
@@ -178,12 +178,12 @@ impl AuthRepository for super::PSQLDB {
         }
     }
 
-    async fn get_token_hash(&self, signup_hash: &str) -> Result<TokenInfo, Error> {
+    async fn get_token_hash(&self, signup_hash: &str) -> Result<Token, Error> {
         match self.client.query_one(
             "SELECT * FROM tokens WHERE signup_hash = $1",
             &[&signup_hash]).await
         {
-            Ok(row) => Ok(TokenInfo {
+            Ok(row) => Ok(Token {
                 uuid:        row.get("uuid"),
                 token:       row.get("token"),
                 signup_hash: row.get("signup_hash"),
@@ -193,12 +193,12 @@ impl AuthRepository for super::PSQLDB {
         }
     }
 
-    async fn get_token(&self, token: &str) -> Result<TokenInfo, Error> {
+    async fn get_token(&self, token: &str) -> Result<Token, Error> {
         match self.client.query_one(
             "SELECT * FROM tokens WHERE token = $1",
             &[&token]).await
         {
-            Ok(row) => Ok(TokenInfo {
+            Ok(row) => Ok(Token {
                 uuid:        row.get("uuid"),
                 token:       row.get("token"),
                 signup_hash: row.get("signup_hash"),
@@ -209,9 +209,9 @@ impl AuthRepository for super::PSQLDB {
     }
 
 
-    async fn getall_token(&self) -> Result<Vec<TokenInfo>, Error> {
+    async fn getall_token(&self) -> Result<Vec<Token>, Error> {
         match self.client.query("SELECT * FROM Tokens", &[]).await {
-            Ok(rows) => Ok(rows.iter().map(|row| TokenInfo {
+            Ok(rows) => Ok(rows.iter().map(|row| Token {
                 uuid:         row.get::<&str, &str>("UUID").to_string(),
                 token:        row.get::<&str, &str>("token").to_string(),
                 signup_hash:  row.get::<&str, &str>("signup_hash").to_string(),

@@ -5,7 +5,7 @@ use uuid::Uuid;
 use log::{LevelFilter};
 use env_logger::Builder;
 
-use crate::{repository::auth_repository::FullUser, types::Role};
+use crate::{repository::auth_repository::User, types::Role};
 
 mod database;
 mod endpoints;
@@ -72,7 +72,7 @@ async fn main() {
         Some("bootstrap-owner") => {
             let fname = std::env::args().nth(2).expect("usage: bootstrap-owner <fname> <lname>");
             let lname = std::env::args().nth(3).expect("usage: bootstrap-owner <fname> <lname>");
-            let signup_hash = state.auth.create_user(FullUser {
+            let signup_hash = state.auth.create_user(User {
                 uuid: Uuid::new_v4().to_string(),
                 fname: fname, 
                 lname: lname,

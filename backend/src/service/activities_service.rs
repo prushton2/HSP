@@ -9,7 +9,7 @@ use crate::repository::{Repository, activities_repository::ActivityBindField};
 use crate::encryption::{Encryption};
 
 use crate::repository::activities_repository::{Activity, ActivityBind, SearchActivity, SearchActivityBind, UpdateActivity};
-use crate::repository::student_repository::{SearchResidenceInfo, SearchStudentInfo};
+use crate::repository::student_repository::{SearchStudentResidence, SearchStudentInfo};
 use crate::service::student_service::FullStudent;
 use crate::types::Error;
 
@@ -128,7 +128,7 @@ impl ActivitiesService {
             Err(t) => return Err(Error::ErrorDuring("Getting attendee info".to_owned(), Box::new(t)))
         };
 
-        match self.repo.search_residence(&SearchResidenceInfo{uuid: "".to_owned(), hall: None, room: None, wing: None}).await {
+        match self.repo.search_residence(&SearchStudentResidence{uuid: "".to_owned(), hall: None, room: None, wing: None}).await {
             Ok(t) => {
                 for info in t {
                     match attendee_info.get_mut(&info.uuid) {

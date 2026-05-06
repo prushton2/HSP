@@ -1,5 +1,5 @@
 use crate::repository::StudentRepository;
-use crate::repository::student_repository::{EncryptedInfo, UpdateStudentInfo, ResidenceInfo, UpdateResidenceInfo, StudentInfo, SearchStudentInfo, UpdateEncryptedInfo, SearchResidenceInfo};
+use crate::repository::student_repository::{StudentEncrypted, UpdateStudentInfo, StudentResidence, UpdateStudentResidence, StudentInfo, SearchStudentInfo, UpdateStudentEncrypted, SearchStudentResidence};
 
 use crate::types::Error;
 
@@ -119,14 +119,14 @@ impl StudentRepository for super::PSQLDB {
         Ok(vec)
     }
 
-    async fn insert_encrypted(&self, data: &EncryptedInfo) -> Result<(), Error> {
+    async fn insert_encrypted(&self, data: &StudentEncrypted) -> Result<(), Error> {
         return match self.client.execute("insert into encrypteddata (UUID, encrypted) values ($1, $2)", &[&data.uuid, &data.data]).await {
             Ok(_) => Ok(()),
             Err(t) => Err(Error::ErrorDuring("Inserting encrypted".to_owned(), Box::new(Error::PostgresError(t))))
         };
     }
 
-    async fn update_encrypted(&self, update: &UpdateEncryptedInfo) -> Result<(), Error> {
+    async fn update_encrypted(&self, update: &UpdateStudentEncrypted) -> Result<(), Error> {
         if update.data.is_none() {
             return Ok(())
         }
@@ -143,20 +143,20 @@ impl StudentRepository for super::PSQLDB {
         };
     }
 
-    async fn get_encrypted(&self, uuid: &str) -> Result<EncryptedInfo, Error> {
+    async fn get_encrypted(&self, uuid: &str) -> Result<StudentEncrypted, Error> {
         let row = match self.client.query_one("select encrypted from encrypteddata where UUID = $1", &[&uuid]).await {
             Ok(t) => t,
             Err(t) => return Err(Error::ErrorDuring("Getting encrypted".to_owned(), Box::new(Error::PostgresError(t))))
         };
 
-        Ok(EncryptedInfo {
+        Ok(StudentEncrypted {
             uuid: uuid.to_string(),
             data: row.get::<&str, &str>("encrypted").to_string(),
         })
     }
 
-    async fn getall_encrypted(&self) -> Result<Vec<EncryptedInfo>, Error> {
-        let mut vec: Vec<EncryptedInfo> = vec![];
+    async fn getall_encrypted(&self) -> Result<Vec<StudentEncrypted>, Error> {
+        let mut vec: Vec<StudentEncrypted> = vec![];
 
         let rows = match self.client.query("select * from encrypteddata", &[]).await {
             Ok(t) => t,
@@ -164,7 +164,7 @@ impl StudentRepository for super::PSQLDB {
         };
 
         for row in rows {
-            vec.push(EncryptedInfo{
+            vec.push(StudentEncrypted{
                 uuid: row.get("uuid"),
                 data: row.get("encrypted")
             });
@@ -174,7 +174,7 @@ impl StudentRepository for super::PSQLDB {
     }
 
 
-    async fn insert_residence(&self, user: &ResidenceInfo) -> Result<(), Error> {
+    async fn insert_residence(&self, user: &StudentResidence) -> Result<(), Error> {
         return match self.client.execute("insert into residencies (UUID, hall, room, wing) values ($1, $2, $3, $4)",
             &[&user.uuid, &user.hall, &user.room, &user.wing]).await {
             Ok(_) => Ok(()),
@@ -182,7 +182,7 @@ impl StudentRepository for super::PSQLDB {
         };
     }
 
-    async fn update_residence(&self, update: &UpdateResidenceInfo) -> Result<(), Error> {
+    async fn update_residence(&self, update: &UpdateStudentResidence) -> Result<(), Error> {
         let mut set_clauses: Vec<String> = Vec::new();
         let mut params: Vec<Box<dyn ToSql + Sync + Send>> = Vec::new();
         let mut idx = 1;
@@ -225,13 +225,13 @@ impl StudentRepository for super::PSQLDB {
         };
     }
 
-    async fn get_residence(&self, uuid: &str) -> Result<ResidenceInfo, Error> {
+    async fn get_residence(&self, uuid: &str) -> Result<StudentResidence, Error> {
         let row = match self.client.query_one("select * from residencies where UUID = $1", &[&uuid]).await {
             Ok(t) => t,
             Err(t) => return Err(Error::ErrorDuring("Getting residence".to_owned(), Box::new(Error::PostgresError(t))))
         };
 
-        Ok(ResidenceInfo {
+        Ok(StudentResidence {
             uuid: uuid.to_string(),
             hall: row.get::<&str, &str>("hall").to_string(),
             room: row.get::<&str, i32>("room"),
@@ -239,7 +239,7 @@ impl StudentRepository for super::PSQLDB {
         })
     }
 
-    async fn search_residence(&self, params: &SearchResidenceInfo) -> Result<Vec<ResidenceInfo>, Error> {
+    async fn search_residence(&self, params: &SearchStudentResidence) -> Result<Vec<StudentResidence>, Error> {
         // Dynamically build query
         let mut clauses: Vec<String> = Vec::new();
         let mut query_params: Vec<Box<dyn ToSql + Sync + Send>> = Vec::new();
@@ -271,10 +271,10 @@ impl StudentRepository for super::PSQLDB {
             Ok(t) => t,
             Err(t) => return Err(Error::ErrorDuring("Getting residence".to_owned(), Box::new(Error::PostgresError(t))))
         };
-        let mut vec: Vec<ResidenceInfo> = vec![];
+        let mut vec: Vec<StudentResidence> = vec![];
 
         for row in rows {
-            vec.push(ResidenceInfo{
+            vec.push(StudentResidence{
                 uuid: row.get("uuid"),
                 hall: row.get::<&str, &str>("hall").to_string(),
                 room: row.get::<&str, i32>("room"),

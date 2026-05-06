@@ -1,16 +1,17 @@
 :root {
-  --bg-dark:  #C4C4C4;
-  --bg:       #DDDDDD;
-  --bg-light: #FFFFFF;
-  --highlight:#BBBBBB;
-
+  --bg-dark:  #e8e4f0;
+  --bg:       #f2effa;
+  --bg-light: #faf9fd;
+  --highlight:#ddd8ee;
+ 
   --text:       #111;
-  --text-muted: #555;
-  --shadow:     #888;
+  --text-muted: #5a5570;
+  --shadow:     #c0bcd4;
   
-  --accent-dark: #6b4d84;
-  --accent:      #ab79d5;
-  --accent-light:#c689f7;
+  --accent-dark: #5a3d72;
+  --accent:      #8b5bbf;
+  --accent-light:#a370d8;
+
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;

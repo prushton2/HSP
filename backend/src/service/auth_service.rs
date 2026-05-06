@@ -13,7 +13,7 @@ use crate::encryption::Encryption;
 use crate::types::Error;
 
 use crate::repository::Repository;
-use crate::repository::auth_repository::{FullUser, UpdateUser};
+use crate::repository::auth_repository::{User, UpdateUser};
 use crate::types::Role;
 
 pub struct AuthService {
@@ -31,7 +31,7 @@ impl AuthService {
         }
     }
 
-    pub async fn is_authenticated(&self, jar: &CookieJar, permission: &Role, action: &str) -> Option<FullUser> {
+    pub async fn is_authenticated(&self, jar: &CookieJar, permission: &Role, action: &str) -> Option<User> {
         let token = match jar.get("token") {
             Some(t) => t.value(),
             None => return None
@@ -64,8 +64,8 @@ impl AuthService {
         }
     }
 
-    pub async fn create_user(&self, user: FullUser) -> Result<String, Error> {
-        let new_user = FullUser {
+    pub async fn create_user(&self, user: User) -> Result<String, Error> {
+        let new_user = User {
             fname: user.fname,
             lname: user.lname,
             uuid: Uuid::new_v4().to_string(),

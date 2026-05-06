@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::repository::Repository;
-use crate::repository::student_repository::{EncryptedInfo, ResidenceInfo, SearchResidenceInfo, SearchStudentInfo, StudentInfo, UpdateEncryptedInfo, UpdateResidenceInfo, UpdateStudentInfo};
+use crate::repository::student_repository::{StudentEncrypted, StudentResidence, SearchStudentResidence, SearchStudentInfo, StudentInfo, UpdateStudentEncrypted, UpdateStudentResidence, UpdateStudentInfo};
 
 use crate::encryption::{Encryption, EncryptedContents};
 
@@ -41,7 +41,7 @@ impl StudentService {
             Err(t) => return Err(Error::ErrorDuring("Inserting info".to_owned(), Box::new(t)))
         }
 
-        let residence = ResidenceInfo {
+        let residence = StudentResidence {
             uuid: uuid.clone(),
             hall: student.hall,
             room: student.room,
@@ -59,7 +59,7 @@ impl StudentService {
             pronouns: student.pronouns
         });
 
-        let encrypted_info = EncryptedInfo {
+        let encrypted_info = StudentEncrypted {
             uuid: uuid,
             data: encrypted
         };
@@ -86,7 +86,7 @@ impl StudentService {
 
             let encrypted = self.encryption.encrypt(&current_info);
 
-            let new_encrypted = UpdateEncryptedInfo {
+            let new_encrypted = UpdateStudentEncrypted {
                 uuid: uuid.to_string(),
                 data: Some(encrypted)
             };
@@ -112,7 +112,7 @@ impl StudentService {
         }
 
         if update.room.is_some() || update.wing.is_some() || update.hall.is_some() {
-            let new_info = UpdateResidenceInfo {
+            let new_info = UpdateStudentResidence {
                 uuid: uuid.to_string(),
                 room: update.room.clone(),
                 wing: update.wing.clone(),
@@ -191,7 +191,7 @@ impl StudentService {
             number: params.number,
         };
 
-        let residence_info_params = SearchResidenceInfo {
+        let residence_info_params = SearchStudentResidence {
             uuid: String::from(""),
             hall: params.hall.clone(),
             room: params.room,
@@ -276,7 +276,7 @@ impl StudentService {
             }
         });
 
-        let residences = match self.repo.search_residence(&SearchResidenceInfo {uuid: String::from(""), hall: None, wing: None, room: None}).await {
+        let residences = match self.repo.search_residence(&SearchStudentResidence {uuid: String::from(""), hall: None, wing: None, room: None}).await {
             Ok(t) => t,
             Err(t) => return Err(Error::ErrorDuring("Getting residence info".to_owned(), Box::new(t)))
         };

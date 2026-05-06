@@ -10,8 +10,8 @@ use crate::repository::activities_repository::{Activity, SearchActivity};
 use crate::types::Error;
 
 use crate::repository::Repository;
-use crate::repository::auth_repository::{FullUser};
-use crate::repository::student_repository::{EncryptedInfo, ResidenceInfo, SearchResidenceInfo, SearchStudentInfo, StudentInfo};
+use crate::repository::auth_repository::{User};
+use crate::repository::student_repository::{StudentEncrypted, StudentResidence, SearchStudentResidence, SearchStudentInfo, StudentInfo};
 
 pub struct AdminService {
     repo: Box<dyn Repository>,
@@ -34,7 +34,7 @@ impl AdminService {
     pub async fn get_all_tables(&self) -> Result<AllTables, Error> {
 
         Ok(AllTables {
-            residence: self.repo.search_residence(&SearchResidenceInfo{uuid: String::from(""), hall: None, wing: None, room: None}).await?,
+            residence: self.repo.search_residence(&SearchStudentResidence{uuid: String::from(""), hall: None, wing: None, room: None}).await?,
             studentinfo: self.repo.search_studentinfo(&SearchStudentInfo{uuid: String::from(""), fname: None, lname: None, number: None}).await?,
             encryptedinfo: self.repo.getall_encrypted().await?,
             users: self.repo.getall_user().await?,
@@ -46,10 +46,10 @@ impl AdminService {
 
 #[derive(Serialize, Deserialize)]
 pub struct AllTables {
-    pub residence: Vec<ResidenceInfo>,
+    pub residence: Vec<StudentResidence>,
     pub studentinfo: Vec<StudentInfo>,
-    pub encryptedinfo: Vec<EncryptedInfo>,
-    pub users: Vec<FullUser>,
+    pub encryptedinfo: Vec<StudentEncrypted>,
+    pub users: Vec<User>,
     pub tokens: Vec<ObfuscatedTokenInfo>,
     pub activities: Vec<Activity>
 }

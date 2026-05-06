@@ -8,7 +8,7 @@ use axum_extra::extract::CookieJar;
 use serde::Deserialize;
 
 use crate::TOKEN_EXPIRY;
-use crate::repository::auth_repository::{FullUser, UpdateUser};
+use crate::repository::auth_repository::{User, UpdateUser};
 use crate::types::{Role, Error};
 
 #[derive(Deserialize)]
@@ -24,7 +24,7 @@ pub async fn create_user(State(state): State<Arc<super::Services>>, jar: CookieJ
         None => return (StatusCode::UNAUTHORIZED, Error::UnauthenticatedError.log_to_obfuscated("NO UUID"))
     };
 
-    let new_user = FullUser {
+    let new_user = User {
         uuid: String::from(""),
         fname: body.fname,
         lname: body.lname,
