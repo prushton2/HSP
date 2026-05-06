@@ -12,13 +12,13 @@ pub mod student;
 pub mod auth;
 
 pub struct MockDB {
-    students: Mutex<HashMap<String, StudentInfo>>,
-    encrypted: Mutex<HashMap<String, StudentEncrypted>>,
-    residences: Mutex<HashMap<String, StudentResidence>>,
-    users: Mutex<HashMap<String, User>>,
-    tokens: Mutex<HashMap<String, Token>>,
-    activities: Mutex<HashMap<String, Activity>>,
-    activity_binds: Mutex<Vec<ActivityBind>>,
+    pub students: Mutex<HashMap<String, StudentInfo>>,
+    pub encrypted: Mutex<HashMap<String, StudentEncrypted>>,
+    pub residences: Mutex<HashMap<String, StudentResidence>>,
+    pub users: Mutex<HashMap<String, User>>,
+    pub tokens: Mutex<HashMap<String, Token>>,
+    pub activities: Mutex<HashMap<String, Activity>>,
+    pub activity_binds: Mutex<Vec<ActivityBind>>,
 }
 
 impl Repository for MockDB {}

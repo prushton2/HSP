@@ -14,19 +14,23 @@ use crate::service::student_service::FullStudent;
 use crate::types::Error;
 
 pub struct ActivitiesService {
-    repo: Box<dyn Repository>,
+    repo: Arc<dyn Repository>,
     encryption: Arc<dyn Encryption>
 }
 
 impl ActivitiesService {
-    pub fn new(repo: Box<dyn Repository>, encryption: Arc<dyn Encryption>) -> Self {
+    pub fn new(repo: Arc<dyn Repository>, encryption: Arc<dyn Encryption>) -> Self {
         Self {
             repo: repo,
             encryption: encryption
         }
     }
 
-    pub async fn create_activity(&self, mut activity: CreateActivity) -> Result<(), Error>{
+    pub fn get_repo(&self) -> &dyn Repository {
+        self.repo.as_ref()
+    }
+
+    pub async fn create_activity(&self, mut activity: CreateActivity) -> Result<String, Error>{
         let uuid = Uuid::new_v4().to_string();
 
         if activity.staff.len() < 8 {
@@ -42,14 +46,14 @@ impl ActivitiesService {
         }
 
         let new_activity = Activity {
-            uuid: uuid,
+            uuid: uuid.clone(),
             name: activity.name.clone(),
             staff: activity.staff.try_into().unwrap(),
             dates: activity.dates.try_into().unwrap()
         };
 
         match self.repo.insert_activity(&new_activity).await {
-            Ok(_) => Ok(()),
+            Ok(_) => Ok(uuid),
             Err(t) => Err(Error::ErrorDuring("Creating Activity".to_owned(), Box::new(t)))
         }
     }

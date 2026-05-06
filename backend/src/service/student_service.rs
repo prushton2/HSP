@@ -14,16 +14,20 @@ use crate::encryption::{Encryption, EncryptedContents};
 use crate::types::Error;
 
 pub struct StudentService {
-    repo: Box<dyn Repository>,
+    repo: Arc<dyn Repository>,
     encryption: Arc<dyn Encryption>
 }
 
 impl StudentService {
-    pub fn new(repo: Box<dyn Repository>, encryption: Arc<dyn Encryption>) -> Self {
+    pub fn new(repo: Arc<dyn Repository>, encryption: Arc<dyn Encryption>) -> Self {
         Self {
             repo: repo,
             encryption: encryption
         }
+    }
+
+    pub fn get_repo(&self) -> &dyn Repository {
+        self.repo.as_ref()
     }
 
     pub async fn create_student(&self, student: FullStudent) -> Result<(), Error> {

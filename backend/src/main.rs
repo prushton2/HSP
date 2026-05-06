@@ -5,17 +5,8 @@ use uuid::Uuid;
 use log::{LevelFilter};
 use env_logger::Builder;
 
-use crate::{repository::auth_repository::User, types::Role};
+use hsp_backend::{database, encryption::{self, Encryption}, endpoints, repository::{Repository, auth_repository::User}, service};
 
-mod database;
-mod endpoints;
-mod encryption;
-mod repository;
-mod service;
-mod types;
-
-const TOKEN_EXPIRY: i64 = 3024000;
-const SIGNUP_HASH_EXPIRY: i64 = 86400;
 
 #[tokio::main]
 async fn main() {
@@ -45,24 +36,25 @@ async fn main() {
         };
     }
 
-    let encryption = Arc::new(encryption::PlaintextEncryption::new());
+    let encryption: Arc<dyn Encryption> = Arc::new(encryption::PlaintextEncryption::new());
+    let repo: Arc<dyn Repository> = Arc::new(database::PSQLDB::new(&dbinfo).await);
 
     let state = Arc::new(
         endpoints::Services { 
             student: service::StudentService::new(
-                Box::new(database::PSQLDB::new(&dbinfo).await),
+                repo.clone(),
                 encryption.clone()
             ),
             admin: service::AdminService::new(
-                Box::new(database::PSQLDB::new(&dbinfo).await),
+                repo.clone(),
                 encryption.clone()
             ),
             auth: service::AuthService::new(
-                Box::new(database::PSQLDB::new(&dbinfo).await),
+                repo.clone(),
                 encryption.clone()
             ),
             activities: service::ActivitiesService::new(
-                Box::new(database::PSQLDB::new(&dbinfo).await),
+                repo.clone(),
                 encryption.clone()
             )
         }
@@ -76,7 +68,7 @@ async fn main() {
                 uuid: Uuid::new_v4().to_string(),
                 fname: fname, 
                 lname: lname,
-                role: Role::Owner,
+                role: hsp_backend::types::Role::Owner,
             }).await.expect("failed to create owner");
             println!("Signup link: /signup?token={}", signup_hash);
             return;

@@ -14,13 +14,13 @@ use crate::repository::auth_repository::{User};
 use crate::repository::student_repository::{StudentEncrypted, StudentResidence, SearchStudentResidence, SearchStudentInfo, StudentInfo};
 
 pub struct AdminService {
-    repo: Box<dyn Repository>,
+    repo: Arc<dyn Repository>,
     _encryption: Arc<dyn Encryption>
 }
 
 #[allow(dead_code)]
 impl AdminService {
-    pub fn new(repo: Box<dyn Repository>, encryption: Arc<dyn Encryption>) -> Self {
+    pub fn new(repo: Arc<dyn Repository>, encryption: Arc<dyn Encryption>) -> Self {
         Self {
             repo: repo,
             _encryption: encryption

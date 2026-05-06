@@ -17,18 +17,22 @@ use crate::repository::auth_repository::{User, UpdateUser};
 use crate::types::Role;
 
 pub struct AuthService {
-    repo: Box<dyn Repository>,
+    repo: Arc<dyn Repository>,
     encryption: Arc<dyn Encryption>,
     signup_mutex: Mutex<bool> // load bearing drywall that determines if someone is signing up (one signup at a time)
 }
 
 impl AuthService {
-    pub fn new(repo: Box<dyn Repository>, encryption: Arc<dyn Encryption>) -> Self {
+    pub fn new(repo: Arc<dyn Repository>, encryption: Arc<dyn Encryption>) -> Self {
         Self {
             repo: repo,
             encryption: encryption,
             signup_mutex: Mutex::new(false),
         }
+    }
+
+    pub fn get_repo(&self) -> &dyn Repository {
+        self.repo.as_ref()
     }
 
     pub async fn is_authenticated(&self, jar: &CookieJar, permission: &Role, action: &str) -> Option<User> {
