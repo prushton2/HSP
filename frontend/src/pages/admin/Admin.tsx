@@ -9,7 +9,6 @@ import { Toast } from '../../components/toast';
 import { RoleGE } from '../../components/Role';
 import DatePicker from 'react-datepicker';
 import { formatProperly } from '../../components/Format';
-import { flushSync } from 'react-dom';
 
 function Admin({user, ribbon}: {user: Tables.Users, ribbon: (e: JSX.Element) => void}) {
     const [studentInfo, setStudentInfo] = useState<ApiResponseObjects.AllTables>({} as ApiResponseObjects.AllTables);
