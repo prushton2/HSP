@@ -9,6 +9,7 @@ import { Toast } from '../../components/toast';
 import { RoleGE } from '../../components/Role';
 import DatePicker from 'react-datepicker';
 import { formatProperly } from '../../components/Format';
+import { flushSync } from 'react-dom';
 
 function Admin({user, ribbon}: {user: Tables.Users, ribbon: (e: JSX.Element) => void}) {
     const [studentInfo, setStudentInfo] = useState<ApiResponseObjects.AllTables>({} as ApiResponseObjects.AllTables);
@@ -52,10 +53,11 @@ export default Admin
 function Ribbon(user: Tables.Users, selectedUUID: string): JSX.Element {
     return <>
         <HoverDropdown title="Student" buttons={[
-            ["Create",  async () => {await prompt.show("Create Student", <CreateStudent />)}],
-            ["Edit",    async () => {await prompt.show("Edit Student",   <EditStudent   init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-            ["Get",     async () => {await prompt.show("Get Student",    <GetStudent    init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
-            ["Delete",  async () => {await prompt.show("Delete Student", <DeleteStudent init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+            ["Create",      async () => {await prompt.show("Create Student",      <CreateStudent />)}],
+            ["Edit",        async () => {await prompt.show("Edit Student",        <EditStudent   init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+            ["Get",         async () => {await prompt.show("Get Student",         <GetStudent    init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+            ["Delete",      async () => {await prompt.show("Delete Student",      <DeleteStudent init_uuid={selectedUUID == "0" ? "" : selectedUUID}/>)}],
+            ["Mass Create", async () => {await prompt.show("Mass Create Student", <MassCreateStudent />)}],
         ]}/>
 
         <HoverDropdown title="Activities" buttons={[
@@ -497,6 +499,125 @@ function DeleteActivity({init_uuid}: {init_uuid: string}): JSX.Element {
                 if(!checked) {return}
                 await Toast.WrapFunction(() => Http.Activity.Delete(uuid), "User Deleted")
             }}>Confirm</button></td></tr>
+        </tbody>
+        </table>
+    </>
+}
+
+function MassCreateStudent(): JSX.Element {
+    const [input, setInput] = useState<string>("");
+
+    return <>
+        <h5>CSV Format: <br />fname, lname, pronouns, number, hall, room, wing</h5>
+        <textarea rows={10} className="massCreateBox" onChange={(e) => setInput(e.target.value)} />
+        <button className="highlight-button" onClick={async () => {
+            prompt.widen();
+            await prompt.show("Confirm Creation", <MassCreateStudentResult input={input.split("\n")} />)
+        }}>Create Students</button>
+    </>
+}
+
+function MassCreateStudentResult({input}: {input: string[]}): JSX.Element {
+    const [students, setStudents] = useState<ApiRequestObjects.CreateStudent[]>([]);
+    const [responses, setResponses] = useState<JSX.Element[]>([])
+
+    useEffect(() => {
+        let student_array: ApiRequestObjects.CreateStudent[] = [];
+        let response_array: JSX.Element[] = [];
+        for(let i = 0; i < input.length; i++) {
+            let student_arr: string[] = input[i].split(",");
+                
+            student_arr = student_arr.map((e) => {
+                return e.trim()
+            });
+
+            let student: ApiRequestObjects.CreateStudent = {
+                fname: student_arr[0],
+                lname: student_arr[1],
+                pronouns: student_arr[2],
+                number: parseInt(student_arr[3]),
+                hall: student_arr[4],
+                room: parseInt(student_arr[5]),
+                wing: student_arr[6],
+            };
+
+            student_array.push(student);
+            response_array.push(<></>);
+        }
+        setStudents(student_array);
+        setResponses(response_array);
+    }, [])
+
+    function delay(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function renderStudents(): JSX.Element[] {
+        let elements: JSX.Element[] = [];
+
+        students.forEach((e, i) => {
+            elements.push(<tr>
+                <td>{e.fname} {e.lname} ({e.pronouns})</td>
+                <td>{e.number}</td>
+                <td>{e.hall} {e.room} ({e.wing})</td>
+                <td>{responses.length > i ? responses[i] : "!"}</td>
+            </tr>)
+        })
+
+        return elements;
+    }
+
+    async function CreateAllTheStudents() {
+        let next: JSX.Element[] = [...responses];
+        next.fill(<>Waiting...</>, 0, responses.length);
+        setResponses(next);
+
+        await delay(500);
+
+        for(let i = 0; i < students.length; i++) {
+            let result = await Http.Student.Create(students[i]);
+
+            setResponses(prev => {
+                const next = [...prev];
+                if(result.is_ok()) {
+                    next[i] = <label style={{color: "var(--success)"}}>Done</label>;
+                } else {
+                    next[i] = <label style={{color: "var(--fail)"}}>{result.into_err()}</label>;
+                }
+
+                return next;
+            });
+
+            await delay(500);
+        }
+    }
+
+    return <>
+        <table className='student_review_table'>
+        <thead>
+            <tr>
+                <td>Name</td>
+                <td>No</td>
+                <td>Residence</td>
+                <td>Status</td>
+            </tr>
+        </thead>
+        <tbody>
+            {renderStudents()}
+            <tr>
+                <td><button className='highlight-button' onClick={() => {
+                    let failed: string[] = [];
+                    responses.forEach((e, i) => {
+                        if(e.props.style.color == "var(--fail)") {
+                            failed.push(input[i])
+                        }
+                    })
+                    navigator.clipboard.writeText(failed.join("\n"))
+                }}>Copy Failed</button></td>
+                <td colSpan={3}><button className="highlight-button" onClick={async () => {
+                    await CreateAllTheStudents();
+                }}>Create</button></td>
+            </tr>
         </tbody>
         </table>
     </>

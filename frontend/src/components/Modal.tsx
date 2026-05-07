@@ -3,22 +3,30 @@ import { useCallback, useRef, useState, type JSX } from "react";
 import { useEffect } from "react";
 
 type ShowPromptFn = (title: string, body: JSX.Element) => Promise<boolean>;
+type WideModeFn = () => void;
 
-let promptDefault: { show: ShowPromptFn } = {
+let promptDefault: { show: ShowPromptFn, widen: WideModeFn} = {
     // @ts-ignore
     show: ShowPromptFn => {
         console.warn("PromptContainer is not yet mounted or initialized.");
         return new Promise((res) => { res(false); });
+    },
+    
+    // @ts-ignore
+    widen: WideModeFn => {
+        console.warn("PromptContainer is not yet mounted or initialized.");
     }
 };
 
-export const prompt: { show: ShowPromptFn } = {
+export const prompt: { show: ShowPromptFn, widen: WideModeFn } = {
     show: promptDefault.show,
+    widen: promptDefault.widen
 };
 
 
 export function Modal(): JSX.Element {
     const [visible, setVisible] = useState<boolean>(false);
+    const [wide, setWide] = useState<boolean>(false);
     const [title, setTitle] = useState<string>("")
     const [body, setBody] = useState<JSX.Element>(<></>)
 
@@ -33,10 +41,17 @@ export function Modal(): JSX.Element {
         });
     }, []);
 
+    const internalWidePrompt = useCallback(() => {
+        setWide(true);
+    }, [])
+
     useEffect(() => {
         prompt.show = internalShowPrompt;
+        prompt.widen = internalWidePrompt;
+        
         return () => {
             prompt.show = promptDefault.show
+            prompt.widen = promptDefault.widen
         }
     }, [internalShowPrompt])
 
@@ -54,9 +69,9 @@ export function Modal(): JSX.Element {
 
     return (
         <div className="modal-container">
-            <div className="modal-inner-container">
+            <div className={`modal-inner-container ${wide ? "wide" : ""}`}>
                 <div className="modal-button-x-container">
-                    <button onClick={() => handleButton(false)}>x</button>
+                    <button onClick={() => {setWide(false); handleButton(false)}}>x</button>
                 </div>
                 <div className="modal-title">{title}</div>
                 <div className="modal-body">{body}</div>

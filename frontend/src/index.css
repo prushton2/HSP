@@ -12,6 +12,9 @@
   --accent:      #8b5bbf;
   --accent-light:#a370d8;
 
+  --success:     #00843D;
+  --fail:        #DA291C;
+
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -46,6 +49,9 @@
     --accent-dark: #271635;
     --accent:      #472960;
     --accent-light:#663d89;
+
+    --success:     #00843D;
+    --fail:        #DA291C;
   }
 
   #social .button-icon {

@@ -45,3 +45,32 @@ h5 {
 .context_menu tr:last-child td{
   text-align: center;
 }
+
+.massCreateBox {
+  width: 100%;
+}
+
+.student_review_table {
+  width: 100%;
+}
+
+.student_review_table thead {
+  background-color: var(--bg-dark);
+}
+
+.student_review_table td {
+  /* max-width: min-content; */
+  white-space: nowrap;
+  text-align: left;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.student_review_table tr td:last-child {
+  white-space: unset;
+  width: 99%;
+}
+
+.student_review_table tr:last-child td{
+  text-align: center;
+}
